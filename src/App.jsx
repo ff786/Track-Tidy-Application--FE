@@ -9,6 +9,7 @@ import AddInventory from './Components/HomeInventory/addInventory.jsx'
 import ViewInventory from './Components/HomeInventory/viewInventory.jsx'
 import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
 import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
+import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
 
 import {
     createBrowserRouter,
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
         path: '/user-services',
         element: <div> <UserServices /> </div>
     },
+
     {
         path: '/add-in',
         element: <div> <AddInventory /> </div>
@@ -39,6 +41,10 @@ const router = createBrowserRouter([
     {
         path: '/view-one-in/:id',
         element: <div> <ViewOneInventory /> </div>
+    },
+    {
+        path: '/in-page',
+        element: <div> <InventoryPage /> </div>
     },
 ])
 

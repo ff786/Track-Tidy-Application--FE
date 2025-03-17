@@ -81,7 +81,7 @@ const addInventory = () => {
                <form className="p-6 space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="userid" className="block text-sm font-medium text-gray-700 mb-1 mr-70">User ID</label>
+                <label htmlFor="userid" className="block text-m font-semibold text-gray-700 mb-1 mr-70">User ID</label>
                 <input 
                   type="text" 
                   id="userid" 
@@ -94,7 +94,7 @@ const addInventory = () => {
               </div>
               
               <div>
-                <label htmlFor="productname" className="block text-sm font-medium text-gray-700 mb-1 mr-55">Product Name</label>
+                <label htmlFor="productname" className="block text-m font-semibold text-gray-700 mb-1 mr-58">Product Name</label>
                 <input 
                   type="text" 
                   id="productname" 
@@ -107,7 +107,7 @@ const addInventory = () => {
               </div>
               
               <div>
-                <label htmlFor="productid" className="block text-sm font-medium text-gray-700 mb-1 mr-60">Product ID</label>
+                <label htmlFor="productid" className="block text-m font-semibold text-gray-700 mb-1 mr-60">Product ID</label>
                 <input 
                   type="text" 
                   id="productid" 
@@ -121,7 +121,7 @@ const addInventory = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1 mr-30">Quantity</label>
+                  <label htmlFor="quantity" className="block text-m font-semibold text-gray-700 mb-1 mr-30">Quantity</label>
                   <input 
                     type="number" 
                     id="quantity" 
@@ -135,7 +135,7 @@ const addInventory = () => {
                 </div>
                 
                 <div>
-                  <label htmlFor="productvalue" className="block text-sm font-medium text-gray-700 mb-1 mr-20">Value ($)</label>
+                  <label htmlFor="productvalue" className="block text-m font-semibold text-gray-700 mb-1 mr-20">Value ($)</label>
                   <input 
                     type="text" 
                     id="productvalue" 
@@ -150,7 +150,7 @@ const addInventory = () => {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="purchasedate" className="block text-sm font-medium text-gray-700 mb-1 mr-10">Purchase Date</label>
+                  <label htmlFor="purchasedate" className="block text-m font-semibold text-gray-700 mb-1 mr-10">Purchase Date</label>
                   <input 
                     type="date" 
                     id="purchasedate" 
@@ -162,7 +162,7 @@ const addInventory = () => {
                 </div>
                 
                 <div>
-                  <label htmlFor="warrantyperiod" className="block text-sm font-medium text-gray-700 mb-1 mr-10">Warranty (months)</label>
+                  <label htmlFor="warrantyperiod" className="block text-m font-semibold text-gray-700 mb-1 mr-8">Warranty (months)</label>
                   <input 
                     type="number" 
                     id="warrantyperiod" 
@@ -177,7 +177,7 @@ const addInventory = () => {
               </div>
               
               <div>
-                <label htmlFor="productcategory" className="block text-sm font-medium text-gray-700 mb-1 mr-50">Product Category</label>
+                <label htmlFor="productcategory" className="block text-m font-semibold text-gray-700 mb-1 mr-50">Product Category</label>
                 <select 
                   id="productcategory" 
                   name="productcategory" 
@@ -193,7 +193,7 @@ const addInventory = () => {
               </div>
               
               <div>
-                <label htmlFor="productimage" className="block text-sm font-medium text-gray-700 mb-1 mr-50">Product Image</label>
+                <label htmlFor="productimage" className="block text-m font-semibold text-gray-700 mb-1 mr-50">Product Image</label>
                 
                 {!imagePreview ? (
                   <div className="flex items-center justify-center w-full">
