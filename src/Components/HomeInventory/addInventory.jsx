@@ -1,58 +1,131 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, Upload, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+import axios from 'axios'; // Import axios for HTTP requests
+import Swal from 'sweetalert2';
+
 
 const addInventory = () => {
-    const [formData, setFormData] = useState({
-      userid: '',
-      productname: '',
-      productid: '',
-      quantity: '',
-      productvalue: '',
-      purchasedate: '',
-      warrantyperiod: '',
-      productcategory: '',
-      productimage: null
-    });
-    
-    const [imagePreview, setImagePreview] = useState(null);
-    
-    const handleChange = (e) => {
-      const { name, value, files } = e.target;
-      
-      if (name === 'productimage' && files && files[0]) {
-        const selectedFile = files[0];
-        setFormData({
-          ...formData,
-          [name]: selectedFile
-        });
-        
-        // Create preview URL for the image
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setImagePreview(e.target.result);
-        };
-        reader.readAsDataURL(selectedFile);
-      } else {
-        setFormData({
-          ...formData,
-          [name]: value
-        });
-      }
-    };
-    
-    const removeImage = () => {
+  const navigate = useNavigate(); // Initialize navigate function for page redirection
+
+  const [formData, setFormData] = useState({
+    userid: '',
+    productname: '',
+    productid: '',
+    quantity: '',
+    productvalue: '',
+    purchasedate: '',
+    warrantyperiod: '',
+    productcategory: '',
+    productimage: null
+  });
+
+  const [imagePreview, setImagePreview] = useState(null);
+  const [errors, setErrors] = useState({}); // To store validation errors
+
+  // Set current date for purchase date field when component mounts
+  useEffect(() => {
+    const currentDate = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+    setFormData((prevData) => ({
+      ...prevData,
+      purchasedate: currentDate,
+    }));
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (name === 'productimage' && files && files[0]) {
+      const selectedFile = files[0];
       setFormData({
         ...formData,
-        productimage: null
+        [name]: selectedFile
       });
-      setImagePreview(null);
-    };
-    
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log('Form submitted:', formData);
-      // Add submission logic here
-    };
+
+      // Create preview URL for the image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({
+      ...formData,
+      productimage: null
+    });
+    setImagePreview(null);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.userid) newErrors.userid = 'User ID is required';
+    if (!formData.productname) newErrors.productname = 'Product Name is required';
+    if (!formData.productid) newErrors.productid = 'Product ID is required';
+    if (!formData.quantity || formData.quantity <= 0) newErrors.quantity = 'Quantity must be greater than 0';
+    if (!formData.productvalue || formData.productvalue <= 0) newErrors.productvalue = 'Product Value must be greater than 0';
+    if (!formData.warrantyperiod || formData.warrantyperiod < 0) newErrors.warrantyperiod = 'Warranty Period must be 0 or greater';
+    if (!formData.productcategory) newErrors.productcategory = 'Product Category is required';
+    if (!formData.productimage) newErrors.productimage = 'Product Image is required';
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0; // If no errors, return true
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Form validation (check if all fields are valid)
+    if (!validateForm()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill in all fields correctly!',
+      });
+      return;
+    }
+
+    // If valid, proceed with form submission
+    try {
+      // Create FormData object to handle image upload
+      const formDataToSend = new FormData();
+      for (const key in formData) {
+        formDataToSend.append(key, formData[key]);
+      }
+
+      // Add your form submission logic here (e.g., API call)
+      await axios.post('/api/inventory', formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Product Added!',
+        text: 'Your product has been successfully added.',
+      });
+
+      // After successful submission, redirect to /view-in with form data
+      navigate('/view-in', { state: formData });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Something went wrong. Please try again later.',
+      });
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-500 to-teal-400 p-8 rounded-xl overflow-hidden">
@@ -91,6 +164,7 @@ const addInventory = () => {
                   onChange={handleChange}
                   value={formData.userid}
                 />
+                 {errors.userid && <p className="text-red-500 text-sm">{errors.userid}</p>}
               </div>
               
               <div>
@@ -104,6 +178,7 @@ const addInventory = () => {
                   onChange={handleChange}
                   value={formData.productname}
                 />
+                 {errors.productname && <p className="text-red-500 text-sm">{errors.productname}</p>}
               </div>
               
               <div>
@@ -117,6 +192,7 @@ const addInventory = () => {
                   onChange={handleChange}
                   value={formData.productid}
                 />
+                 {errors.productid && <p className="text-red-500 text-sm">{errors.productid}</p>}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -132,6 +208,7 @@ const addInventory = () => {
                     onChange={handleChange}
                     value={formData.quantity}
                   />
+                   {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity}</p>}
                 </div>
                 
                 <div>
@@ -145,6 +222,7 @@ const addInventory = () => {
                     onChange={handleChange}
                     value={formData.productvalue}
                   />
+                   {errors.productvalue && <p className="text-red-500 text-sm">{errors.productvalue}</p>}
                 </div>
               </div>
               
@@ -158,6 +236,7 @@ const addInventory = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     onChange={handleChange}
                     value={formData.purchasedate}
+                    readOnly={true} 
                   />
                 </div>
                 
@@ -173,6 +252,7 @@ const addInventory = () => {
                     onChange={handleChange}
                     value={formData.warrantyperiod}
                   />
+                   {errors.warrantyperiod && <p className="text-red-500 text-sm">{errors.warrantyperiod}</p>}
                 </div>
               </div>
               
@@ -190,6 +270,7 @@ const addInventory = () => {
                   <option value="furniture">Furniture</option>
                   <option value="householdappliance">Household Appliance</option>
                 </select>
+                {errors.productcategory && <p className="text-red-500 text-sm">{errors.productcategory}</p>}
               </div>
               
               <div>
