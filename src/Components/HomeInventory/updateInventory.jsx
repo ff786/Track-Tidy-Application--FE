@@ -1,81 +1,137 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Upload, X } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom'; // Import useNavigate for routing
+import axios from 'axios'; // Import axios for HTTP requests
+import Swal from 'sweetalert2';
 
-const UpdateInventory = ({ existingItem }) => {
-    const [formData, setFormData] = useState({
-      userid: '',
-      productname: '',
-      productid: '',
-      quantity: '',
-      productvalue: '',
-      purchasedate: '',
-      warrantyperiod: '',
-      productcategory: '',
-      productimage: null
-    });
-    
-    const [imagePreview, setImagePreview] = useState(null);
-    
-    // Load existing data when component mounts or existingItem changes
-    useEffect(() => {
-      if (existingItem) {
+
+const UpdateInventory = () => {
+  const navigate = useNavigate(); // Initialize navigate function for page redirection
+  const {id} = useParams();
+
+  // Fetch current product data when the component mounts
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const response = await axios.get(`/api/inventory/${id}`);
+        const product = response.data;
+
+        // Populate form with existing product data
         setFormData({
-          userid: existingItem.userid || '',
-          productname: existingItem.productname || '',
-          productid: existingItem.productid || '',
-          quantity: existingItem.quantity || '',
-          productvalue: existingItem.productvalue || '',
-          purchasedate: existingItem.purchasedate || '',
-          warrantyperiod: existingItem.warrantyperiod || '',
-          productcategory: existingItem.productcategory || '',
-          productimage: existingItem.productimage || null
+          ...product,
+          purchasedate: product.purchasedate || new Date().toISOString().split('T')[0], // Set current date if not provided
         });
-        
-        // Set image preview if it exists
-        if (existingItem.imageUrl) {
-          setImagePreview(existingItem.imageUrl);
+
+        if (product.productimage) {
+          setImagePreview(product.productimage); // Set the existing image preview
         }
-      }
-    }, [existingItem]);
-    
-    const handleChange = (e) => {
-      const { name, value, files } = e.target;
-      
-      if (name === 'productimage' && files && files[0]) {
-        const selectedFile = files[0];
-        setFormData({
-          ...formData,
-          [name]: selectedFile
-        });
-        
-        // Create preview URL for the image
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setImagePreview(e.target.result);
-        };
-        reader.readAsDataURL(selectedFile);
-      } else {
-        setFormData({
-          ...formData,
-          [name]: value
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error!',
+          text: 'Unable to fetch the product data.',
         });
       }
     };
-    
-    const removeImage = () => {
+
+    fetchProductData();
+  }, [id]);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (name === 'productimage' && files && files[0]) {
+      const selectedFile = files[0];
       setFormData({
         ...formData,
-        productimage: null
+        [name]: selectedFile
       });
-      setImagePreview(null);
-    };
-    
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log('Form submitted for update:', formData);
-      // Add update logic here
-      // This would typically involve an API call to update the item
-    };
+
+      // Create preview URL for the image
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
+  };
+
+  const removeImage = () => {
+    setFormData({
+      ...formData,
+      productimage: null
+    });
+    setImagePreview(null);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.userid) newErrors.userid = 'User ID is required';
+    if (!formData.productname) newErrors.productname = 'Product Name is required';
+    if (!formData.productid) newErrors.productid = 'Product ID is required';
+    if (!formData.quantity || formData.quantity <= 0) newErrors.quantity = 'Quantity must be greater than 0';
+    if (!formData.productvalue || formData.productvalue <= 0) newErrors.productvalue = 'Product Value must be greater than 0';
+    if (!formData.warrantyperiod || formData.warrantyperiod < 0) newErrors.warrantyperiod = 'Warranty Period must be 0 or greater';
+    if (!formData.productcategory) newErrors.productcategory = 'Product Category is required';
+    if (!formData.productimage && !imagePreview) newErrors.productimage = 'Product Image is required';
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0; // If no errors, return true
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    // Form validation (check if all fields are valid)
+    if (!validateForm()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill in all fields correctly!',
+      });
+      return;
+    }
+
+    // If valid, proceed with form submission
+    try {
+      // Create FormData object to handle image upload
+      const formDataToSend = new FormData();
+      for (const key in formData) {
+        formDataToSend.append(key, formData[key]);
+      }
+
+      // API call to update the product data
+      await axios.put(`/api/inventory/${id}`, formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Product Updated!',
+        text: 'Your product has been successfully updated.',
+      });
+
+      // After successful submission, redirect to /view-in with updated form data
+      navigate('/view-in', { state: formData });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Something went wrong. Please try again later.',
+      });
+    }
+  };
 
   return (
     <div className="bg-gradient-to-r from-blue-500 to-teal-400 p-8 rounded-xl overflow-hidden">
@@ -83,14 +139,14 @@ const UpdateInventory = ({ existingItem }) => {
              {/* Left Side: Image with Overlay */}
              <div className="relative w-full lg:w-1/2 h-full">
                <img
-                   src="/api/placeholder/800/600"
-                   alt="Home inventory update"
+                   src="https://images.pexels.com/photos/1080696/pexels-photo-1080696.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                   alt="Home inventory"
                    className="w-full h-full object-cover rounded-lg"
                />
                <div className="absolute inset-0 bg-black opacity-40 rounded-lg"></div>
                <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
                  <h2 className="text-2xl font-semibold mb-4">
-                 Update Your Inventory,</h2> <h2 className="text-2xl font-semibold mb-4">Keep Records Current</h2> 
+                 Track What You Own,</h2> <h2 className="text-2xl font-semibold mb-4">Protect What You Value</h2> 
                </div>
              </div>
    
@@ -98,13 +154,13 @@ const UpdateInventory = ({ existingItem }) => {
              <div className="bg-white p-8 rounded-lg w-full lg:w-1/2 flex flex-col justify-center">
                {/* Header */}
                <h1 className="text-3xl font-bold text-center text-primary mb-4">
-                 Update Inventory
+                 Home Inventory
                </h1>
    
-               <form className="p-6 space-y-5" onSubmit={handleSubmit}>
+               <form className="p-6 space-y-5" onSubmit={handleUpdate}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="userid" className="block text-sm font-medium text-gray-700 mb-1 mr-70">User ID</label>
+                <label htmlFor="userid" className="block text-m font-semibold text-gray-700 mb-1 mr-70">User ID</label>
                 <input 
                   type="text" 
                   id="userid" 
@@ -113,12 +169,12 @@ const UpdateInventory = ({ existingItem }) => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   onChange={handleChange}
                   value={formData.userid}
-                  readOnly
                 />
+                 {errors.userid && <p className="text-red-500 text-sm">{errors.userid}</p>}
               </div>
               
               <div>
-                <label htmlFor="productname" className="block text-sm font-medium text-gray-700 mb-1 mr-55">Product Name</label>
+                <label htmlFor="productname" className="block text-m font-semibold text-gray-700 mb-1 mr-58">Product Name</label>
                 <input 
                   type="text" 
                   id="productname" 
@@ -128,10 +184,11 @@ const UpdateInventory = ({ existingItem }) => {
                   onChange={handleChange}
                   value={formData.productname}
                 />
+                 {errors.productname && <p className="text-red-500 text-sm">{errors.productname}</p>}
               </div>
               
               <div>
-                <label htmlFor="productid" className="block text-sm font-medium text-gray-700 mb-1 mr-60">Product ID</label>
+                <label htmlFor="productid" className="block text-m font-semibold text-gray-700 mb-1 mr-60">Product ID</label>
                 <input 
                   type="text" 
                   id="productid" 
@@ -140,13 +197,13 @@ const UpdateInventory = ({ existingItem }) => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                   onChange={handleChange}
                   value={formData.productid}
-                  readOnly
                 />
+                 {errors.productid && <p className="text-red-500 text-sm">{errors.productid}</p>}
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1 mr-30">Quantity</label>
+                  <label htmlFor="quantity" className="block text-m font-semibold text-gray-700 mb-1 mr-30">Quantity</label>
                   <input 
                     type="number" 
                     id="quantity" 
@@ -157,10 +214,11 @@ const UpdateInventory = ({ existingItem }) => {
                     onChange={handleChange}
                     value={formData.quantity}
                   />
+                   {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity}</p>}
                 </div>
                 
                 <div>
-                  <label htmlFor="productvalue" className="block text-sm font-medium text-gray-700 mb-1 mr-20">Value ($)</label>
+                  <label htmlFor="productvalue" className="block text-m font-semibold text-gray-700 mb-1 mr-20">Value ($)</label>
                   <input 
                     type="text" 
                     id="productvalue" 
@@ -170,12 +228,13 @@ const UpdateInventory = ({ existingItem }) => {
                     onChange={handleChange}
                     value={formData.productvalue}
                   />
+                   {errors.productvalue && <p className="text-red-500 text-sm">{errors.productvalue}</p>}
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="purchasedate" className="block text-sm font-medium text-gray-700 mb-1 mr-10">Purchase Date</label>
+                  <label htmlFor="purchasedate" className="block text-m font-semibold text-gray-700 mb-1 mr-10">Purchase Date</label>
                   <input 
                     type="date" 
                     id="purchasedate" 
@@ -183,11 +242,12 @@ const UpdateInventory = ({ existingItem }) => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     onChange={handleChange}
                     value={formData.purchasedate}
+                    readOnly={true} 
                   />
                 </div>
                 
                 <div>
-                  <label htmlFor="warrantyperiod" className="block text-sm font-medium text-gray-700 mb-1 mr-10">Warranty (months)</label>
+                  <label htmlFor="warrantyperiod" className="block text-m font-semibold text-gray-700 mb-1 mr-8">Warranty (months)</label>
                   <input 
                     type="number" 
                     id="warrantyperiod" 
@@ -198,11 +258,12 @@ const UpdateInventory = ({ existingItem }) => {
                     onChange={handleChange}
                     value={formData.warrantyperiod}
                   />
+                   {errors.warrantyperiod && <p className="text-red-500 text-sm">{errors.warrantyperiod}</p>}
                 </div>
               </div>
               
               <div>
-                <label htmlFor="productcategory" className="block text-sm font-medium text-gray-700 mb-1 mr-50">Product Category</label>
+                <label htmlFor="productcategory" className="block text-m font-semibold text-gray-700 mb-1 mr-50">Product Category</label>
                 <select 
                   id="productcategory" 
                   name="productcategory" 
@@ -215,10 +276,11 @@ const UpdateInventory = ({ existingItem }) => {
                   <option value="furniture">Furniture</option>
                   <option value="householdappliance">Household Appliance</option>
                 </select>
+                {errors.productcategory && <p className="text-red-500 text-sm">{errors.productcategory}</p>}
               </div>
               
               <div>
-                <label htmlFor="productimage" className="block text-sm font-medium text-gray-700 mb-1 mr-50">Product Image</label>
+                <label htmlFor="productimage" className="block text-m font-semibold text-gray-700 mb-1 mr-50">Product Image</label>
                 
                 {!imagePreview ? (
                   <div className="flex items-center justify-center w-full">
@@ -269,19 +331,12 @@ const UpdateInventory = ({ existingItem }) => {
               </div>
             </div>
             
-            <div className="flex gap-4 pt-4">
+            <div className="pt-4">
               <button 
                 type="submit" 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors shadow-md"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors shadow-md"
               >
-                Update Inventory
-              </button>
-              <button 
-                type="button" 
-                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors shadow-md"
-                onClick={() => console.log('Cancel clicked')}
-              >
-                Cancel
+                Add to Inventory
               </button>
             </div>
           </form>
