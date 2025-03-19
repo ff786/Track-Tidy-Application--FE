@@ -1,38 +1,48 @@
-import React, { useState } from 'react'
-import './App.css'
+import React from 'react';
+import './App.css';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import Login from './Components/HomeIndexLogin/IndexLogin.jsx'
-import UserServices from './Components/TrackServicesHome/UserServices.jsx'
-import UserList from './Components/UserManagement/UserList.jsx';
+import Auth from './components/Auth';
+import Dashboard from './components/Dashboard';
+import UserProfile from './components/UserProfile';
+import UserForm from './Components/UserManagement/UserForm.jsx';
 
-import {
-    createBrowserRouter,
-    RouterProvider
-} from 'react-router-dom'
+import Login from './Components/HomeIndexLogin/IndexLogin.jsx';
+import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 
 const router = createBrowserRouter([
     {
         path: '/',
-        element: <div> <Login /> </div>
+        element: <Login />
+    },
+    {
+        path: '/dashboard',
+        element: <Dashboard />
+    },
+    {
+        path: '/user-profile',
+        element: <UserProfile />
+    },
+    {
+        path: '/user-management',
+        element: <UserList />
     },
     {
         path: '/user-services',
-        element: <div> <UserServices /> </div>
+        element: <UserServices />
     },
-
     {
-        path: '/user-management',
-        element: <div><UserList/></div>
+        path: '/auth',
+        element: <Auth />
     }
-])
+]);
 
 function App() {
-
-  return (
-      <div>
-          <RouterProvider router={router} />
-      </div>
-  )
+    return (
+        <div>
+            <RouterProvider router={router} />
+        </div>
+    );
 }
 
-export default App
+export default App;
