@@ -2,12 +2,12 @@ import React from 'react';
 
 function InventoryPage() {
   return (
-    <div className="p-6 min-h-screen bg-background">
+    <div>
       {/* Hero Section */}
-      <div className="relative bg-cover bg-center h-[400px] w-full"
+      <div className="relative bg-center justify-center h-[400px] w-screen"
            style={{ backgroundImage: `url(https://images.pexels.com/photos/1129413/pexels-photo-1129413.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2)` }}>
         <div className="absolute inset-0 bg-black opacity-50"></div>
-        <div className="relative z-10 flex items-center justify-center h-full">
+        <div className="relative flex items-center justify-center h-full">
           <h1 className="text-4xl font-bold text-white text-center">Track Your Belongings in One Place.</h1>
         </div>
       </div>
