@@ -5,8 +5,12 @@ import ExploreService from "./ExploreService.jsx";
 import QAService from "./Q&A-Serivice.jsx";
 import DIYSection from "./DIYService.jsx";
 
+import SideNav from "../common/SideNav/sideNav.jsx";
+
 const UserServices = () => {
     return (
+        <>
+        <SideNav />
         <div className="relative flex-col">
 
             {/* Hero Section */}
@@ -45,6 +49,7 @@ const UserServices = () => {
             </section>
 
         </div>
+            </>
     );
 };
 

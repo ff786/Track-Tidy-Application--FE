@@ -27,7 +27,7 @@ const ExploreService = () => {
                       <img
                         src={service.icon}
                         alt={service.name}
-                        className="w-20 h-20 object-contain mb-2"
+                        className="w-15 h-15 object-contain mb-2"
                       />
                       <p className="text-center font-medium">{service.name}</p>
                     </div>
