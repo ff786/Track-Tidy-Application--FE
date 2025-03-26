@@ -16,10 +16,10 @@ const router = createBrowserRouter([
         element: <Login />
     },
 
-    {
-        path: '/user-profile',
-        element: <UserProfile />
-    },
+    // {
+    //     path: '/user-profile',
+    //     element: <UserProfile />
+    // },
     {
         path: '/user-management',
         element: <UserList />
