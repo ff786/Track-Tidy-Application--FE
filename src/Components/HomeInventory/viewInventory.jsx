@@ -1,362 +1,268 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Search, Filter, Edit, Trash2, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+import { BsInfoCircle } from 'react-icons/bs';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
-const ViewAllInventory = () => {
+const viewInventory = () => {
+  const [inventory, setInventory] = useState([]);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const [records, setRecords] = useState([]);
-  const [filteredRecords, setFilteredRecords] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    serviceType: '',
-    gender: ''
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [noDataMessage, setNoDataMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleAddClick = () => {
+    navigate('/add-in');
+  };
 
   useEffect(() => {
-    fetchRecords();
+    const fetchInventory = async () => {
+      try {
+        const response = await axios.get('');
+        setInventory(response.data);
+      } catch (error) {
+        console.error(error);
+        setError('Failed to load packages. Please try again later.');
+      }
+    };
+
+    fetchInventory();
   }, []);
 
-  useEffect(() => {
-    filterRecords();
-  }, [records, searchTerm, filters]);
+  const generatePDF = () => {
+    const doc = new jsPDF();
 
-  const fetchRecords = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get('/api/track-tidy/inventory', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      setRecords(response.data || []);
-    } catch (error) {
-      console.error('Error fetching records:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error!',
-        text: 'Failed to load records. Please try again later.',
-      });
-      setRecords([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const tableColumn = [
+      "Product ID",
+      "User ID",
+      "Product Category",
+      "Product Name",
+      "Product Value",
+      "Quantity",
+      "Purchased Date",
+    ];
+    const tableRows = [];
 
-  const filterRecords = () => {
-    let result = [...records];
+    inventory.forEach((inventoryItem) => {
+      const data = [
+        inventoryItem.productid,
+        inventoryItem.userid,
+        inventoryItem.productcategory,
+        inventoryItem.productname,
+        inventoryItem.productvalue,
+        inventoryItem.quantity,
+        inventoryItem.purchasedate,
+      ];
+      tableRows.push(data);
 
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(record => {
-        const firstName = record.firstName?.toLowerCase() || '';
-        const lastName = record.lastName?.toLowerCase() || '';
-        const email = record.email?.toLowerCase() || '';
-        const memberId = record.memberId?.toLowerCase() || '';
-        const phoneNumber = record.phoneNumber?.toLowerCase() || '';
-
-        return (
-          firstName.includes(term) ||
-          lastName.includes(term) ||
-          email.includes(term) ||
-          memberId.includes(term) ||
-          phoneNumber.includes(term)
-        );
-      });
-    }
-
-    // Apply filters
-    if (filters.serviceType) {
-      result = result.filter(record => record.serviceType === filters.serviceType);
-    }
-    if (filters.gender) {
-      result = result.filter(record => record.gender === filters.gender);
-    }
-
-    setFilteredRecords(result);
-    setCurrentPage(1);
-  };
-
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      doc.setFontSize(10).setTextColor("#333");
+      doc.text(`Start Date: ${inventoryItem.start_date}`, 15, doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 60);
+      doc.text(`End Date: ${inventoryItem.end_date}`, 15, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 65);
     });
 
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`/api/track-tidy/inventory/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        Swal.fire(
-          'Deleted!',
-          'The record has been deleted.',
-          'success'
-        );
-        fetchRecords();
-      } catch (error) {
-        console.error('Error deleting record:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to delete record. Please try again later.',
-        });
-      }
-    }
+    const date = new Date().toLocaleDateString();
+
+    doc.setFontSize(24).setFont("helvetica", "bold").setTextColor("#4B9CD3");
+    doc.text("Track Tidy", 105, 15, { align: "center" });
+
+    doc.setFont("helvetica", "normal").setFontSize(18).setTextColor("#333");
+    doc.text("Inventory Details Report", 105, 25, { align: "center" });
+
+    doc.setFont("helvetica", "italic").setFontSize(12).setTextColor("#666");
+    doc.text(`Report Generated Date: ${date}`, 105, 35, { align: "center" });
+
+    doc.setDrawColor(0, 0, 0).setLineWidth(0.5);
+    doc.line(10, 49, 200, 49);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 70,
+      styles: { fontSize: 10, cellPadding: 2 },
+      headStyles: {
+        fillColor: [44, 62, 80],
+        textColor: [255, 255, 255],
+        fontStyle: "bold",
+        halign: "center",
+      },
+      bodyStyles: {
+        halign: "center",
+      },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 20 },
+        4: { cellWidth: 30 },
+        5: { cellWidth: 30 },
+        6: { cellWidth: 30 },
+        7: { cellWidth: 30 },
+      },
+      alternateRowStyles: {
+        fillColor: [230, 230, 230],
+      },
+      margin: { top: 80 },
+    });
+
+    doc.save(`Inventory-Details-Report_${date}.pdf`);
   };
 
-  const handleEdit = (record) => {
-    navigate('/edit-inventory', { state: { record } });
-  };
-
-  // Pagination logic
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = filteredRecords.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+  // Search function
+  const handleSearch = async () => {
+    setLoading(true);
     try {
-      const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    } catch {
-      return 'Invalid Date';
+      const response = await axios.get(`http://localhost:8076/searchpkg?search=${searchQuery}`);
+      console.log("Search response:", response);
+      if (response.data.length === 0) {
+        console.log("No matching packages found.");
+        setNoDataMessage('No matching packages found.');
+      } else {
+        console.log("Matching packages found:", response.data);
+        setNoDataMessage('');
+        setInventory(response.data);
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching packages:", err);
+      setLoading(false);
     }
   };
 
-  const formatCurrency = (amount) => {
-    if (amount === undefined || amount === null) return '$0.00';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
+    // Apply search filter
+    const applySearchFilter = (inventory) => {
+  
+      const productid = inventory.productid ? inventory.productid.toLowerCase() : '';
+      const productname = inventory.productname ? inventory.productname.toLowerCase() : '';
+      const productvalue = inventory.productvalue ? inventory.productvalue.toString() : '';
+      const warrantyperiod = inventory.warrantyperiod ? inventory.warrantyperiod.toString() : '';
+      const quantity = inventory.quantity ? inventory.quantity.toString() : ''; 
+      const purchasedate = inventory.purchasedate ? inventory.purchasedate.toLowerCase() : '';
+      const productcategory = inventory.productcategory ? inventory.productcategory.toLowerCase() : '';
+       
+      return (
+        productid.includes(searchQuery.toLowerCase()) ||
+        productname.includes(searchQuery.toLowerCase()) ||
+        productvalue.includes(searchQuery.toLowerCase()) ||
+        warrantyperiod.includes(searchQuery.toLowerCase()) ||
+        quantity.includes(searchQuery.toLowerCase()) || 
+        purchasedate.includes(searchQuery.toLowerCase()) ||
+        productcategory.includes(searchQuery.toLowerCase())
+      );
+    };
 
-  const getInitials = (firstName, lastName) => {
-    const first = firstName?.charAt(0)?.toUpperCase() || '';
-    const last = lastName?.charAt(0)?.toUpperCase() || '';
-    return first + last;
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+    // Filter reviews based on search query
+    const filteredPackages = inventory.filter(applySearchFilter);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">All Inventory Records</h1>
-          <button
-            onClick={() => navigate('/add-inventory')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center"
+
+    <div className="flex-grow p-6">
+    <div className="flex justify-between items-center ">
+<div className="flex items-center justify-between ">
+<h1 class=" text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-black">Inventory <span class="text-green-600 dark:text-green-500">List</span> </h1>
+<div className="flex items-center gap-4 ">
+<input
+  type="text"
+  name="searchQuery"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  placeholder="Search here..."
+   className="border border-gray-300 p-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+/>
+ <button
+  onClick={handleSearch}
+  className="relative inline-flex items-center justify-center p-0.5  me-2 overflow-hidden text-sm font-medium text-black-100 rounded-lg group bg-gradient-to-br from-green-900 to-green-500  group-hover:to-green-500 hover:text-white dark:text-black focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800"
+>
+  <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-black-100 rounded-md group-hover:bg-opacity-0">
+      Search
+      </span>
+</button>  
+
+<button
+  onClick={generatePDF}
+  className="relative inline-flex items-center justify-center p-0.5  me-2 overflow-hidden text-sm font-medium text-black-100 rounded-lg group bg-gradient-to-br from-green-900 to-green-500  group-hover:to-green-500 hover:text-white dark:text-black focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800"
+>
+  <span className="relative px-4 py-1.5 transition-all ease-in duration-75 bg-white dark:bg-black-100 rounded-md group-hover:bg-opacity-0">
+      Generate PDF
+      </span>
+</button>
+
+<button
+  className="relative inline-flex items-center justify-center p-0.5  me-2 overflow-hidden text-sm font-medium text-black-100 rounded-lg group bg-gradient-to-br from-green-900 to-green-500  group-hover:to-green-500 hover:text-white dark:text-black focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800"
+  onClick={handleAddClick}
+>
+  <span className="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-black-100 rounded-md group-hover:bg-opacity-0">
+        Add
+      </span>
+    </button>
+</div>
+</div>
+</div> 
+{noDataMessage && (
+<p className="text-red-500 text-center">{noDataMessage}</p>
+)}            
+{error && <p className="text-red-600">{error}</p>}
+
+<div className="overflow-x-auto">
+<div className="bg-white shadow-md rounded-lg overflow-hidden">
+<div className="max-h-[400px] overflow-y-auto">
+<table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
+  <thead className="bg-gray-100">
+    <tr>
+      <th className="px-4 py-2 text-left font-semibold">Product ID</th>
+      <th className="px-4 py-2 text-left font-semibold">Product Category</th>
+      <th className="px-4 py-2 text-left font-semibold">Product Name</th>
+      <th className="px-4 py-2 text-left font-semibold">User ID</th>
+      <th className="px-4 py-2 text-left font-semibold">Product Quantity</th>
+      <th className="px-4 py-2 text-left font-semibold">Product Value</th>
+      <th className="px-4 py-2 text-left font-semibold">Purchased Date</th>
+      <th className="px-4 py-2 text-left font-semibold">Warranty Period</th>
+      <th className="px-8 py-2 text-left font-semibold">Image</th>
+      <th className="px-4 py-2 text-left font-semibold">Actions</th>
+    </tr>
+  </thead>
+  <tbody className="bg-white divide-y divide-gray-200">
+    {filteredPackages.map((inventory) => (
+      <tr key={pkg._id} className="hover:bg-gray-100 transition duration-150 ease-in-out">
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.productid}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.productcategory}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.productname}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.userid}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.quantity}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.productvalue}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.purchasedate.slice(0, 10)}</td>
+        <td className="px-4 py-2 text-sm text-gray-700">{inventory.warrantyperiod}</td>
+
+        <td className="px-4 py-2 text-gray-700">
+      <img src={`http://localhost:8076/${inventory.productimage}`}  alt="Package" className='w-24 h-24 object-cover rounded-full' />
+          {console.log(`http://localhost:8076/${inventory.productimage}`)}
+      </td> 
+
+        <td className="px-6 py-4 text-sm text-gray-700 flex space-x-2">
+          <Link 
+            className="text-green-600  hover:text-green-800 transition duration-150 ease-in-out"
+            to={`/view-in/${inventory._id}`}
+            title="View Details"
           >
-            <Plus size={18} className="mr-2" />
-            Add New Record
-          </button>
-        </div>
+            <BsInfoCircle size={20} />
+            </Link>
+          <Link to={`/update-in/${inventory._id}`}>
+            <FaEdit className="text-yellow-500 cursor-pointer hover:text-yellow-700" title="Edit" />
+          </Link>
+          <Link to={`/delete-in/${inventory._id}`}>
+            <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" title="Delete" />
+          </Link>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+  )
+}
 
-        {/* Search and Filter Section */}
-        <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="text-gray-400" size={18} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search records..."
-                className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Filter className="text-gray-400" size={18} />
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={filters.serviceType}
-                onChange={(e) => setFilters({...filters, serviceType: e.target.value})}
-              >
-                <option value="">All Service Types</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-                <option value="vip">VIP</option>
-              </select>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Filter className="text-gray-400" size={18} />
-              <select
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={filters.gender}
-                onChange={(e) => setFilters({...filters, gender: e.target.value})}
-              >
-                <option value="">All Genders</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Records Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {currentRecords.length > 0 ? (
-                currentRecords.map((record) => (
-                  <tr key={record._id || Math.random()} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <span className="text-blue-600 font-medium">
-                            {getInitials(record.firstName, record.lastName)}
-                          </span>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {[record.firstName, record.lastName].filter(Boolean).join(' ') || 'N/A'}
-                          </div>
-                          <div className="text-sm text-gray-500">{record.phoneNumber || 'N/A'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.email || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {record.memberId || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(record.dob)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {record.serviceType ? (
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${record.serviceType === 'vip' ? 'bg-purple-100 text-purple-800' : 
-                            record.serviceType === 'premium' ? 'bg-blue-100 text-blue-800' : 
-                            'bg-green-100 text-green-800'}`}>
-                          {record.serviceType.charAt(0).toUpperCase() + record.serviceType.slice(1)}
-                        </span>
-                      ) : 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {formatCurrency(record.amount)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEdit(record)}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="Edit"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(record._id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="7" className="px-6 py-4 text-center text-sm text-gray-500">
-                    No records found. {searchTerm || filters.serviceType || filters.gender ? 
-                    'Try adjusting your search or filters.' : 'Add a new record to get started.'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {filteredRecords.length > recordsPerPage && (
-          <div className="mt-6 flex items-center justify-between">
-            <div className="text-sm text-gray-500">
-              Showing <span className="font-medium">{indexOfFirstRecord + 1}</span> to{' '}
-              <span className="font-medium">
-                {Math.min(indexOfLastRecord, filteredRecords.length)}
-              </span>{' '}
-              of <span className="font-medium">{filteredRecords.length}</span> records
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => paginate(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 rounded-md ${currentPage === 1 ? 
-                  'bg-gray-100 text-gray-400 cursor-not-allowed' : 
-                  'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                <ChevronLeft size={18} />
-              </button>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
-                <button
-                  key={number}
-                  onClick={() => paginate(number)}
-                  className={`px-3 py-1 rounded-md ${currentPage === number ? 
-                    'bg-blue-600 text-white' : 
-                    'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                >
-                  {number}
-                </button>
-              ))}
-              
-              <button
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded-md ${currentPage === totalPages ? 
-                  'bg-gray-100 text-gray-400 cursor-not-allowed' : 
-                  'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default ViewAllInventory;
+export default viewInventory
