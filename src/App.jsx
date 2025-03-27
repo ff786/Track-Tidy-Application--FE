@@ -4,8 +4,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import UserForm from './Components/UserManagement/UserForm.jsx';
 import UserList from './Components/UserManagement/UserList.jsx';
-import Login from './Components/HomeIndexLogin/IndexLogin.jsx';
-import Signup from './Components/HomeIndexLogin/Signup.jsx';
+import Login from './Components/Auth/Login.jsx';
+import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 
 // Function to check user role
