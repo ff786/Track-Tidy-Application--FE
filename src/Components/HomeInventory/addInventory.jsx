@@ -102,14 +102,14 @@ const addInventory = () => {
 
   return (
     <div 
-      className=" w-full flex items-center justify-center p-4 bg-cover bg-center"
-      style={{
-        backgroundImage: "url('https://images.pexels.com/photos/1080696/pexels-photo-1080696.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
-        backgroundSize: 'cover',
-      }}
-    >
+    className="w-screen h-screen flex items-center justify-center p-4 overflow-hidden"
+    style={{
+      background: 'linear-gradient(135deg, #0a7a36, #2ecc71, #1e8449)',
+      backgroundSize: 'cover',
+    }}
+  >
       <motion.div 
-        className="w-full max-w-2xl p-8 rounded-3xl"
+        className="w-full max-w-4xl h-[90vh] overflow-y-auto p-8 rounded-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
