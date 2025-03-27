@@ -1,45 +1,88 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Auth.css';
+import React, { useState } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
+import "./Signup.css"; // Reuse the same styling
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('user');
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [isSignupActive, setIsSignupActive] = useState(false);
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        // Call backend API for authentication
-        const response = await fetch('http://localhost:8080/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, role })
-        });
+  const togglePanel = () => {
+    setIsSignupActive(!isSignupActive);
+  };
 
-        const data = await response.json();
-        if (response.ok) {
-            localStorage.setItem('token', data.token);
-            navigate(role === 'vendor' ? '/vendor-dashboard' : '/user-dashboard');
-        } else {
-            alert('Invalid credentials');
-        }
-    };
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email format")
+      .required("Email is required"),
+    password: Yup.string().required("Password is required"),
+  });
 
-    return (
-        <div className="auth-container">
-            <form onSubmit={handleLogin}>
-                <h2>Login</h2>
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                    <option value="user">User</option>
-                    <option value="vendor">Vendor</option>
-                </select>
-                <button type="submit">Login</button>
-            </form>
+  const formik = useFormik({
+    initialValues: {
+      email: " ",
+      password: " ",
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      console.log("Login Data:", values);
+      alert("Login Successful!");
+      navigate("/dashboard");
+    },
+  });
+
+  return (
+    <div className={`signup-container ${isSignupActive ? "active" : ""}`}>
+      <div className="toggle-box">
+        <div className="toggle-panel">
+          <h1>Welcome Back!</h1>
+          <h5>Don't have an account?</h5>
+          <button className="btn signup-btn" onClick={togglePanel}>
+            Sign Up
+          </button>
         </div>
-    );
+      </div>
+      <form onSubmit={formik.handleSubmit} className="signup-form">
+        <h2>Login to Your Account</h2>
+
+        <div className="input-box">
+          <label>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={formik.values.email}
+            {...formik.getFieldProps("email")}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            placeholder="Enter your email"
+          />
+          {formik.touched.email && formik.errors.email && (
+            <p className="error">{formik.errors.email}</p>
+          )}
+        </div>
+        <div className="input-box">
+          <label htmlFor="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            {...formik.getFieldProps("password")}
+            placeholder={formik.values.password ? "" : "Enter your password"}
+          />
+          {formik.touched.password && formik.errors.password && (
+            <p className="error">{formik.errors.password}</p>
+          )}
+        </div>
+
+
+
+        <button type="submit" className="submit">
+          Login
+        </button>
+      </form>
+    </div>
+  );
 };
 
 export default Login;

@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/user-services',
-        element: getUserRole() === 'vendor' ? <UserServices /> : <Login />
+        element: <UserServices />
     },
 ]);
 

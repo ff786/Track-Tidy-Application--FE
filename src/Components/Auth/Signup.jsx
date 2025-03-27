@@ -58,7 +58,7 @@ const Signup = () => {
       <div className="toggle-box">
         <div className="toggle-panel">
           <h1>Welcome!</h1>
-          <p>Already have an account?</p>
+          <h5>Already have an account?</h5>
           <button className="btn login-btn" onClick={togglePanel}>
             Login
           </button>
