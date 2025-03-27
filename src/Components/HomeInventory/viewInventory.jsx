@@ -171,7 +171,11 @@ const ViewInventory = () => {
             </motion.button>
             <motion.button
               onClick={() => navigate('/add-in')}
-              className="px-4 py-2 rounded-full bg-green-500 text-white font-semibold hover:bg-green-700 transition-all flex items-center"
+              className="px-4 py-2 rounded-full font-semibold hover:bg-green-700 transition-all flex items-center"
+              style={{ 
+                background: 'linear-gradient(to right,rgb(14, 221, 200), #99f6ec)',
+                boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)' 
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
