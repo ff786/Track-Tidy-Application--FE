@@ -57,32 +57,30 @@ const ViewOneInventory = () => {
   if (!item) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl">Inventory item not found</div>
+        <div className="text-gray-400 text-xl">Inventory item not found</div>
       </div>
     );
   }
 
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center p-4"
+      className="w-full flex items-center justify-center p-4 min-h-screen"
       style={{
-        backgroundImage: "url('https://images.pexels.com/photos/8583818/pexels-photo-8583818.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
       }}
     >
       <motion.div 
-        className="w-full max-w-3xl p-8 rounded-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        }}
-      >
+              className="w-full max-w-2xl p-8 rounded-3xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              }}
+            >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -91,7 +89,7 @@ const ViewOneInventory = () => {
         >
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-white hover:text-gray-300 transition-colors"
+            className="flex items-center text-gray-400 hover:text-gray-300 transition-colors"
           >
             <ArrowLeft className="mr-2" />
             Back to Inventory
@@ -176,15 +174,15 @@ const ViewOneInventory = () => {
               </div>
             )}
             <div className="mt-4 text-center">
-              <h3 className="text-2xl font-bold text-white">{item.productName}</h3>
-              <p className="text-white opacity-80">{item.productCategory}</p>
+              <h3 className="text-2xl font-bold ">{item.productName}</h3>
+              <p className=" opacity-80">{item.productCategory}</p>
               <div className={`mt-2 px-4 py-1 rounded-full inline-block ${item.Faulted === 'Yes' ? 'bg-red-500' : 'bg-green-500'}`}>
                 {item.Faulted === 'Yes' ? 'Faulted' : 'Good Condition'}
               </div>
             </div>
           </div>
 
-          <div className="text-white">
+          <div className="text-gray-500">
             <div className="space-y-4">
               <div>
                 <h4 className="text-sm font-semibold opacity-70">Product ID</h4>
@@ -220,12 +218,12 @@ const ViewOneInventory = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <h3 className="text-xl font-bold text-white mb-4">Additional Information</h3>
+          <h3 className="text-xl font-bold  mb-4">Additional Information</h3>
           <div className="bg-white bg-opacity-10 p-4 rounded-lg">
             {item.additionalNotes ? (
-              <p className="text-white">{item.additionalNotes}</p>
+              <p className="text-gray-400">{item.additionalNotes}</p>
             ) : (
-              <p className="text-white opacity-70">No additional information available for this item.</p>
+              <p className="text-gray-400 opacity-70">No additional information available for this item.</p>
             )}
           </div>
         </motion.div>

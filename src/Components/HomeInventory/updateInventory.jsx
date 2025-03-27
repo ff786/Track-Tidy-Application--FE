@@ -150,25 +150,23 @@ const UpdateInventory = () => {
 
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center p-4"
+      className="w-full flex items-center justify-center p-4 min-h-screen"
       style={{
-        backgroundImage: "url('https://images.pexels.com/photos/1106443/pexels-photo-1106443.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
       }}
     >
       <motion.div 
-        className="w-full max-w-2xl p-8 rounded-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        }}
-      >
+              className="w-full max-w-2xl p-8 rounded-3xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              }}
+            >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -423,11 +421,11 @@ const UpdateInventory = () => {
                 </div>
               ) : (
                 <div className="flex items-center justify-center w-full">
-                  <label htmlFor="ProductImage" className="flex flex-col items-center justify-center w-full h-24 border-2 border-white border-dashed rounded-lg cursor-pointer bg-opacity-20 hover:bg-opacity-30 transition-all">
+                  <label htmlFor="ProductImage" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-opacity-20 hover:bg-opacity-30 transition-all">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Camera className="w-8 h-8 text-white mb-1" />
-                      <p className="text-sm text-white">Click to upload or drag and drop</p>
-                      <p className="text-xs text-white">PNG, JPG or WEBP (max. 2MB)</p>
+                      <Camera className="w-8 h-8 text-teal-500 mb-1" />
+                      <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
+                      <p className="text-xs text-gray-500">PNG, JPG or WEBP (max. 2MB)</p>
                     </div>
                     <input 
                       type="file" 
@@ -459,12 +457,16 @@ const UpdateInventory = () => {
               Cancel
             </motion.button>
             <motion.button
-              type="submit"
-              className="px-6 py-3 rounded-full bg-green-500 text-white font-semibold hover:bg-green-700 transition-all"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={loading}
-            >
+                          type="submit"
+                          className="px-6 py-3 rounded-full text-white font-semibold transition-all"
+                          style={{ 
+                            background: 'linear-gradient(to right, #5eeadb, #99f6ec)',
+                            boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)' 
+                          }}
+                          whileHover={{ scale: 1.02, boxShadow: '0 6px 15px rgba(93, 234, 219, 0.4)' }}
+                          whileTap={{ scale: 0.98 }}
+                          disabled={loading}
+                        >
               {loading ? 'Updating Item...' : 'Update Inventory Item'}
             </motion.button>
           </motion.div>

@@ -133,32 +133,30 @@ const ViewInventory = () => {
 
   return (
     <div 
-      className="min-h-screen w-full p-6"
+      className="w-full flex items-center justify-center p-4 min-h-screen"
       style={{
-        backgroundImage: "url('https://images.pexels.com/photos/5157368/pexels-photo-5157368.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
       }}
     >
       <motion.div 
-        className="w-full p-8 rounded-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        }}
-      >
+              className="w-full max-w-2xl p-8 rounded-3xl"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+              }}
+            >
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
           className="flex flex-col md:flex-row justify-between items-center mb-8"
         >
-          <h2 className="text-3xl font-bold text-white mb-4 md:mb-0">
+          <h2 className="text-3xl font-bold mb-4 md:mb-0">
             Inventory Overview
           </h2>
           <div className="flex space-x-4">
@@ -197,7 +195,7 @@ const ViewInventory = () => {
           <input
             type="text"
             placeholder="Search by ID, name, category, user ID, quantity or value..."
-            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -215,7 +213,7 @@ const ViewInventory = () => {
             transition={{ delay: 0.3 }}
           >
             <thead>
-              <tr className="text-white border-b border-white border-opacity-30">
+              <tr className="border-b border-white border-opacity-30">
                 <th className="px-4 py-3 text-left">Image</th>
                 <th className="px-4 py-3 text-left">Product Name</th>
                 <th className="px-4 py-3 text-left">Product ID</th>
@@ -232,7 +230,7 @@ const ViewInventory = () => {
                 currentItems.map((item) => (
                   <motion.tr
                     key={item._id}
-                    className="text-white border-b border-white border-opacity-20 hover:bg-white hover:bg-opacity-10 transition-colors"
+                    className="text-gray-400 border-b border-white border-opacity-20 hover:bg-white hover:bg-opacity-10 transition-colors"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
@@ -270,7 +268,7 @@ const ViewInventory = () => {
                           whileTap={{ scale: 0.9 }}
                           title="View Details"
                         >
-                          <Eye size={16} className="text-white" />
+                          <Eye size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
                           onClick={() => navigate(`/update-in/${item._id}`)}
@@ -279,7 +277,7 @@ const ViewInventory = () => {
                           whileTap={{ scale: 0.9 }}
                           title="Edit"
                         >
-                          <Edit size={16} className="text-white" />
+                          <Edit size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
                           onClick={() => handleDelete(item._id)}
@@ -288,7 +286,7 @@ const ViewInventory = () => {
                           whileTap={{ scale: 0.9 }}
                           title="Delete"
                         >
-                          <Trash2 size={16} className="text-white" />
+                          <Trash2 size={16} className="text-gray-500" />
                         </motion.button>
                       </div>
                     </td>
@@ -296,7 +294,7 @@ const ViewInventory = () => {
                 ))
               ) : (
                 <motion.tr
-                  className="text-white text-center"
+                  className="text-gray-400 text-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
@@ -317,7 +315,7 @@ const ViewInventory = () => {
                 <motion.button
                   key={number}
                   onClick={() => paginate(number)}
-                  className={`px-3 py-1 rounded-full ${currentPage === number ? 'bg-blue-500 text-white' : 'bg-white bg-opacity-20 text-white'}`}
+                  className={`px-3 py-1 rounded-full ${currentPage === number ? 'bg-blue-500 text-gray-400' : 'bg-white bg-opacity-20 text-gray-500'}`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
