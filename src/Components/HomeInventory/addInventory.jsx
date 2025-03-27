@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Camera, Upload, X } from 'react-feather';
 
-const AddInventory = () => {
+const addInventory = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     productName: '',
@@ -102,11 +102,10 @@ const AddInventory = () => {
 
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center p-4"
+      className=" w-full flex items-center justify-center p-4 bg-cover bg-center"
       style={{
         backgroundImage: "url('https://images.pexels.com/photos/1080696/pexels-photo-1080696.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
       }}
     >
       <motion.div 
@@ -400,4 +399,4 @@ const AddInventory = () => {
   );
 };
 
-export default AddInventory;
+export default addInventory;

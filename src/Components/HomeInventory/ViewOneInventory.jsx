@@ -1,270 +1,235 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Edit, Trash2, ArrowLeft, Download } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+import { Edit, Trash2, ArrowLeft } from 'react-feather';
 
 const ViewOneInventory = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [record, setRecord] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [imageUrl, setImageUrl] = useState('');
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    const fetchRecord = async () => {
+    const fetchInventoryItem = async () => {
       try {
-        setIsLoading(true);
-        const response = await axios.get(`/api/track-tidy/inventory/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setRecord(response.data);
-        
-        // Create image URL if receipt exists
-        if (response.data.receipt) {
-          setImageUrl(`data:image/jpeg;base64,${response.data.receipt}`);
-        }
-      } catch (error) {
-        console.error('Error fetching record:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to load record. Please try again later.',
-        });
-        navigate('/view-inventory');
-      } finally {
-        setIsLoading(false);
+        const response = await axios.get(`http://localhost:8080/api/track-tidy/inventory/get/${id}`);
+        setItem(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to fetch inventory item.');
+        setLoading(false);
       }
     };
 
-    fetchRecord();
-  }, [id, navigate]);
+    fetchInventoryItem();
+  }, [id]);
 
   const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    });
-
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`/api/track-tidy/inventory/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        
-        Swal.fire(
-          'Deleted!',
-          'The record has been deleted.',
-          'success'
-        );
-        navigate('/view-inventory');
-      } catch (error) {
-        console.error('Error deleting record:', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error!',
-          text: 'Failed to delete record. Please try again later.',
-        });
-      }
+    try {
+      await axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete/${id}`);
+      navigate('/view-in');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete inventory item.');
     }
-  };
-
-  const handleDownload = () => {
-    if (!imageUrl) return;
-    
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = `receipt-${record.memberId || 'unknown'}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    try {
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return new Date(dateString).toLocaleDateString(undefined, options);
-    } catch {
-      return 'Invalid Date';
-    }
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
-  const formatCurrency = (amount) => {
-    if (amount === undefined || amount === null) return '$0.00';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const getInitials = (firstName, lastName) => {
-    const first = firstName?.charAt(0)?.toUpperCase() || '';
-    const last = lastName?.charAt(0)?.toUpperCase() || '';
-    return first + last;
-  };
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Loading inventory item...</div>
       </div>
     );
   }
 
-  if (!record) {
+  if (!item) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-4">Record not found</h2>
-          <button
-            onClick={() => navigate('/view-inventory')}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center mx-auto"
-          >
-            <ArrowLeft size={18} className="mr-2" />
-            Back to Inventory
-          </button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl">Inventory item not found</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-teal-400 p-6 text-white">
-          <div className="flex justify-between items-center">
-            <button
-              onClick={() => navigate('/view-inventory')}
-              className="flex items-center text-white hover:text-gray-200"
+    <div 
+      className="min-h-screen w-full flex items-center justify-center p-4"
+      style={{
+        backgroundImage: "url('https://images.pexels.com/photos/8583818/pexels-photo-8583818.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <motion.div 
+        className="w-full max-w-3xl p-8 rounded-3xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        style={{
+          background: 'rgba(255, 255, 255, 0.15)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-white hover:text-gray-300 transition-colors"
+          >
+            <ArrowLeft className="mr-2" />
+            Back to Inventory
+          </button>
+          <div className="flex space-x-4">
+            <motion.button
+              onClick={() => navigate(`/update-in/${id}`)}
+              className="px-4 py-2 rounded-full bg-yellow-500 text-white font-semibold hover:bg-yellow-600 transition-all flex items-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <ArrowLeft size={20} className="mr-2" />
-              Back
-            </button>
-            <h1 className="text-2xl font-bold">Record Details</h1>
-            <div className="flex space-x-2">
+              <Edit size={18} className="mr-2" />
+              Edit Item
+            </motion.button>
+            <motion.button
+              onClick={() => setConfirmDelete(true)}
+              className="px-4 py-2 rounded-full bg-red-500 text-white font-semibold hover:bg-red-600 transition-all flex items-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Trash2 size={18} className="mr-2" />
+              Delete Item
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {error && (
+          <motion.div
+            className="bg-red-100 bg-opacity-90 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {confirmDelete && (
+          <motion.div
+            className="bg-white bg-opacity-20 border border-white border-opacity-30 p-4 rounded-lg mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p className="text-white mb-4">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div className="flex justify-end space-x-4">
               <button
-                onClick={() => navigate(`/edit-inventory/${id}`, { state: { record } })}
-                className="bg-white text-blue-600 hover:bg-gray-100 font-medium py-1 px-3 rounded-lg flex items-center"
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-2 rounded-full bg-gray-500 text-white hover:bg-gray-600 transition-colors"
               >
-                <Edit size={16} className="mr-1" />
-                Edit
+                Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-white text-red-600 hover:bg-gray-100 font-medium py-1 px-3 rounded-lg flex items-center"
+                className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
               >
-                <Trash2 size={16} className="mr-1" />
-                Delete
+                Confirm Delete
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
 
-        {/* Main Content */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left Column - Personal Info */}
-            <div className="md:col-span-1 bg-gray-50 p-6 rounded-lg">
-              <div className="flex flex-col items-center mb-6">
-                <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                  <span className="text-blue-600 text-2xl font-bold">
-                    {getInitials(record.firstName, record.lastName)}
-                  </span>
-                </div>
-                <h2 className="text-xl font-semibold text-center">
-                  {[record.firstName, record.lastName].filter(Boolean).join(' ') || 'N/A'}
-                </h2>
-                <p className="text-gray-500">{record.memberId || 'N/A'}</p>
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="flex flex-col items-center">
+            {item.ProductImage ? (
+              <motion.div
+                className="w-64 h-64 rounded-lg overflow-hidden border-2 border-white border-opacity-30"
+                whileHover={{ scale: 1.02 }}
+              >
+                <img
+                  src={`http://localhost:8080/uploads/${item.ProductImage}`}
+                  alt={item.productName}
+                  className="w-full h-full object-cover"
+                />
+              </motion.div>
+            ) : (
+              <div className="w-64 h-64 rounded-lg bg-white bg-opacity-10 border-2 border-white border-opacity-30 flex items-center justify-center">
+                <span className="text-white">No Image Available</span>
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Email</h3>
-                  <p className="text-gray-900">{record.email || 'N/A'}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Phone</h3>
-                  <p className="text-gray-900">{record.phoneNumber || 'N/A'}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Date of Birth</h3>
-                  <p className="text-gray-900">{formatDate(record.dob)}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Gender</h3>
-                  <p className="text-gray-900 capitalize">{record.gender || 'N/A'}</p>
-                </div>
+            )}
+            <div className="mt-4 text-center">
+              <h3 className="text-2xl font-bold text-white">{item.productName}</h3>
+              <p className="text-white opacity-80">{item.productCategory}</p>
+              <div className={`mt-2 px-4 py-1 rounded-full inline-block ${item.Faulted === 'Yes' ? 'bg-red-500' : 'bg-green-500'}`}>
+                {item.Faulted === 'Yes' ? 'Faulted' : 'Good Condition'}
               </div>
-            </div>
-
-            {/* Middle Column - Service Details */}
-            <div className="md:col-span-1 bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-lg font-semibold mb-4">Service Information</h3>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Service Type</h3>
-                  <p className="text-gray-900 capitalize">
-                    {record.serviceType || 'N/A'}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Amount Paid</h3>
-                  <p className="text-gray-900">{formatCurrency(record.amount)}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Registration Date</h3>
-                  <p className="text-gray-900">{formatDate(record.createdAt)}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
-                  <p className="text-gray-900">{formatDate(record.updatedAt)}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column - Receipt */}
-            <div className="md:col-span-1 bg-gray-50 p-6 rounded-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Receipt</h3>
-                {imageUrl && (
-                  <button
-                    onClick={handleDownload}
-                    className="text-blue-600 hover:text-blue-800 flex items-center"
-                  >
-                    <Download size={16} className="mr-1" />
-                    Download
-                  </button>
-                )}
-              </div>
-              
-              {imageUrl ? (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <img
-                    src={imageUrl}
-                    alt="Receipt"
-                    className="w-full h-auto object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <p className="text-gray-500">No receipt available</p>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      </div>
+
+          <div className="text-white">
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">Product ID</h4>
+                <p className="text-lg">{item.productId}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">User ID</h4>
+                <p className="text-lg">{item.userId}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">Quantity</h4>
+                <p className="text-lg">{item.quantity}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">Product Value</h4>
+                <p className="text-lg">${item.productValue}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">Purchase Date</h4>
+                <p className="text-lg">{formatDate(item.purchaseDate)}</p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold opacity-70">Warranty Date</h4>
+                <p className="text-lg">{formatDate(item.warrantyDate)}</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <motion.div
+          className="mt-8 pt-6 border-t border-white border-opacity-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <h3 className="text-xl font-bold text-white mb-4">Additional Information</h3>
+          <div className="bg-white bg-opacity-10 p-4 rounded-lg">
+            {item.additionalNotes ? (
+              <p className="text-white">{item.additionalNotes}</p>
+            ) : (
+              <p className="text-white opacity-70">No additional information available for this item.</p>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

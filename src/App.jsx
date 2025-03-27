@@ -35,11 +35,11 @@ const router = createBrowserRouter([
         element: <div> <ViewInventory /> </div>
     },
     {
-        path: '/update-in/:id',
+        path: '/update-in',
         element: <div> <UpdateInventory /> </div>
     },
     {
-        path: '/view-one-in/:id',
+        path: '/view-one-in',
         element: <div> <ViewOneInventory /> </div>
     },
     {
