@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Camera, Upload, X } from 'react-feather';
-// import Navbar from '../NavBar';
 
 const addInventory = () => {
   const navigate = useNavigate();
@@ -23,6 +22,9 @@ const addInventory = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Get today's date in YYYY-MM-DD format for the date input min attribute
+  const today = new Date().toISOString().split('T')[0];
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
@@ -108,9 +110,7 @@ const addInventory = () => {
         background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
       }}
     >
-
-    {/* <Navbar /> */}
-    <motion.div 
+      <motion.div 
         className="w-full max-w-2xl p-8 rounded-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,6 @@ const addInventory = () => {
           boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
         }}
       >
-
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -148,7 +147,7 @@ const addInventory = () => {
         )}
 
         <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -230,7 +229,8 @@ const addInventory = () => {
                 type="date"
                 name="purchaseDate"
                 required
-                className="w-full px-4 py-3 rounded-full border border-gray-200  text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
+                min={today} // Prevent selecting past dates
+                className="w-full px-4 py-3 rounded-full border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
                 placeholder="Purchase Date"
                 value={formData.purchaseDate}
                 onChange={handleChange}
@@ -303,7 +303,7 @@ const addInventory = () => {
               <select
                 name="Faulted"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-1/2 px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 value={formData.Faulted}
                 onChange={handleChange}
                 style={{ backdropFilter: 'blur(5px)' }}
@@ -325,7 +325,7 @@ const addInventory = () => {
                 <div className="flex items-center justify-center w-full">
                   <label htmlFor="ProductImage" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-opacity-20 hover:bg-opacity-30 transition-all">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Camera className="w-8 h-8 text-teal-500 mb-1" />
+                      <Camera className="w-8 h-8 mb-1" style={{ color: '#0d9488' }} />
                       <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
                       <p className="text-xs text-gray-500">PNG, JPG or WEBP (max. 2MB)</p>
                     </div>
@@ -341,8 +341,8 @@ const addInventory = () => {
                 </div>
               ) : (
                 <div className="relative">
-                  <div className="rounded-lg overflow-hidden border border-white border-opacity-30  bg-opacity-10">
-                    <div className="flex items-center justify-between px-3 py-2  bg-opacity-20">
+                  <div className="rounded-lg overflow-hidden border border-white border-opacity-30 bg-opacity-10">
+                    <div className="flex items-center justify-between px-3 py-2 bg-opacity-20">
                       <div className="flex items-center">
                         <Upload size={16} className="text-white mr-2" />
                         <span className="text-sm text-white truncate max-w-xs">
@@ -357,7 +357,7 @@ const addInventory = () => {
                         <X size={28} />
                       </button>
                     </div>
-                    <div className="flex justify-center p-2  bg-opacity-10">
+                    <div className="flex justify-center p-2 bg-opacity-10">
                       <img 
                         src={imagePreview} 
                         alt="Product preview" 

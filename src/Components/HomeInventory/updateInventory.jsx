@@ -26,6 +26,8 @@ const UpdateInventory = () => {
   const [loadingItem, setLoadingItem] = useState(true);
   const [errors, setErrors] = useState({});
 
+  const today = new Date().toISOString().split('T')[0];
+
   useEffect(() => {
     const fetchInventoryItem = async () => {
       try {
@@ -274,6 +276,7 @@ const UpdateInventory = () => {
                 type="date"
                 name="purchaseDate"
                 required
+                min={today}
                 className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Purchase Date"
                 value={formData.purchaseDate}
@@ -347,7 +350,7 @@ const UpdateInventory = () => {
               <select
                 name="Faulted"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-1/2 px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 value={formData.Faulted}
                 onChange={handleChange}
                 style={{ backdropFilter: 'blur(5px)' }}
@@ -423,7 +426,7 @@ const UpdateInventory = () => {
                 <div className="flex items-center justify-center w-full">
                   <label htmlFor="ProductImage" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-opacity-20 hover:bg-opacity-30 transition-all">
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Camera className="w-8 h-8 text-teal-500 mb-1" />
+                      <Camera className="w-8 h-8 mb-1" style={{ color: '#0d9488' }} />
                       <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
                       <p className="text-xs text-gray-500">PNG, JPG or WEBP (max. 2MB)</p>
                     </div>
