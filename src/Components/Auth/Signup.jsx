@@ -65,7 +65,7 @@ const Signup = () => {
 
         if (response.ok) {
           alert("Signup Successful! Redirecting to login...");
-          navigate("/login");
+          navigate("/");
         } else {
           alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
         }

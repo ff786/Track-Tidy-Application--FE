@@ -8,6 +8,7 @@ import Login from './Components/Auth/Login.jsx';
 import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 import ForgotPassword from './Components/Auth/Forgot-password.jsx';
+import EditVendorForm from './Components/UserManagement/EditVendorForm.jsx';
 
 // Function to check user role
 const getUserRole = () => {
@@ -31,11 +32,12 @@ const router = createBrowserRouter([
     {
         path:'/forgot-password',
         element:<ForgotPassword />
-
     },
-
-
-    ]);
+    {
+        path: '/edit-vendor/:id',
+        element: <EditVendorForm />
+    },
+]);
 
 function App() {
     return (
