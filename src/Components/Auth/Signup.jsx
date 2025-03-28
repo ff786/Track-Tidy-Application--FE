@@ -8,16 +8,25 @@ const Signup = () => {
   const navigate = useNavigate();
   const [isLoginActive, setIsLoginActive] = useState(false);
 
+  // Function to navigate to the login page
   const togglePanel = () => {
-    setIsLoginActive(!isLoginActive);
+    setIsLoginActive(true); // This sets the state to 'active'
+    navigate("/"); // This redirects to the login page
   };
 
+  // Validation Schema
   const validationSchema = Yup.object({
-    name: Yup.string()
-      .min(3, "Name must be at least 3 characters")
-      .required("Name is required"),
+    firstName: Yup.string()
+      .min(2, "First name must be at least 2 characters")
+      .trim()
+      .required("First name is required"),
+    lastName: Yup.string()
+      .min(2, "Last name must be at least 2 characters")
+      .trim()
+      .required("Last name is required"),
     email: Yup.string()
       .email("Invalid email format")
+      .trim()
       .required("Email is required"),
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
@@ -26,30 +35,46 @@ const Signup = () => {
       .matches(/[0-9]/, "Must contain at least one number")
       .matches(/[@$!%*?&]/, "Must contain at least one special character")
       .required("Password is required"),
-    phone: Yup.string()
-      .matches(/^\d{10}$/, "Phone number must be 10 digits")
-      .required("Phone number is required"),
-    role: Yup.string().required("Role is required"),
-    vendorCompany: Yup.string().when("role", {
-      is: "Vendor",
-      then: Yup.string().required("Company name is required for vendors"),
-    }),
+    mobileNumber: Yup.string()
+      .matches(/^[0-9]{10}$/, "Mobile number must be 10 digits")
+      .trim()
+      .required("Mobile number is required"),
   });
 
+  // Formik Setup
   const formik = useFormik({
     initialValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
-      phone: "",
-      role: "",
-      vendorCompany: "",
+      mobileNumber: "",
     },
     validationSchema,
-    onSubmit: (values) => {
-      console.log("Form Data:", values);
-      alert("Signup Successful!");
-      navigate("/login");
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const response = await fetch("http://localhost:8080/user/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        const data = await response.json(); // Extract response data
+
+        if (response.ok) {
+          alert("Signup Successful! Redirecting to login...");
+          navigate("/login");
+        } else {
+          alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+        alert("Error signing up. Please check your network and try again.");
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
@@ -68,15 +93,28 @@ const Signup = () => {
         <h2>Create Your Account</h2>
 
         <div className="input-box">
-          <label>Name:</label>
+          <label>First Name:</label>
           <input
             type="text"
-            name="name"
-            {...formik.getFieldProps("name")}
-            placeholder="Enter your full name"
+            name="firstName"
+            {...formik.getFieldProps("firstName")}
+            placeholder="Enter your first name"
           />
-          {formik.touched.name && formik.errors.name && (
-            <p className="error">{formik.errors.name}</p>
+          {formik.touched.firstName && formik.errors.firstName && (
+            <p className="error">{formik.errors.firstName}</p>
+          )}
+        </div>
+
+        <div className="input-box">
+          <label>Last Name:</label>
+          <input
+            type="text"
+            name="lastName"
+            {...formik.getFieldProps("lastName")}
+            placeholder="Enter your last name"
+          />
+          {formik.touched.lastName && formik.errors.lastName && (
+            <p className="error">{formik.errors.lastName}</p>
           )}
         </div>
 
@@ -107,49 +145,20 @@ const Signup = () => {
         </div>
 
         <div className="input-box">
-          <label>Phone Number:</label>
+          <label>Mobile Number:</label>
           <input
             type="text"
-            name="phone"
-            {...formik.getFieldProps("phone")}
-            placeholder="Enter 10-digit phone number"
+            name="mobileNumber"
+            {...formik.getFieldProps("mobileNumber")}
+            placeholder="Enter 10-digit mobile number"
           />
-          {formik.touched.phone && formik.errors.phone && (
-            <p className="error">{formik.errors.phone}</p>
+          {formik.touched.mobileNumber && formik.errors.mobileNumber && (
+            <p className="error">{formik.errors.mobileNumber}</p>
           )}
         </div>
 
-        <div className="input-box">
-          <label>Role:</label>
-          <select name="role" {...formik.getFieldProps("role")}>
-            <option value="">Select Role</option>
-            <option value="User">User</option>
-            <option value="Vendor">Vendor</option>
-            <option value="Staff">Staff</option>
-            <option value="Admin">Admin</option>
-          </select>
-          {formik.touched.role && formik.errors.role && (
-            <p className="error">{formik.errors.role}</p>
-          )}
-        </div>
-
-        {formik.values.role === "Vendor" && (
-          <div className="input-box">
-            <label>Company Name:</label>
-            <input
-              type="text"
-              name="vendorCompany"
-              {...formik.getFieldProps("vendorCompany")}
-              placeholder="Enter your company name"
-            />
-            {formik.touched.vendorCompany && formik.errors.vendorCompany && (
-              <p className="error">{formik.errors.vendorCompany}</p>
-            )}
-          </div>
-        )}
-
-        <button type="submit" className="submit">
-          Register
+        <button type="submit" className="submit" disabled={formik.isSubmitting}>
+          {formik.isSubmitting ? "Registering..." : "Register"}
         </button>
       </form>
     </div>

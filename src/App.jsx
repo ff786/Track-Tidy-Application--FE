@@ -7,6 +7,7 @@ import UserList from './Components/UserManagement/UserList.jsx';
 import Login from './Components/Auth/Login.jsx';
 import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
+import ForgotPassword from './Components/Auth/Forgot-password.jsx';
 
 // Function to check user role
 const getUserRole = () => {
@@ -27,7 +28,14 @@ const router = createBrowserRouter([
         path: '/user-services',
         element: <UserServices />
     },
-]);
+    {
+        path:'/forgot-password',
+        element:<ForgotPassword />
+
+    },
+
+
+    ]);
 
 function App() {
     return (

@@ -23,6 +23,14 @@ const UserForm = () => {
       <div className="flex flex-col lg:flex-row items-center justify-between rounded-lg overflow-hidden">
         {/* Left Side: Image with Overlay */}
         <div className="relative w-full lg:w-1/2 h-full">
+          {/* Image */}
+          <img
+            src="/assets/user.avif"
+            alt="User Profile"
+            className="absolute inset-0 w-full h-full object-cover rounded-lg"
+          />
+
+
           <div className="absolute inset-0 bg-black opacity-40 rounded-lg"></div>
           <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
             <h2 className="text-2xl font-semibold mb-4">Add New User</h2>
