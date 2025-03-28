@@ -30,15 +30,27 @@ body {
     background: #fff;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     color: #333;
     text-align: center;
     padding: 20px;
     flex-direction: column;
-    overflow-y: auto;
+    overflow-y: scroll;
     z-index: 1;
+    max-height: 500px;
 }
 
+/* Hide scrollbar */
+.signup-form::-webkit-scrollbar {
+    width: 0px; /* Hide scrollbar */
+    background: transparent; /* Ensure background is transparent */
+}
+
+/* Optional: to avoid space being taken up by scrollbar */
+.signup-form {
+    -ms-overflow-style: none;  /* For IE and Edge */
+    scrollbar-width: none; /* For Firefox */
+}
 /* Title */
 
 .signup-form h2 {
@@ -143,7 +155,7 @@ form {
     left: -250%;
     width: 300%;
     height: 100%;
-    background: #7494ec;
+    background: #577de5;
     border-radius: 150px;
     z-index: 2;
 }

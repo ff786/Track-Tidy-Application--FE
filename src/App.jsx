@@ -20,7 +20,8 @@ const router = createBrowserRouter([
     // Role-Based Protected Routes
     {
         path: '/user-management',
-        element: getUserRole() === 'admin' ? <UserList /> : <Login />
+        element: <UserList/>
+        //element: getUserRole() === 'admin' ? <UserList /> : <Login />
     },
     {
         path: '/user-services',
