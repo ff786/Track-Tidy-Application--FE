@@ -51,29 +51,31 @@ const Login = () => {
           <input
             type="email"
             name="email"
-            value={formik.values.email}
             {...formik.getFieldProps("email")}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
             placeholder="Enter your email"
           />
           {formik.touched.email && formik.errors.email && (
             <p className="error">{formik.errors.email}</p>
           )}
         </div>
+
         <div className="input-box">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            {...formik.getFieldProps("password")}
-            placeholder={formik.values.password ? "" : "Enter your password"}
-          />
-          {formik.touched.password && formik.errors.password && (
-            <p className="error">{formik.errors.password}</p>
-          )}
-        </div>
+  <label>Password:</label>
+  <input
+    name="password"
+    {...formik.getFieldProps("password")}
+    placeholder="Enter your password"
+    onChange={formik.handleChange}
+    onBlur={formik.handleBlur}
+    style={{
+      WebkitTextSecurity: formik.values.password ? "disc" : "none", // Hide text if entered
+    }}
+  />
+  {formik.touched.password && formik.errors.password && (
+    <p className="error">{formik.errors.password}</p>
+  )}
+</div>
+
 
 
 
