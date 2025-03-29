@@ -65,43 +65,56 @@ const addInventory = () => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    // Create FormData manually instead of using the form element
+    const newFormData = new FormData();
+    
+    // Add all form fields to the FormData object
+    newFormData.append('productName', formData.productName);
+    newFormData.append('userId', formData.userId);
+    newFormData.append('productId', formData.productId);
+    newFormData.append('quantity', formData.quantity);
+    newFormData.append('purchaseDate', formData.purchaseDate);
+    newFormData.append('productValue', formData.productValue);
+    newFormData.append('warrantyDate', formData.warrantyDate);
+    newFormData.append('productCategory', formData.productCategory);
+    newFormData.append('Faulted', formData.Faulted);
+    
+    // Add the file if it exists
+    if (formData.ProductImage) {
+      newFormData.append('ProductImage', formData.ProductImage);
+    }
+    
     setLoading(true);
-
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setLoading(false);
-      return;
-    }
-
+    setError('');
+    
     try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'ProductImage') {
-          formDataToSend.append(key, formData[key]);
-        } else {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      const response = await axios.post('http://localhost:8080/api/track-tidy/inventory/create', formDataToSend, {
+      const response = await fetch('http://localhost:8080/api/track-tidy/inventory/create', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Accept': 'application/json'
+        },
+        body: newFormData,
       });
-
-      if (response.data) {
-        navigate('/view-in');
+        
+      if (response.ok) {
+        alert("Details Added to DB");
+        navigate(-1); // Navigate back on success
+      } else {
+        console.error('Failed to submit form');
+        setError('Failed to submit form. Please try again.');
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add inventory item. Please try again.');
-    } finally {
+    }
+    catch (error) {
+      console.error('Error uploading image:', error);
+      setError('Failed to Submit Form, Please try again later!');
+    }
+    finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <div 

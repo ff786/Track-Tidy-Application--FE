@@ -11,6 +11,8 @@ import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
 import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
 import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
 
+import Home from './Home.jsx'
+
 import {
     createBrowserRouter,
     RouterProvider
@@ -20,6 +22,10 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: <div> <Login /> </div>
+    },
+    {
+        path: '/home',
+        element: <div> <Home /> </div>
     },
     {
         path: '/user-services',
@@ -46,6 +52,7 @@ const router = createBrowserRouter([
         path: '/in-page',
         element: <div> <InventoryPage /> </div>
     },
+    
 ])
 
 function App() {
