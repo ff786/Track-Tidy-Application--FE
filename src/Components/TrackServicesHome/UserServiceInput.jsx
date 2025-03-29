@@ -1,101 +1,130 @@
-import React from "react";
+import React, { useState } from "react";
+import { Mail } from "lucide-react";
 import ServiceLady from "../../assets/ServiceLady.png";
 
 const ServiceInput = () => {
-  return (
-      <div className="bg-gradient-to-r from-blue-500 to-teal-400 p-8 rounded-xl overflow-hidden">
-        <div className="flex flex-col lg:flex-row items-center justify-between rounded-lg overflow-hidden">
-          {/* Left Side: Image with Overlay */}
-          <div className="relative w-full lg:w-1/2 h-full">
-            <img
-                src={ServiceLady}
-                alt="Service Lady"
-                className="w-full h-full object-cover rounded-lg"
-            />
-            <div className="absolute inset-0 bg-black opacity-40 rounded-lg"></div>
-            <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8 text-center">
-              <h2 className="text-2xl font-semibold mb-4">
-                Get the Best Service at Home
-              </h2>
-              <p className="text-lg">
-                Our experts are ready to assist you. Book now to experience
-                top-tier service!
-              </p>
-            </div>
-          </div>
+    const [step, setStep] = useState(1);
+    const [jobDescription, setJobDescription] = useState("");
+    const [error, setError] = useState("");
 
-          {/* Right Side: Form Section */}
-          <div className="bg-white p-8 rounded-lg w-full lg:w-1/2 flex flex-col justify-center">
-            {/* Header */}
-            <h1 className="text-3xl font-bold text-center text-primary mb-4">
-              QuickHelp
-            </h1>
-            <p className="text-lg text-center mt-2 mb-6 text-gray-700">
-              Reliable care for your home at your fingertips using experienced and
-              trusted Service Professionals
-            </p>
+    const handleNext = () => {
+        if (!jobDescription.trim()) {
+            setError("Job description is required");
+            return;
+        }
+        setError("");
+        setStep(2);
+    };
 
-            {/* Stats Section */}
-            <div className="text-center mt-6 text-gray-600 space-x-4">
-              <span>5,000+ Customers</span>
-              <span>•</span>
-              <span>14,000+ Jobs Done</span>
-              <span>•</span>
-              <span>4.7 Positive Ratings</span>
-            </div>
-
-            {/* Booking Form */}
-            <div className="mt-8 space-y-6">
-              <h2 className="text-xl font-semibold text-center mb-4">
-                Book your service provider now!
-              </h2>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">1. Service Details</h3>
-
-                {/* Service Selection */}
-                <div>
-                  <label className="text-gray-600 mb-2 block">
-                    Service Required (Select)*
-                  </label>
-                  <select className="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500">
-                    <option value="">Select...</option>
-                    <option value="plumbing">Plumbing</option>
-                    <option value="cleaning">Cleaning</option>
-                    <option value="electrician">Electrician</option>
-                  </select>
+    return (
+        <div
+            className="relative max-w-full h-auto md:h-120 p-4"
+            style={{
+                backgroundImage: `url(${ServiceLady})`,
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
+                borderRadius: "15px",
+                backgroundPosition: "top-left",
+            }}
+        >
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-10 md:gap-20 p-5">
+                <div className="relative text-black text-left md:text-left">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-2">Track Tidy Services</h2>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-3 leading-tight">
+                        Reliable care for your home <br />
+                        at your fingertips <span className="text-lg font-semibold">using experienced and</span>
+                    </h1>
+                    <p className="text-lg md:text-xl mb-6">trusted Service Professionals</p>
                 </div>
 
-                {/* Job Description */}
-                <div>
-                  <label className="text-gray-600 mb-2 block">
-                    Tell us a little bit about the job*
-                  </label>
-                  <textarea
-                      className="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:ring-2 focus:ring-blue-500"
-                      rows="4"
-                      required
-                      placeholder="Describe the service required..."
-                  ></textarea>
+                <div className="relative w-full md:max-w-md bg-white opacity-90 rounded-lg shadow-lg p-5">
+                    <div className="bg-black text-white text-lg p-3 rounded-t-lg opacity-80 flex items-center">
+                        <h3 className="text-md md:text-lg font-medium">
+                            {step === 1 ? "Book your service provider now!" : "Enter Your Details"}
+                        </h3>
+                    </div>
+
+                    <div className="p-4">
+                        <div className="flex mb-6 justify-center md:justify-start">
+                            <div className={`flex items-center ${step === 1 ? 'text-blue-500' : 'opacity-50'}`}>
+                                <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+                                    1
+                                </div>
+                                <span className="ml-2 text-sm font-medium">Service Details</span>
+                            </div>
+                            <div className="flex-1"></div>
+                            <div className={`flex items-center ${step === 2 ? 'text-blue-500' : 'opacity-50'}`}>
+                                <div className={`w-8 h-8 rounded-full ${step === 2 ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'} flex items-center justify-center font-bold`}>
+                                    2
+                                </div>
+                                <span className="ml-2 text-sm font-medium">Your Details</span>
+                            </div>
+                        </div>
+
+                        {step === 1 ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <select className="block w-full bg-white border border-gray-300 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:ring focus:border-blue-300 text-gray-700">
+                                        <option value="" disabled selected hidden>
+                                            Select the required service
+                                        </option>
+                                        <option value="HomeCleaning">Home Cleaning</option>
+                                        <option value="SofaCleaning">Sofa Cleaning</option>
+                                        <option value="CarpetCleaning">Carpet Cleaning</option>
+                                        <option value="MattressCleaning">Mattress Cleaning</option>
+                                        <option value="AirConditioning">Air Conditioning</option>
+                                        <option value="WashingMachine">Washing Machine Repairing</option>
+                                        <option value="Refrigerator">Refrigerator Repairing</option>
+                                        <option value="TVRepair">TV Repairing</option>
+                                        <option value="electrical">Electrical Work</option>
+                                        <option value="plumbing">Plumbing</option>
+                                        <option value="painting">Painting</option>
+                                        <option value="gardening">Gardening</option>
+                                        <option value="floorPolishing">Floor Polishing</option>
+                                        <option value="handyman">Handyman</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <textarea
+                                        className="w-full h-32 px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                        placeholder="Tell us a little bit about the job*"
+                                        value={jobDescription}
+                                        onChange={(e) => setJobDescription(e.target.value)}
+                                    ></textarea>
+                                    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <button onClick={handleNext} className="w-full md:w-auto bg-black text-white py-2 px-6 rounded font-medium hover:bg-gray-800 transition">
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Member ID" />
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Name" />
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Address" />
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="email" placeholder="Email" />
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Contact Number" />
+                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Referral Code" />
+
+                                <div className="flex justify-between items-center">
+                                    <button onClick={() => setStep(1)} className="w-full md:w-auto bg-gray-500 text-white py-2 px-6 rounded font-medium hover:bg-gray-700 transition">
+                                        Previous
+                                    </button>
+                                    <button className="w-full md:w-auto bg-black text-white py-2 px-6 rounded font-medium hover:bg-gray-800 transition">
+                                        Book Service
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="text-center mt-6">
-                <button className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-200">
-                  Next
-                </button>
-              </div>
-
-              {/* Alternative Contact */}
-              <div className="mt-4 text-center text-gray-600">
-                <span>Mail us instead</span>
-              </div>
             </div>
-          </div>
         </div>
-      </div>
-  );
+    );
 };
 
 export default ServiceInput;
