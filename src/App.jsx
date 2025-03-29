@@ -1,25 +1,30 @@
-import React from 'react';
-import './App.css';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import React, { useState } from 'react'
 
-import UserForm from './Components/UserManagement/UserForm.jsx';
-import UserList from './Components/UserManagement/UserList.jsx';
 import Login from './Components/Auth/Login.jsx';
-import Signup from './Components/Auth/Signup.jsx';
-import UserServices from './Components/TrackServicesHome/UserServices.jsx';
-import ForgotPassword from './Components/Auth/Forgot-password.jsx';
-import EditVendorForm from './Components/UserManagement/EditVendorForm.jsx';
 
-// Function to check user role
-const getUserRole = () => {
-    return localStorage.getItem("userRole"); // Assume role is stored after login
-};
+import UserServices from './Components/TrackServicesHome/UserServices.jsx'
+import UserList from './Components/UserManagement/UserList.jsx';
+import Signup from './Components/Auth/Signup.jsx';
+import AddInventory from './Components/HomeInventory/addInventory.jsx'
+import ViewInventory from './Components/HomeInventory/viewInventory.jsx'
+import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
+import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
+import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
+
+import {
+    createBrowserRouter,
+    RouterProvider
+} from 'react-router-dom'
 
 const router = createBrowserRouter([
-    { path: '/', element: <Login /> },
-    { path: '/signup', element: <Signup /> },
-
-    // Role-Based Protected Routes
+    {
+        path: '/',
+        element: <div> <Login /> </div>
+    },
+    {
+        path: '/signup',
+        element: <div> <Signup /> </div>
+    },
     {
         path: '/user-management',
         element: <UserList/>
@@ -27,24 +32,38 @@ const router = createBrowserRouter([
     },
     {
         path: '/user-services',
-        element: <UserServices />
+        element: <div> <UserServices /> </div>
+    },
+
+    {
+        path: '/add-in',
+        element: <div> <AddInventory /> </div>
     },
     {
-        path:'/forgot-password',
-        element:<ForgotPassword />
+        path: '/view-in',
+        element: <div> <ViewInventory /> </div>
     },
     {
-        path: '/edit-vendor/:id',
-        element: <EditVendorForm />
+        path: '/update-in/:id',
+        element: <div> <UpdateInventory /> </div>
     },
-]);
+    {
+        path: '/view-one-in/:id',
+        element: <div> <ViewOneInventory /> </div>
+    },
+    {
+        path: '/in-page',
+        element: <div> <InventoryPage /> </div>
+    },
+])
 
 function App() {
-    return (
-        <div>
-            <RouterProvider router={router} />
-        </div>
-    );
+
+  return (
+      <div>
+          <RouterProvider router={router} />
+      </div>
+  )
 }
 
 export default App;
