@@ -1,5 +1,5 @@
 /* Centering the form on the page */
-body {
+.HSDbody {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,7 +9,7 @@ body {
 }
 
 /* Signup container */
-.signup-container {
+.HSDsignup-container {
     position: relative;
     width: 850px;
     height: 600px;
@@ -22,7 +22,7 @@ body {
 }
 
 /* Signup form section */
-.signup-form {
+.HSDsignup-form {
     position: absolute;
     right: 0;
     width: 50%;
@@ -30,7 +30,7 @@ body {
     background: #fff;
     display: flex;
     align-items: center;
-    justify-content:space-between;
+    justify-content: space-between;
     color: #333;
     text-align: center;
     padding: 20px;
@@ -41,19 +41,19 @@ body {
 }
 
 /* Hide scrollbar */
-.signup-form::-webkit-scrollbar {
+.HSDsignup-form::-webkit-scrollbar {
     width: 0px; /* Hide scrollbar */
     background: transparent; /* Ensure background is transparent */
 }
 
 /* Optional: to avoid space being taken up by scrollbar */
-.signup-form {
+.HSDsignup-form {
     -ms-overflow-style: none;  /* For IE and Edge */
     scrollbar-width: none; /* For Firefox */
 }
-/* Title */
 
-.signup-form h2 {
+/* Title */
+.HSDsignup-form h2 {
     font-size: 30px;
     margin-bottom: 20px;
     margin-top: 30px;
@@ -61,49 +61,49 @@ body {
 }
 
 /* Form Styling */
-form {
+.HSDform {
     width: 100%;
     max-width: 600px;
 }
 
 /* Input Box */
-.input-box {
+.HSDinput-box {
     position: relative;
     margin-bottom: 1px;
     width: 100%;
 }
 
 /* Input fields & dropdowns */
-.input-box input,
-.input-box select {
+.HSDinput-box input,
+.HSDinput-box select {
     width: 100%;
-    max-width: 500px;  /* Adjust the maximum width */
-    padding: 16px;  /* Increased height */
-    font-size: 14px;  /* Bigger text */
+    max-width: 500px;
+    padding: 16px;
+    font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 8px;
     outline: none;
     background: #eee;
     color: #333;
     font-weight: 500;
-    box-sizing: border-box; /* Prevent width issues */
+    box-sizing: border-box;
 }
 
 /* Focus effect */
-.input-box input:focus,
-.input-box select:focus {
+.HSDinput-box input:focus,
+.HSDinput-box select:focus {
     border-color: #7494ec;
     box-shadow: 0 0 8px rgba(116, 148, 236, 0.5);
 }
 
 /* Placeholder text */
-.input-box input::placeholder {
+.HSDinput-box input::placeholder {
     color: #888;
     font-weight: 400;
 }
 
 /* Label styling */
-.input-box label {
+.HSDinput-box label {
     display: block;
     font-size: 16px;
     font-weight: bold;
@@ -111,7 +111,7 @@ form {
 }
 
 /* Icons inside input fields */
-.input-box i {
+.HSDinput-box i {
     position: absolute;
     right: 15px;
     top: 50%;
@@ -120,9 +120,8 @@ form {
     color: #888;
 }
 
-
 /* Submit button */
-.submit {
+.HSDsubmit {
     width: 100%;
     max-width: 300px;
     height: 50px;
@@ -138,19 +137,17 @@ form {
     margin-top: 30px;
 }
 
-
-
-.submit:hover {
+.HSDsubmit:hover {
     background: #5673c9;
 }
 
-.toggle-box{
+.HSDtoggle-box {
     position: absolute;
     width: 100%;
     height: 100%;
-   
 }
-.toggle-box::before{
+
+.HSDtoggle-box::before {
     content: '';
     position: absolute;
     left: -250%;
@@ -161,11 +158,10 @@ form {
     z-index: 2;
 }
 
-.toggle-panel{
+.HSDtoggle-panel {
     position: absolute;
     width: 50%;
     height: 100%;
-    /*background: seagreen;*/
     color: #fff;
     display: flex;
     flex-direction: column;
@@ -174,11 +170,11 @@ form {
     z-index: 2;
 }
 
-.toggle-panel p{
+.HSDtoggle-panel p {
     margin-bottom: 20px;
 }
 
-.toggle-panel .btn{
+.HSDtoggle-panel .HSDbtn {
     width: 160px;
     height: 46px;
     background: transparent;
