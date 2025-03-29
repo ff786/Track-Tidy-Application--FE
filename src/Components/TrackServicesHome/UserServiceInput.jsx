@@ -4,16 +4,64 @@ import ServiceLady from "../../assets/ServiceLady.png";
 
 const ServiceInput = () => {
     const [step, setStep] = useState(1);
-    const [jobDescription, setJobDescription] = useState("");
+    const [serviceDesc, setServiceDesc] = useState("");
+    const [serviceType, setServiceType] = useState("");
     const [error, setError] = useState("");
+    const [memberId, setMemberId] = useState("");
+    const [memberName, setName] = useState("");
+    const [address, setAddress] = useState("");
+    const [email, setEmail] = useState("");
+    const [contactNumber, setContactNumber] = useState("");
+    const [referralCode, setReferralCode] = useState("");
 
     const handleNext = () => {
-        if (!jobDescription.trim()) {
+        if (!serviceDesc.trim()) {
             setError("Job description is required");
             return;
         }
         setError("");
         setStep(2);
+    };
+
+    const handleSubmit = async () => {
+        // Validate all the fields
+        if (!memberId || !memberName || !address || !email || !contactNumber) {
+            setError("Please fill in all fields.");
+            return;
+        }
+        setError(""); // Clear any previous error messages
+
+        const formData = new URLSearchParams();
+        formData.append("jobDescription", serviceDesc);
+        formData.append("memberId", memberId);
+        formData.append("memberName", memberName);
+        formData.append("address", address);
+        formData.append("email", email);
+        formData.append("contactNumber", contactNumber);
+        formData.append("referralCode", referralCode);
+        formData.append("serviceType", serviceType);
+        formData.append("serviceDesc", serviceDesc);
+
+        try {
+            const response = await fetch("http://localhost:8080/api/track-tidy/service/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                },
+                body: formData.toString(),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to submit the service request");
+            }
+
+            // Handle success (you can redirect or show a success message)
+            alert("Service request submitted successfully!");
+            setStep(1); // Reset the form or navigate elsewhere
+        } catch (error) {
+            setError(error.message);
+        }
     };
 
     return (
@@ -64,7 +112,7 @@ const ServiceInput = () => {
                         {step === 1 ? (
                             <div className="space-y-4">
                                 <div>
-                                    <select className="block w-full bg-white border border-gray-300 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:ring focus:border-blue-300 text-gray-700">
+                                    <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="block w-full bg-white border border-gray-300 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:ring focus:border-blue-300 text-gray-700">
                                         <option value="" disabled selected hidden>
                                             Select the required service
                                         </option>
@@ -89,8 +137,8 @@ const ServiceInput = () => {
                                     <textarea
                                         className="w-full h-32 px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
                                         placeholder="Tell us a little bit about the job*"
-                                        value={jobDescription}
-                                        onChange={(e) => setJobDescription(e.target.value)}
+                                        value={serviceDesc}
+                                        onChange={(e) => setServiceDesc(e.target.value)}
                                     ></textarea>
                                     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                                 </div>
@@ -103,18 +151,57 @@ const ServiceInput = () => {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Member ID" />
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Name" />
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Address" />
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="email" placeholder="Email" />
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Contact Number" />
-                                <input className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700" type="text" placeholder="Referral Code" />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="text"
+                                    placeholder="Member ID"
+                                    value={memberId}
+                                    onChange={(e) => setMemberId(e.target.value)}
+                                />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="text"
+                                    placeholder="Name"
+                                    value={memberName}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="text"
+                                    placeholder="Address"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="email"
+                                    placeholder="Email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="text"
+                                    placeholder="Contact Number"
+                                    value={contactNumber}
+                                    onChange={(e) => setContactNumber(e.target.value)}
+                                />
+                                <input
+                                    className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
+                                    type="text"
+                                    placeholder="Referral Code"
+                                    value={referralCode}
+                                    onChange={(e) => setReferralCode(e.target.value)}
+                                />
 
                                 <div className="flex justify-between items-center">
                                     <button onClick={() => setStep(1)} className="w-full md:w-auto bg-gray-500 text-white py-2 px-6 rounded font-medium hover:bg-gray-700 transition">
                                         Previous
                                     </button>
-                                    <button className="w-full md:w-auto bg-black text-white py-2 px-6 rounded font-medium hover:bg-gray-800 transition">
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="w-full md:w-auto bg-black text-white py-2 px-6 rounded font-medium hover:bg-gray-800 transition"
+                                    >
                                         Book Service
                                     </button>
                                 </div>

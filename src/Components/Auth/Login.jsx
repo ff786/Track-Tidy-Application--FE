@@ -30,14 +30,22 @@ const Login = () => {
 
       try {
         // Sending the login request to backend
-        const response = await axios.post("http://localhost:8080/api/track-tidy/user/request/token", {
+        const response = await fetch('http://localhost:8080/api/track-tidy/user/request/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
+
           email: values.email,
           password: values.password,
           role: values.role,
         });
-        console.log("Login Response:", response.data);
-        alert("Login Successful!");
-        navigate("/dashboard");
+        const data = await response.json();
+          console.log("Login Response:", response.data);
+          alert("Login Successful!");
+          sessionStorage.setItem('access_token', data.access_token);
+          navigate("/dashboard");
       } catch (error) {
         console.error("Login failed:", error.response?.data || error.message);
         alert("Login Failed! Please check your credentials.");

@@ -67,41 +67,32 @@ const addInventory = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      setLoading(false);
-      return;
-    }
+    const form = document.getElementById('inventoryForm');
+    const formData = new FormData(form);
 
     try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'ProductImage') {
-          formDataToSend.append(key, formData[key]);
-        } else {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      const response = await axios.post('http://localhost:8080/api/track-tidy/inventory/create', formDataToSend, {
+      const response = await fetch('http://localhost:8080/api/track-tidy/inventory/create', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Accept': 'application/json',
+        },
+        body: formData,
       });
 
-      if (response.data) {
-        navigate('/view-in');
+      if (response.ok) {
+        alert("Details Added to DB");
+        navigate('/view-in');  // Navigate to another page after successful submission
+      } else {
+        console.error('Failed to submit form');
+        alert('Failed to submit form');
       }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add inventory item. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to Submit Form, Please try again later!');
     }
   };
+
 
   return (
     <div 
@@ -146,7 +137,7 @@ const addInventory = () => {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
+        <form id="inventoryForm" onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
