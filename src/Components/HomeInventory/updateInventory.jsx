@@ -185,7 +185,7 @@ const UpdateInventory = () => {
 
         {error && (
           <motion.div
-            className="bg-red-100 bg-opacity-90 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4"
+            className="bg-red-100 bg-opacity-90 border border-red-400 text-red-700 px-4 py-2 rounded-lg mb-4"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -204,7 +204,7 @@ const UpdateInventory = () => {
                 type="text"
                 name="productName"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Product Name"
                 value={formData.productName}
                 onChange={handleChange}
@@ -221,7 +221,7 @@ const UpdateInventory = () => {
                 type="text"
                 name="userId"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="User ID"
                 value={formData.userId}
                 onChange={handleChange}
@@ -238,7 +238,7 @@ const UpdateInventory = () => {
                 type="text"
                 name="productId"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Product ID"
                 value={formData.productId}
                 onChange={handleChange}
@@ -257,7 +257,7 @@ const UpdateInventory = () => {
                 name="quantity"
                 required
                 min="1"
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Quantity"
                 value={formData.quantity}
                 onChange={handleChange}
@@ -277,7 +277,7 @@ const UpdateInventory = () => {
                 name="purchaseDate"
                 required
                 min={today}
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Purchase Date"
                 value={formData.purchaseDate}
                 onChange={handleChange}
@@ -295,7 +295,7 @@ const UpdateInventory = () => {
                 name="productValue"
                 required
                 min="1"
-                className="mt-4 w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="mt-4 w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Product Value"
                 value={formData.productValue}
                 onChange={handleChange}
@@ -314,7 +314,7 @@ const UpdateInventory = () => {
                 type="date"
                 name="warrantyDate"
                 required
-                className="w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Warranty Date"
                 value={formData.warrantyDate}
                 onChange={handleChange}
@@ -330,7 +330,7 @@ const UpdateInventory = () => {
               <select
                 name="productCategory"
                 required
-                className="mt-4 w-full px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="mt-4 w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 value={formData.productCategory}
                 onChange={handleChange}
                 style={{ backdropFilter: 'blur(5px)' }}
@@ -350,7 +350,7 @@ const UpdateInventory = () => {
               <select
                 name="Faulted"
                 required
-                className="w-1/2 px-4 py-3 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-1/2 px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 value={formData.Faulted}
                 onChange={handleChange}
                 style={{ backdropFilter: 'blur(5px)' }}
@@ -453,7 +453,7 @@ const UpdateInventory = () => {
             <motion.button
               type="button"
               onClick={() => navigate(-1)}
-              className="px-6 py-3 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-all"
+              className="px-6 py-2 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-all"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -461,7 +461,7 @@ const UpdateInventory = () => {
             </motion.button>
             <motion.button
                           type="submit"
-                          className="px-6 py-3 rounded-full text-white font-semibold transition-all"
+                          className="px-6 py-2 rounded-full font-semibold transition-all"
                           style={{ 
                             background: 'linear-gradient(to right, #5eeadb, #99f6ec)',
                             boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)' 
