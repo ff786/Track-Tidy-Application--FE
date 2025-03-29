@@ -1,11 +1,20 @@
+.HSDlogin-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51));
+  padding: 20px;
+}
 /* Centering the form on the page */
 .HSDbody {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(90deg, #e2e2e2, #c9d6ff);
+    background: linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51)); /* Added the gradient background */
     margin: 0;
+    position: relative;
 }
 
 /* Signup container */
@@ -125,20 +134,24 @@
     width: 100%;
     max-width: 300px;
     height: 50px;
-    background: #7494ec;
+    background: linear-gradient(to right, #5eeadb, #99f6ec); /* Updated with your gradient */
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border: none;
     cursor: pointer;
     font-size: 18px;
-    color: #fff;
+    color: #333;
     font-weight: 500;
     transition: 0.3s;
     margin-top: 30px;
 }
 
 .HSDsubmit:hover {
-    background: #5673c9;
+    background: linear-gradient(to right, #5eeadb, #99f6ec); /* Updated with your gradient */
+    box-shadow: 0 4px 10px rgba(93, 234, 219, 0.3); /* Added box shadow on hover */
+
+
+
 }
 
 .HSDtoggle-box {
@@ -153,8 +166,8 @@
     left: -250%;
     width: 300%;
     height: 100%;
-    background: #577de5;
-    border-radius: 150px;
+    background:linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51)); 
+     border-radius: 150px;
     z-index: 2;
 }
 

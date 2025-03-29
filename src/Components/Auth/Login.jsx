@@ -46,6 +46,7 @@ const Login = () => {
   });
 
   return (
+    <div className="HSDlogin-page"> 
     <div className="HSDsignup-container">
       {/* Toggle Panel */}
       <div className="HSDtoggle-box">
@@ -112,6 +113,7 @@ const Login = () => {
           </a>
         </div>
       </form>
+    </div>
     </div>
   );
 };
