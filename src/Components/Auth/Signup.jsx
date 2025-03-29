@@ -53,7 +53,7 @@ const Signup = () => {
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await fetch("http://localhost:8080/user/register", {
+        const response = await fetch("http://localhost:8080/api/track-tidy/user/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
