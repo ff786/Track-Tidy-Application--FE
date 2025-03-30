@@ -15,20 +15,21 @@
     min-height: 100vh;
     background: linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51)); /* Added the gradient background */
     margin: 0;
-    position: relative;
+    
 }
 
 /* Signup container */
 .HSDsignup-container {
-    position: relative;
+    position:relative;
     width: 850px;
     height: 600px;
     background: #fff;
     border-radius: 30px;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-    display: flex;
+    display:flex;
     flex-direction: row;
     overflow: hidden;
+    margin: auto;
 }
 
 /* Signup form section */
