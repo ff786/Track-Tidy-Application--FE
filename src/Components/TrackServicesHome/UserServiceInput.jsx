@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Mail } from "lucide-react";
 import ServiceLady from "../../assets/ServiceLady.png";
 
 const ServiceInput = () => {
