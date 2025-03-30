@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { Camera, Upload, X } from 'react-feather';
+// import { Camera, Upload, X } from 'react-feather';
 
 const UpdateInventory = () => {
   const navigate = useNavigate();
@@ -16,11 +16,11 @@ const UpdateInventory = () => {
     productValue: '',
     warrantyDate: '',
     productCategory: '',
-    ProductImage: null,
+    // ProductImage: null,
     Faulted: ''
   });
-  const [imagePreview, setImagePreview] = useState(null);
-  const [existingImage, setExistingImage] = useState(null);
+  // const [imagePreview, setImagePreview] = useState(null);
+  // const [existingImage, setExistingImage] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingItem, setLoadingItem] = useState(true);
@@ -31,7 +31,13 @@ const UpdateInventory = () => {
   useEffect(() => {
     const fetchInventoryItem = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/track-tidy/inventory/update/${id}`);
+        const response = await fetch(`http://localhost:8080/api/track-tidy/inventory/getAll?id=${userId}`,{
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+          },
+          body: formDataToSend,
+        });
         const item = response.data;
         
         setFormData({
@@ -46,9 +52,9 @@ const UpdateInventory = () => {
           Faulted: item.Faulted
         });
 
-        if (item.ProductImage) {
-          setExistingImage(`http://localhost:8080/uploads/${item.ProductImage}`);
-        }
+        // if (item.ProductImage) {
+        //   setExistingImage(`http://localhost:8080/uploads/${item.ProductImage}`);
+        // }
 
         setLoadingItem(false);
       } catch (err) {
@@ -62,27 +68,27 @@ const UpdateInventory = () => {
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-    if (type === 'file' && name === 'ProductImage') {
-      const file = files[0];
-      setFormData({ ...formData, [name]: file });
+    // if (type === 'file' && name === 'ProductImage') {
+    //   const file = files[0];
+    //   setFormData({ ...formData, [name]: file });
       
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setExistingImage(null); // Clear existing image when new one is selected
-      };
-      reader.readAsDataURL(file);
-    } else {
+    //   // Create preview URL
+    //   const reader = new FileReader();
+    //   reader.onloadend = () => {
+    //     setImagePreview(reader.result);
+    //     setExistingImage(null); // Clear existing image when new one is selected
+    //   };
+    //   reader.readAsDataURL(file);
+    // } else {
       setFormData({ ...formData, [name]: value });
-    }
+    // }
   };
 
-  const removeImage = () => {
-    setFormData({ ...formData, ProductImage: null });
-    setImagePreview(null);
-    setExistingImage(null);
-  };
+  // const removeImage = () => {
+  //   setFormData({ ...formData, ProductImage: null });
+  //   setImagePreview(null);
+  //   setExistingImage(null);
+  // };
 
   const validate = () => {
     const newErrors = {};
@@ -114,21 +120,22 @@ const UpdateInventory = () => {
       const formDataToSend = new FormData();
       Object.keys(formData).forEach(key => {
         if (formData[key] !== null && formData[key] !== undefined) {
-          if (key === 'ProductImage') {
+          // if (key === 'ProductImage') {
+          //   formDataToSend.append(key, formData[key]);
+          // } else {
             formDataToSend.append(key, formData[key]);
-          } else {
-            formDataToSend.append(key, formData[key]);
-          }
+          // }
         }
       });
 
-      const response = await axios.put(
-        `http://localhost:8080/api/track-tidy/inventory/update/${id}`,
-        formDataToSend,
+      const response = await fetch(`http://localhost:8080/api/track-tidy/inventory/update?id=${id}`,
+       
         {
+          method: "PUT",
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+          },
+          body: formDataToSend,
         }
       );
 
@@ -151,13 +158,13 @@ const UpdateInventory = () => {
   }
 
   return (
-    <div 
+    <div
       className="w-full flex items-center justify-center p-4 min-h-screen"
       style={{
-        background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
+        background: 'linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51))',
       }}
     >
-      <motion.div 
+      <motion.div
               className="w-full max-w-2xl p-8 rounded-3xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -169,13 +176,13 @@ const UpdateInventory = () => {
                 boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
               }}
             >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-8"
-        >
-          <h2 className="text-3xl font-bold text-white mb-2">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-center mb-8"
+              >
+          <h2 className="text-3xl font-bold mb-2">
             Update Inventory Item
           </h2>
           <p className="text-gray-200">
@@ -194,7 +201,7 @@ const UpdateInventory = () => {
         )}
 
         <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -204,7 +211,7 @@ const UpdateInventory = () => {
                 type="text"
                 name="productName"
                 required
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-bleck placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
                 placeholder="Product Name"
                 value={formData.productName}
                 onChange={handleChange}
@@ -257,7 +264,7 @@ const UpdateInventory = () => {
                 name="quantity"
                 required
                 min="1"
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full border border-gray-200 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
                 placeholder="Quantity"
                 value={formData.quantity}
                 onChange={handleChange}
@@ -277,7 +284,7 @@ const UpdateInventory = () => {
                 name="purchaseDate"
                 required
                 min={today}
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+                className="w-full px-4 py-2 rounded-full border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
                 placeholder="Purchase Date"
                 value={formData.purchaseDate}
                 onChange={handleChange}
@@ -361,7 +368,8 @@ const UpdateInventory = () => {
               </select>
             </motion.div>
 
-            <motion.div
+            {/* Image upload section commented out */}
+            {/* <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.1 }}
@@ -441,7 +449,7 @@ const UpdateInventory = () => {
                   </label>
                 </div>
               )}
-            </motion.div>
+            </motion.div> */}
           </div>
 
           <motion.div

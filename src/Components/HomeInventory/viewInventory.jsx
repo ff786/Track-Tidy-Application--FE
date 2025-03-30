@@ -241,7 +241,7 @@ const ViewInventory = () => {
           >
             <thead>
             <tr className="border-b border-white border-opacity-30">
-            <th className="px-6 py-3 text-left">Image</th>  {/* Increased padding */}
+            {/* <th className="px-6 py-3 text-left">Image</th>  Increased padding */}
             <th className="px-6 py-3 text-left w-1/6">Product Name</th>  {/* Added width */}
             <th className="px-6 py-3 text-left">Product ID</th>
             <th className="px-6 py-3 text-left">User ID</th>
@@ -262,7 +262,7 @@ const ViewInventory = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <td className="px-6 py-4">
+                    {/* <td className="px-6 py-4">
                       {item.ProductImage ? (
                         <img
                           src={`http://localhost:8080/uploads/${item.ProductImage}`}
@@ -274,7 +274,7 @@ const ViewInventory = () => {
                           <span className="text-xs">No Image</span>
                         </div>
                       )}
-                    </td>
+                    </td> */}
                     <td className="px-4 py-3 text-lg">{item.productName}</td>
                     <td className="px-4 py-3 text-lg">{item.productId}</td>
                     <td className="px-4 py-3 text-lg">{item.userId}</td>
@@ -288,7 +288,7 @@ const ViewInventory = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex space-x-2">
-                        <motion.button
+                        {/* <motion.button
                           onClick={() => navigate(`/view-in/${item.id}`)}
                           className="p-2 rounded-full hover:bg-opacity-10 hover:bg-blue-500 transition-colors"
                           whileHover={{ scale: 1.1 }}
@@ -296,7 +296,7 @@ const ViewInventory = () => {
                           title="View Details"
                         >
                           <Eye size={20} className="text-blue-500" />
-                        </motion.button>
+                        </motion.button> */}
                         <motion.button
                           onClick={() => navigate(`/update-in/${item.id}`)}
                           className="p-2  rounded-full hover:bg-yellow-700 transition-colors"

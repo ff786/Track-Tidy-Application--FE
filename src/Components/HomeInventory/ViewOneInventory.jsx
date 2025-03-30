@@ -15,7 +15,7 @@ const ViewOneInventory = () => {
   useEffect(() => {
     const fetchInventoryItem = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/track-tidy/inventory/get/${id}`,{
+        const response = await fetch(`http://localhost:8080/api/track-tidy/inventory/get?id=${id}`,{
           method: 'GET',
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
@@ -34,7 +34,12 @@ const ViewOneInventory = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete/${id}`);
+      await fetch(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`,{
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+        }
+      });
       navigate('/view-in');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete inventory item.');
