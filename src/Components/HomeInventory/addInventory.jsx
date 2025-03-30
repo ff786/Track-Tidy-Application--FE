@@ -8,15 +8,6 @@ const addInventory = () => {
 
   const navigate = useNavigate();
 
-  const [productName, setProductName] = useState("");
-  const [userId, setUserId] = useState("");
-  const [productId, setProductId] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [purchaseDate, setPurchaseDate] = useState("");
-  const [warrantyDate, setWarrantyDate] = useState("");
-  const [productCategory, setProductCategory] = useState("");
-  const [faulted, setFaulted] = useState("");
-
   const [formData, setFormData] = useState({
     productName: "",
     userId: "",
