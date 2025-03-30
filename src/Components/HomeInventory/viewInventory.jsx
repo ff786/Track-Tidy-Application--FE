@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { Edit, Trash2, Eye, Plus, Download } from 'react-feather';
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from "jspdf";
+import autoTable from 'jspdf-autotable';
 
 const ViewInventory = () => {
   const navigate = useNavigate();
@@ -86,18 +85,12 @@ const ViewInventory = () => {
     const dataToExport = searchTerm ? filteredInventory : inventory;
     
     // Table columns
-    const tableColumn = [
-      "Product ID",
-      "Name",
-      "Category",
-      "User ID",
-      "Quantity",
-      "Value",
-      "Status"
+    const headers = [
+      ["Product ID", "Name", "Category", "User ID", "Quantity", "Value", "Status"]
     ];
     
-    // Table rows
-    const tableRows = dataToExport.map(item => [
+    // Table data
+    const data = dataToExport.map(item => [
       item.productId || 'N/A',
       item.productName || 'N/A',
       item.productCategory || 'N/A',
@@ -107,10 +100,10 @@ const ViewInventory = () => {
       item.Faulted === 'Yes' ? 'Faulted' : 'Good'
     ]);
     
-    // Add table to document
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
+    // Add table using autoTable plugin
+    autoTable(doc, {
+      head: headers,
+      body: data,
       startY: 40,
       styles: { fontSize: 9 },
       headStyles: {
@@ -130,7 +123,7 @@ const ViewInventory = () => {
     });
     
     // Save the PDF
-    doc.save(`Inventory_Report_${date}.pdf`);
+    doc.save(`Inventory_Report_${date.replace(/\//g, '-')}.pdf`);
   };
 
   const filteredInventory = Array.isArray(inventory) ? inventory.filter(item => {
@@ -169,7 +162,7 @@ const ViewInventory = () => {
       }}
     >
       <motion.div 
-              className="w-full max-w-2xl p-8 rounded-3xl"
+              className="w-full max-w-5xl p-8 rounded-3xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -229,7 +222,7 @@ const ViewInventory = () => {
           <input
             type="text"
             placeholder="Search by ID, name, category, user ID, quantity or value..."
-            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30  placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -241,23 +234,23 @@ const ViewInventory = () => {
 
         <div className="overflow-x-auto">
           <motion.table
-            className="w-full"
+            className="w-full min-w-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
             <thead>
-              <tr className="border-b border-white border-opacity-30">
-                <th className="px-4 py-3 text-left">Image</th>
-                <th className="px-4 py-3 text-left">Product Name</th>
-                <th className="px-4 py-3 text-left">Product ID</th>
-                <th className="px-4 py-3 text-left">User ID</th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="px-4 py-3 text-left">Quantity</th>
-                <th className="px-4 py-3 text-left">Value</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Actions</th>
-              </tr>
+            <tr className="border-b border-white border-opacity-30">
+            <th className="px-6 py-3 text-left">Image</th>  {/* Increased padding */}
+            <th className="px-6 py-3 text-left w-1/6">Product Name</th>  {/* Added width */}
+            <th className="px-6 py-3 text-left">Product ID</th>
+            <th className="px-6 py-3 text-left">User ID</th>
+            <th className="px-6 py-3 text-left w-1/8">Category</th>  {/* Added width */}
+            <th className="px-6 py-3 text-left">Quantity</th>
+            <th className="px-6 py-3 text-left">Value</th>
+            <th className="px-6 py-3 text-left">Status</th>
+            <th className="px-6 py-3 text-left w-1/8">Actions</th>  {/* Added width */}
+          </tr>
             </thead>
             <tbody>
               {currentItems.length > 0 ? (
@@ -269,7 +262,7 @@ const ViewInventory = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       {item.ProductImage ? (
                         <img
                           src={`http://localhost:8080/uploads/${item.ProductImage}`}
@@ -282,45 +275,45 @@ const ViewInventory = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3">{item.productName}</td>
-                    <td className="px-4 py-3">{item.productId}</td>
-                    <td className="px-4 py-3">{item.userId}</td>
-                    <td className="px-4 py-3">{item.productCategory}</td>
-                    <td className="px-4 py-3">{item.quantity}</td>
-                    <td className="px-4 py-3">${item.productValue}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${item.Faulted === 'Yes' ? 'bg-red-500' : 'bg-white-500'}`}>
+                    <td className="px-4 py-3 text-lg">{item.productName}</td>
+                    <td className="px-4 py-3 text-lg">{item.productId}</td>
+                    <td className="px-4 py-3 text-lg">{item.userId}</td>
+                    <td className="px-4 py-3 text-lg">{item.productCategory}</td>
+                    <td className="px-4 py-3 text-lg">{item.quantity}</td>
+                    <td className="px-4 py-3 text-lg">${item.productValue}</td>
+                    <td className="px-4 py-3 text-xl">
+                      <span className={`px-2 py-1 rounded-full text-lg ${item.Faulted === 'Yes' ? 'text-red-500' : 'text-yellow-500'}`}>
                         {item.Faulted === 'Yes' ? 'Faulted' : 'Good'}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-6 py-4">
                       <div className="flex space-x-2">
                         <motion.button
                           onClick={() => navigate(`/view-in/${item.id}`)}
-                          className="p-2 bg-blue-500 rounded-full hover:bg-blue-700 transition-colors"
+                          className="p-2 rounded-full hover:bg-opacity-10 hover:bg-blue-500 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           title="View Details"
                         >
-                          <Eye size={16} className="text-gray-500" />
+                          <Eye size={20} className="text-blue-500" />
                         </motion.button>
                         <motion.button
                           onClick={() => navigate(`/update-in/${item.id}`)}
-                          className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
+                          className="p-2  rounded-full hover:bg-yellow-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           title="Edit"
                         >
-                          <Edit size={16} className="text-gray-500" />
+                          <Edit size={20} className="text-yellow-500" />
                         </motion.button>
                         <motion.button
                           onClick={() => handleDelete(item.id)}
-                          className="p-2 bg-red-500 rounded-full hover:bg-red-700 transition-colors"
+                          className="p-2 rounded-full hover:bg-opacity-10 hover:bg-red-500 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           title="Delete"
                         >
-                          <Trash2 size={16} className="text-gray-500" />
+                          <Trash2 size={20} className="text-red-500" />
                         </motion.button>
                       </div>
                     </td>
