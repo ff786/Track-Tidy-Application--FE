@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import axios from 'axios';
+import { motion } from 'framer-motion';2
 import { Camera, Upload, X } from 'react-feather';
 
 const addInventory = () => {

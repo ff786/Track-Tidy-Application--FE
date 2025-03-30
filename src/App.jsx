@@ -11,6 +11,8 @@ import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
 import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
 import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
 
+import ServiceRequest from './Components/AllServiceRequest/ServiceRequests.jsx'
+
 import {
     createBrowserRouter,
     RouterProvider
@@ -52,6 +54,10 @@ const router = createBrowserRouter([
     {
         path: '/in-page',
         element: <div> <InventoryPage /> </div>
+    },
+    {
+        path: '/view-service',
+        element: <div> <ServiceRequest /> </div>
     },
 ])
 
