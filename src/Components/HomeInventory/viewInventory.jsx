@@ -18,8 +18,19 @@ const ViewInventory = () => {
   useEffect(() => {
     const fetchInventory = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/track-tidy/inventory/getAll');
-        setInventory(response.data);
+        const response = await fetch('http://localhost:8080/api/track-tidy/inventory/getAll', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('access_token')}`,
+          },
+        });
+        
+        const data = await response.json(); // Assuming response is in JSON format
+        if (Array.isArray(data)) {
+          setInventory(data);
+        } else {
+          setError('Invalid inventory data format');
+        }
         setLoading(false);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch inventory items.');
@@ -33,7 +44,12 @@ const ViewInventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this inventory item?')) {
       try {
-        await axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete/${id}`);
+        await fetch(`http://localhost:8080/api/track-tidy/inventory/delete/${_id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem('access_token')}`,
+          },
+        });
         setInventory(inventory.filter(item => item._id !== id));
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to delete inventory item.');
@@ -103,7 +119,7 @@ const ViewInventory = () => {
     doc.save(`Inventory_Report_${date}.pdf`);
   };
 
-  const filteredInventory = inventory.filter(item => {
+  const filteredInventory = Array.isArray(inventory) ? inventory.filter(item => {
     const searchLower = searchTerm.toLowerCase();
     return (
       (item.productId && item.productId.toLowerCase().includes(searchLower)) ||
@@ -113,7 +129,7 @@ const ViewInventory = () => {
       (item.quantity && item.quantity.toString().includes(searchTerm)) ||
       (item.productValue && item.productValue.toString().includes(searchTerm))
     );
-  });
+  }) : [];
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -259,7 +275,7 @@ const ViewInventory = () => {
                     <td className="px-4 py-3">{item.quantity}</td>
                     <td className="px-4 py-3">${item.productValue}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${item.Faulted === 'Yes' ? 'bg-red-500' : 'bg-green-500'}`}>
+                      <span className={`px-2 py-1 rounded-full text-xs ${item.Faulted === 'Yes' ? 'bg-red-500' : 'bg-white-500'}`}>
                         {item.Faulted === 'Yes' ? 'Faulted' : 'Good'}
                       </span>
                     </td>

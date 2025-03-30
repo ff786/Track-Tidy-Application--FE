@@ -15,7 +15,12 @@ const ViewOneInventory = () => {
   useEffect(() => {
     const fetchInventoryItem = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/track-tidy/inventory/get/${id}`);
+        const response = await fetch(`http://localhost:8080/api/track-tidy/inventory/get/${id}`,{
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+          }
+        });
         setItem(response.data);
         setLoading(false);
       } catch (err) {
