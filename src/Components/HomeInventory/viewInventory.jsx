@@ -44,18 +44,32 @@ const ViewInventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this inventory item?')) {
       try {
-        await fetch(`http://localhost:8080/api/track-tidy/inventory/delete/${_id}`, {
+        await fetch(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem('access_token')}`,
           },
         });
-        setInventory(inventory.filter(item => item._id !== id));
+        setInventory(inventory.filter(item => item.id !== id));
+        console.log('Inventory ID ' + id);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to delete inventory item.');
       }
     }
   };
+
+/*  const handleDelete = (id) => {
+    // Delete claim by id
+    axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete?${id}`)
+        .then(response => {
+          console.log(response.data);
+          // Update state to remove the deleted claim
+          setInventory(inventory.filter(data => data.id !== id));
+        })
+        .catch(error => {
+          console.error('Error deleting claim:', error);
+        });
+  };*/
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -282,7 +296,7 @@ const ViewInventory = () => {
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         <motion.button
-                          onClick={() => navigate(`/view-in/${item._id}`)}
+                          onClick={() => navigate(`/view-in/${item.id}`)}
                           className="p-2 bg-blue-500 rounded-full hover:bg-blue-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -291,7 +305,7 @@ const ViewInventory = () => {
                           <Eye size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
-                          onClick={() => navigate(`/update-in/${item._id}`)}
+                          onClick={() => navigate(`/update-in/${item.id}`)}
                           className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -300,7 +314,7 @@ const ViewInventory = () => {
                           <Edit size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => handleDelete(item.id)}
                           className="p-2 bg-red-500 rounded-full hover:bg-red-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
