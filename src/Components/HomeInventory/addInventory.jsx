@@ -5,20 +5,33 @@ import axios from 'axios';
 import { Camera, Upload, X } from 'react-feather';
 
 const addInventory = () => {
+
   const navigate = useNavigate();
+
+  const [productName, setProductName] = useState("");
+  const [userId, setUserId] = useState("");
+  const [productId, setProductId] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [purchaseDate, setPurchaseDate] = useState("");
+  const [warrantyDate, setWarrantyDate] = useState("");
+  const [productCategory, setProductCategory] = useState("");
+  const [faulted, setFaulted] = useState("");
+
   const [formData, setFormData] = useState({
-    productName: '',
-    userId: '',
-    productId: '',
-    quantity: '',
-    purchaseDate: '',
-    productValue: '',
-    warrantyDate: '',
-    productCategory: '',
+    productName: "",
+    userId: "",
+    productId: "",
+    quantity: "",
+    purchaseDate: "",
+    productValue: "",
+    warrantyDate: "",
+    productCategory: "",
     ProductImage: null,
-    Faulted: ''
+    Faulted: "",
   });
-  const [imagePreview, setImagePreview] = useState(null);
+
+
+  const [imagePreview, setImagePreview] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -31,7 +44,7 @@ const addInventory = () => {
     if (type === 'file' && name === 'ProductImage') {
       const file = files[0];
       setFormData({ ...formData, [name]: file });
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -68,40 +81,55 @@ const addInventory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const form = document.getElementById('inventoryForm');
-    const formData = new FormData(form);
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setErrors(errors);
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("productName", formData.productName);
+    formDataToSend.append("userId", formData.userId);
+    formDataToSend.append("productId", formData.productId);
+    formDataToSend.append("quantity", formData.quantity);
+    formDataToSend.append("purchaseDate", formData.purchaseDate);
+    formDataToSend.append("productValue", formData.productValue);
+    formDataToSend.append("warrantyDate", formData.warrantyDate);
+    formDataToSend.append("productCategory", formData.productCategory);
+    formDataToSend.append("ProductImage", formData.ProductImage);
+    formDataToSend.append("Faulted", formData.Faulted);
 
     try {
-      const response = await fetch('http://localhost:8080/api/track-tidy/inventory/create', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/api/track-tidy/inventory/create", {
+        method: "POST",
         headers: {
-          'Accept': 'application/json',
+          Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
         },
-        body: formData,
+        body: formDataToSend,
       });
 
       if (response.ok) {
         alert("Details Added to DB");
-        navigate('/view-in');  // Navigate to another page after successful submission
+        navigate("/view-in");
       } else {
-        console.error('Failed to submit form');
-        alert('Failed to submit form');
+        alert("Failed to submit form");
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
-      alert('Failed to Submit Form, Please try again later!');
+      alert("Failed to submit. Please try again later.");
     }
   };
 
 
+
+
   return (
-    <div 
+    <div
       className="w-full flex items-center justify-center p-4 min-h-screen"
       style={{
         background: 'linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51))',
       }}
     >
-      <motion.div 
+      <motion.div
         className="w-full max-w-2xl p-8 rounded-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -252,7 +280,7 @@ const addInventory = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.9 }}
-            > 
+            >
             <label className="text-gray-500">Warranty Date</label>
               <input
                 type="date"
@@ -320,11 +348,11 @@ const addInventory = () => {
                       <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
                       <p className="text-xs text-gray-500">PNG, JPG or WEBP (max. 2MB)</p>
                     </div>
-                    <input 
-                      type="file" 
-                      id="ProductImage" 
-                      name="ProductImage" 
-                      accept="image/*" 
+                    <input
+                      type="file"
+                      id="ProductImage"
+                      name="ProductImage"
+                      accept="image/*"
                       className="hidden"
                       onChange={handleChange}
                     />
@@ -340,8 +368,8 @@ const addInventory = () => {
                           {formData.ProductImage?.name || "Product Image"}
                         </span>
                       </div>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={removeImage}
                         className="text-red-500 hover:text-red-300 focus:outline-none transition-colors"
                       >
@@ -349,10 +377,10 @@ const addInventory = () => {
                       </button>
                     </div>
                     <div className="flex justify-center p-2 bg-opacity-10">
-                      <img 
-                        src={imagePreview} 
-                        alt="Product preview" 
-                        className="h-40 object-contain" 
+                      <img
+                        src={imagePreview}
+                        alt="Product preview"
+                        className="h-40 object-contain"
                       />
                     </div>
                   </div>
@@ -380,9 +408,9 @@ const addInventory = () => {
             <motion.button
               type="submit"
               className="px-6 py-2 rounded-full font-semibold transition-all"
-              style={{ 
+              style={{
                 background: 'linear-gradient(to right, #5eeadb, #99f6ec)',
-                boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)' 
+                boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)'
               }}
               whileHover={{ scale: 1.02, boxShadow: '0 6px 15px rgba(93, 234, 219, 0.4)' }}
               whileTap={{ scale: 0.98 }}

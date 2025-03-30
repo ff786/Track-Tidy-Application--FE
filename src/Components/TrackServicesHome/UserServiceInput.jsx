@@ -3,16 +3,16 @@ import { Mail } from "lucide-react";
 import ServiceLady from "../../assets/ServiceLady.png";
 
 const ServiceInput = () => {
-    const [step, setStep] = useState(1);
     const [serviceDesc, setServiceDesc] = useState("");
     const [serviceType, setServiceType] = useState("");
-    const [error, setError] = useState("");
     const [memberId, setMemberId] = useState("");
     const [memberName, setName] = useState("");
     const [address, setAddress] = useState("");
     const [email, setEmail] = useState("");
     const [contactNumber, setContactNumber] = useState("");
     const [referralCode, setReferralCode] = useState("");
+    const [error, setError] = useState("");
+    const [step, setStep] = useState(1);
 
     const handleNext = () => {
         if (!serviceDesc.trim()) {

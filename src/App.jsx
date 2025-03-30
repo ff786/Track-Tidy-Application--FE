@@ -28,13 +28,11 @@ const router = createBrowserRouter([
     {
         path: '/user-management',
         element: <UserList/>
-        //element: getUserRole() === 'admin' ? <UserList /> : <Login />
     },
     {
         path: '/user-services',
         element: <div> <UserServices /> </div>
     },
-
     {
         path: '/add-in',
         element: <div> <AddInventory /> </div>
