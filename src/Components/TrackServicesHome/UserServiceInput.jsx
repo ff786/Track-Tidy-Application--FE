@@ -9,7 +9,7 @@ const ServiceInput = () => {
     const [memberName, setName] = useState("");
     const [address, setAddress] = useState("");
     const [email, setEmail] = useState("");
-    const [contactNumber, setContactNumber] = useState("");
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [referralCode, setReferralCode] = useState("");
     const [error, setError] = useState("");
     const [step, setStep] = useState(1);
@@ -25,7 +25,7 @@ const ServiceInput = () => {
 
     const handleSubmit = async () => {
         // Validate all the fields
-        if (!memberId || !memberName || !address || !email || !contactNumber) {
+        if (!memberId || !memberName || !address || !email || !phoneNumber) {
             setError("Please fill in all fields.");
             return;
         }
@@ -37,7 +37,7 @@ const ServiceInput = () => {
         formData.append("memberName", memberName);
         formData.append("address", address);
         formData.append("email", email);
-        formData.append("contactNumber", contactNumber);
+        formData.append("phoneNumber", phoneNumber);
         formData.append("referralCode", referralCode);
         formData.append("serviceType", serviceType);
         formData.append("serviceDesc", serviceDesc);
@@ -183,8 +183,8 @@ const ServiceInput = () => {
                                     className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
                                     type="text"
                                     placeholder="Contact Number"
-                                    value={contactNumber}
-                                    onChange={(e) => setContactNumber(e.target.value)}
+                                    value={phoneNumber}
+                                    onChange={(e) => setPhoneNumber(e.target.value)}
                                 />
                                 <input
                                     className="w-full px-4 py-2 border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300 text-gray-700"
