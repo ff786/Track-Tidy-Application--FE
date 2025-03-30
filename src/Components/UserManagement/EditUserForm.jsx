@@ -33,7 +33,7 @@ const EditUserForm = () => {
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await fetch(`http://localhost:8080/api/track-tidy/user/${userData?.id}`, {
+        const response = await fetch(`http://localhost:8080/api/track-tidy/user/register?id=${id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",

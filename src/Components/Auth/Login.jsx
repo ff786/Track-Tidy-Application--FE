@@ -17,46 +17,48 @@ const Login = () => {
     initialValues: {
       email: "",
       password: "",
+
     },
     validationSchema,
     onSubmit: async (values) => {
       console.log("Login Data:", values);
 
-      // Admin credentials check before sending the request
-      const adminEmail = "admin@example.com"; // Replace with the actual admin email
-      const adminPassword = "adminPassword123"; // Replace with the actual admin password
-
-      // Check if it's the admin login
-      if (values.email === adminEmail && values.password === adminPassword) {
-        alert("Admin Login Successful! Navigating to Admin Dashboard.");
-        navigate("/user-List"); // Navigate to admin dashboard
-        return; // Stop further processing if it's admin login
-      }
-
       try {
-        // Send login request for users
-        const response = await axios.post(
-          "http://localhost:8080/api/track-tidy/user/request/token", // Change API endpoint if necessary
-          {
-            email: values.email,
-            password: values.password,
-          }
-        );
-        console.log("Login Response:", response.data);
+        // Sending the login request to backend
+        const response = await fetch('http://localhost:8080/api/track-tidy/user/request/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(values),
 
-        // Check if the response indicates a successful login and contains a valid token
-        if (response.status === 200 && response.data.token) {
-          alert("Login Successful! Navigating to User Dashboard.");
-          navigate("/dashboard"); // Navigate to user dashboard
-        } else {
-          alert("Login Failed! Please check your credentials.");
+          email: values.email,
+          password: values.password,
+          role: values.role,
+        });
+
+        // Admin credentials check before sending the request
+        const adminEmail = "admin@example.com"; // Replace with the actual admin email
+        const adminPassword = "adminPassword123"; // Replace with the actual admin password
+
+        // Check if it's the admin login
+        if (values.email === adminEmail && values.password === adminPassword) {
+          alert("Admin Login Successful! Navigating to Admin Dashboard.");
+          navigate("/user-List"); // Navigate to admin dashboard
+          return; // Stop further processing if it's admin login
         }
+        const data = await response.json();
+        console.log("Login Response:", response.data);
+        alert("Login Successful!");
+        sessionStorage.setItem('access_token', data.access_token);
+        navigate("/dashboard");
       } catch (error) {
         console.error("Login failed:", error.response?.data || error.message);
         alert("Login Failed! Please check your credentials.");
       }
     },
   });
+
 
   return (
     <div className="HSDlogin-page">
