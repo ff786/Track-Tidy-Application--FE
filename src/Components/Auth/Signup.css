@@ -146,14 +146,20 @@
     font-weight: 500;
     transition: 0.3s;
     margin-top: 30px;
+    box-sizing: border-box;
 }
 
 .HSDsubmit:hover {
     background: linear-gradient(to right, #5eeadb, #99f6ec); /* Updated with your gradient */
-    box-shadow: 0 4px 10px rgba(93, 234, 219, 0.3); /* Added box shadow on hover */
+    box-shadow: 0 0 10px rgba(93, 234, 219, 0.3); /* Added box shadow on hover */
 
 
 
+}
+
+.HSDsubmit:active {
+    transform: none; /* Remove any default transform effect */
+    box-shadow: 0 0 10px rgba(93, 234, 219, 0.3); /* Keep the box-shadow effect */
 }
 
 .HSDtoggle-box {
