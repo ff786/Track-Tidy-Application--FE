@@ -7,16 +7,20 @@ import "./Signup.css";
 const Signup = () => {
   const navigate = useNavigate();
   const [isLoginActive, setIsLoginActive] = useState(false);
+  const [showHint, setShowHint] = useState(false); // State for password hint visibility
 
   const togglePanel = () => {
     setIsLoginActive(true);
-    navigate("/");
+    navigate("/"); // Navigate to login page
   };
 
   const validationSchema = Yup.object({
     firstName: Yup.string().min(2, "First name must be at least 2 characters").trim().required("First name is required"),
     lastName: Yup.string().min(2, "Last name must be at least 2 characters").trim().required("Last name is required"),
-    email: Yup.string().email("Invalid email format").trim().required("Email is required"),
+    email: Yup.string()
+      .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format")
+      .trim()
+      .required("Email is required"),
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
       .matches(/[A-Z]/, "Must contain at least one uppercase letter")
@@ -28,7 +32,6 @@ const Signup = () => {
       .matches(/^[0-9]{10}$/, "Mobile number must be 10 digits")
       .trim()
       .required("Mobile number is required"),
-    role: Yup.string().required("Role selection is required"),
   });
 
   const formik = useFormik({
@@ -38,7 +41,6 @@ const Signup = () => {
       email: "",
       password: "",
       mobileNumber: "",
-      role: "",
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
@@ -55,7 +57,7 @@ const Signup = () => {
 
         if (response.ok) {
           alert("Signup Successful! Redirecting to login...");
-          navigate("/");
+          navigate("/", { state: { userData: values } }); // Pass user data to login page
         } else {
           alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
         }
@@ -69,62 +71,71 @@ const Signup = () => {
   });
 
   return (
-    <div className={`HSDsignup-container ${isLoginActive ? "active" : ""}`}>
-      <div className="HSDtoggle-box">
-        <div className="HSDtoggle-panel">
-          <h1>Welcome!</h1>
-          <p>Already have an account?</p>
-          <button className="HSDbtn" onClick={togglePanel}>Login</button>
+    <div className="HSDlogin-page">
+      <div className="HSDsignup-container">
+        <div className="HSDtoggle-box">
+          <div className="HSDtoggle-panel">
+            <h1>Welcome!</h1>
+            <h5>Already have an account?</h5>
+            <button className="HSDbtn" onClick={togglePanel}>
+              Login
+            </button>
+          </div>
         </div>
+
+        <form onSubmit={formik.handleSubmit} className="HSDsignup-form">
+          <h2>Create Your Account</h2>
+
+          <div className="HSDinput-box">
+            <label>First Name:</label>
+            <input type="text" name="firstName" {...formik.getFieldProps("firstName")} placeholder="Enter your first name" />
+            {formik.touched.firstName && formik.errors.firstName && <p className="error">{formik.errors.firstName}</p>}
+          </div>
+
+          <div className="HSDinput-box">
+            <label>Last Name:</label>
+            <input type="text" name="lastName" {...formik.getFieldProps("lastName")} placeholder="Enter your last name" />
+            {formik.touched.lastName && formik.errors.lastName && <p className="error">{formik.errors.lastName}</p>}
+          </div>
+
+          <div className="HSDinput-box">
+            <label>Email:</label>
+            <input type="email" name="email" {...formik.getFieldProps("email")} placeholder="Enter your email" />
+            {formik.touched.email && formik.errors.email && <p className="error">{formik.errors.email}</p>}
+          </div>
+
+          {/* Password Field with Hint */}
+          <div className="HSDinput-box">
+            <label>Password:</label>
+            <input
+              type="password"
+              name="password"
+              {...formik.getFieldProps("password")}
+              placeholder="Enter a strong password"
+              onFocus={() => setShowHint(true)}  // Show hint when input is focused
+              onBlur={() => setShowHint(false)}  // Hide hint when input is blurred
+            />
+
+            {showHint && (
+              <small>Password must be at least 8 characters with one uppercase letter, one number, and one special character.</small>
+            )}
+
+            {formik.touched.password && formik.errors.password && (
+              <p className="error">{formik.errors.password}</p>
+            )}
+          </div>
+
+          <div className="HSDinput-box">
+            <label>Mobile Number:</label>
+            <input type="text" name="mobileNumber" {...formik.getFieldProps("mobileNumber")} placeholder="Enter 10-digit mobile number" />
+            {formik.touched.mobileNumber && formik.errors.mobileNumber && <p className="error">{formik.errors.mobileNumber}</p>}
+          </div>
+
+          <button type="submit" className="HSDsubmit" disabled={formik.isSubmitting}>
+            {formik.isSubmitting ? "Registering..." : "Register"}
+          </button>
+        </form>
       </div>
-      <form onSubmit={formik.handleSubmit} className="HSDsignup-form">
-        <h2>Create Your Account</h2>
-
-        <div className="HSDinput-box">
-          <label>First Name:</label>
-          <input type="text" name="firstName" {...formik.getFieldProps("firstName")} placeholder="Enter your first name" />
-          {formik.touched.firstName && formik.errors.firstName && <p className="error">{formik.errors.firstName}</p>}
-        </div>
-
-        <div className="HSDinput-box">
-          <label>Last Name:</label>
-          <input type="text" name="lastName" {...formik.getFieldProps("lastName")} placeholder="Enter your last name" />
-          {formik.touched.lastName && formik.errors.lastName && <p className="error">{formik.errors.lastName}</p>}
-        </div>
-
-        <div className="HSDinput-box">
-          <label>Email:</label>
-          <input type="email" name="email" {...formik.getFieldProps("email")} placeholder="Enter your email" />
-          {formik.touched.email && formik.errors.email && <p className="error">{formik.errors.email}</p>}
-        </div>
-
-        <div className="HSDinput-box">
-          <label>Password:</label>
-          <input type="password" name="password" {...formik.getFieldProps("password")} placeholder="Enter a strong password" />
-          {formik.touched.password && formik.errors.password && <p className="error">{formik.errors.password}</p>}
-        </div>
-
-        <div className="HSDinput-box">
-          <label>Mobile Number:</label>
-          <input type="text" name="mobileNumber" {...formik.getFieldProps("mobileNumber")} placeholder="Enter 10-digit mobile number" />
-          {formik.touched.mobileNumber && formik.errors.mobileNumber && <p className="error">{formik.errors.mobileNumber}</p>}
-        </div>
-
-        <div className="HSDinput-box">
-          <label>Role:</label>
-          <select name="role" {...formik.getFieldProps("role")}>
-            <option value="" label="Select your role" />
-            <option value="User">User</option>
-            <option value="Vendor">Vendor</option>
-            <option value="Staff">Staff</option>
-          </select>
-          {formik.touched.role && formik.errors.role && <p className="error">{formik.errors.role}</p>}
-        </div>
-
-        <button type="submit" className="HSDsubmit" disabled={formik.isSubmitting}>
-          {formik.isSubmitting ? "Registering..." : "Register"}
-        </button>
-      </form>
     </div>
   );
 };
