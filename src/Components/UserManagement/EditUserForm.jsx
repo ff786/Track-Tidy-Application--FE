@@ -3,13 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
-
 const EditUserForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const userData = location.state?.user;
+  const userData = location.state?.user; // User data passed through location state
 
   const [user, setUser] = useState(userData || {
+    id: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -31,9 +31,16 @@ const EditUserForm = () => {
   const formik = useFormik({
     initialValues: user,
     validationSchema,
+    enableReinitialize: true, // To enable re-initialization of form values
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await fetch(`http://localhost:8080/api/track-tidy/user/register?id=${id}`, {
+        // Ensure that user.id is available here
+        if (!user.id) {
+          alert("User ID is missing!");
+          return;
+        }
+
+        const response = await fetch(`http://localhost:8080/user/update/${user.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -45,7 +52,7 @@ const EditUserForm = () => {
 
         if (response.ok) {
           alert("User details updated successfully!");
-          navigate("/user-management");
+          navigate("/user-management"); // Navigate to user list
         } else {
           alert(`Update Failed: ${data.message || "Something went wrong!"}`);
         }

@@ -7,7 +7,9 @@ const UserList = () => {
   const [users, setUsers] = useState([
     { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", mobileNumber: "1234567890", role: "Admin" },
     { id: 2, firstName: "Alice", lastName: "Brown", email: "alice@example.com", mobileNumber: "0987654321", role: "User" },
+
   ]);
+  
 
   useEffect(() => {
     if (location.state?.userData) {

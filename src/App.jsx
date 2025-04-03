@@ -9,6 +9,7 @@ import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 import UsersList from './Components/UserManagement/UserList.jsx';
 import EditUserForm from './Components/UserManagement/EditUserForm.jsx';
+import TrackTidyHomePage  from './Home.jsx';
 
 // Function to check user role
 const getUserRole = () => {
@@ -18,6 +19,7 @@ const getUserRole = () => {
 const router = createBrowserRouter([
   { path: '/', element: <Login /> },
   { path: '/signup', element: <Signup /> },
+  { path: '/dashboard', element: <TrackTidyHomePage /> },
   
   // Role-Based Protected Routes
   {

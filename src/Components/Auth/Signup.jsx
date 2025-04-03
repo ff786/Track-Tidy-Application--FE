@@ -10,7 +10,7 @@ const Signup = () => {
 
   const togglePanel = () => {
     setIsLoginActive(true);
-    navigate("/");
+    navigate("/"); // Navigate to login page
   };
 
   const validationSchema = Yup.object({
@@ -53,6 +53,7 @@ const Signup = () => {
 
         if (response.ok) {
           alert("Signup Successful! Redirecting to login...");
+          // Passing the user data to login page
           navigate("/", { state: { userData: values } });
         } else {
           alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
