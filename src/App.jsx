@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './App.css'
 import Login from './Components/Auth/Login.jsx';
+import TrackTidyHomePage from './Home.jsx';
 
 import UserServices from './Components/TrackServicesHome/UserServices.jsx'
 import UserList from './Components/UserManagement/UserList.jsx';
@@ -11,6 +12,7 @@ import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
 import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
 import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
 
+
 import {
     createBrowserRouter,
     RouterProvider
@@ -20,6 +22,10 @@ const router = createBrowserRouter([
     {
         path: '/',
         element: <div> <Login /> </div>
+    },
+    {
+        path: '/dashboard',
+        element: <div> <TrackTidyHomePage /> </div>
     },
     {
         path: '/signup',
