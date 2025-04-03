@@ -106,7 +106,7 @@ const SideNav = () => {
                                                 </a>
                                             </li>
                                             <li className="py-2 px-2 w-full">
-                                                <a href="#" className="no-underline rounded-lg mb-0.5 text-white flex items-start hover:bg-[#97A0F2] p-2">
+                                                <a href="/view-in" className="no-underline rounded-lg mb-0.5 text-white flex items-start hover:bg-[#97A0F2] p-2">
                                                     <i className="bx bx-user h-12 min-w-14 flex text-xl items-start"></i>
                                                     <span className="ml-2 text-left">My Inventory</span>
                                                 </a>
@@ -181,14 +181,14 @@ const SideNav = () => {
                 </nav>
             </div>
 
-            {/* Toggle Switch for Dark/Light Mode (Optional) */}
+            {/* Toggle Switch for Dark/Light Mode (Optional)
             <div className="absolute bottom-5 left-5 flex items-center">
                 <label className="relative inline-block w-16 h-8">
                     <input type="checkbox" className="opacity-0 w-0 h-0" />
                     <span className="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 transition-all duration-400 rounded-full before:absolute before:content-[''] before:h-6 before:w-6 before:left-1 before:bottom-1 before:bg-black before:transition-all before:duration-400 before:rounded-full"></span>
                 </label>
                 <span className="ml-2 text-sm">Mode</span>
-            </div>
+            </div>*/}
         </>
     );
 };
