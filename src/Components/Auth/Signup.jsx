@@ -7,6 +7,7 @@ import "./Signup.css";
 const Signup = () => {
   const navigate = useNavigate();
   const [isLoginActive, setIsLoginActive] = useState(false);
+  const [showHint, setShowHint] = useState(false); // State for password hint visibility
 
   const togglePanel = () => {
     setIsLoginActive(true);
@@ -16,7 +17,10 @@ const Signup = () => {
   const validationSchema = Yup.object({
     firstName: Yup.string().min(2, "First name must be at least 2 characters").trim().required("First name is required"),
     lastName: Yup.string().min(2, "Last name must be at least 2 characters").trim().required("Last name is required"),
-    email: Yup.string().email("Invalid email format").trim().required("Email is required"),
+    email: Yup.string()
+      .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format")
+      .trim()
+      .required("Email is required"),
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
       .matches(/[A-Z]/, "Must contain at least one uppercase letter")
@@ -53,8 +57,7 @@ const Signup = () => {
 
         if (response.ok) {
           alert("Signup Successful! Redirecting to login...");
-          // Passing the user data to login page
-          navigate("/", { state: { userData: values } });
+          navigate("/", { state: { userData: values } }); // Pass user data to login page
         } else {
           alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
         }
@@ -101,10 +104,25 @@ const Signup = () => {
             {formik.touched.email && formik.errors.email && <p className="error">{formik.errors.email}</p>}
           </div>
 
+          {/* Password Field with Hint */}
           <div className="HSDinput-box">
             <label>Password:</label>
-            <input type="password" name="password" {...formik.getFieldProps("password")} placeholder="Enter a strong password" />
-            {formik.touched.password && formik.errors.password && <p className="error">{formik.errors.password}</p>}
+            <input
+              type="password"
+              name="password"
+              {...formik.getFieldProps("password")}
+              placeholder="Enter a strong password"
+              onFocus={() => setShowHint(true)}  // Show hint when input is focused
+              onBlur={() => setShowHint(false)}  // Hide hint when input is blurred
+            />
+
+            {showHint && (
+              <small>Password must be at least 8 characters with one uppercase letter, one number, and one special character.</small>
+            )}
+
+            {formik.touched.password && formik.errors.password && (
+              <p className="error">{formik.errors.password}</p>
+            )}
           </div>
 
           <div className="HSDinput-box">
