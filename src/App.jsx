@@ -10,6 +10,8 @@ import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 import UsersList from './Components/UserManagement/UserList.jsx';
 import EditUserForm from './Components/UserManagement/EditUserForm.jsx';
 import TrackTidyHomePage  from './Home.jsx';
+import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
+import ResetPassword from './Components/Auth/ResetPassword.jsx';
 
 // Function to check user role
 const getUserRole = () => {
@@ -42,6 +44,14 @@ const router = createBrowserRouter([
     path: '/edit-user/:id',
     element: <EditUserForm />
   },
+  {
+    path: '/Forgot-password',
+    element: <ForgotPassword/>
+  },
+  {
+    path: '/Reset-password',
+    element: <ResetPassword/>
+  }
 
 ]);
 

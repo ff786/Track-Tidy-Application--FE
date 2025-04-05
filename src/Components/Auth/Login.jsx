@@ -100,7 +100,7 @@ const Login = () => {
           </button>
 
           <div className="HSDforgot-password-link">
-            <a href="#" onClick={() => navigate("/forgot-password")}>
+            <a href="#" onClick={() => navigate("/Forgot-password")}>
               Forgot Password?
             </a>
           </div>
