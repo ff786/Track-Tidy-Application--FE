@@ -11,7 +11,7 @@ import UsersList from './Components/UserManagement/UserList.jsx';
 import EditUserForm from './Components/UserManagement/EditUserForm.jsx';
 import TrackTidyHomePage  from './Home.jsx';
 import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
-import ResetPassword from './Components/Auth/ResetPassword.jsx';
+import { ResetPassword } from './Components/Auth/ResetPassword.jsx';
 
 // Function to check user role
 const getUserRole = () => {

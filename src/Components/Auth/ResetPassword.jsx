@@ -31,7 +31,7 @@ const ForgotPassword = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Reset link sent successfully! Check your email.");
+        setMessage("✅ Reset link sent successfully! Check your email.");
         setTimeout(() => {
           navigate("/reset-password");
         }, 2000);
@@ -81,18 +81,49 @@ const ForgotPassword = () => {
 const ResetPassword = () => {
   const { token } = useParams();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const isPasswordStrong = (pwd) => {
+    return pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch("http://localhost:5000/api/auth/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password }),
-    });
+    setError("");
+    setMessage("");
 
-    const data = await response.json();
-    setMessage(data.message);
+    if (!isPasswordStrong(password)) {
+      setError("Password must be at least 8 characters long, contain an uppercase letter and a number.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
+
+      const data = await response.json();
+      setMessage("✅ Your password has been successfully reset!");
+
+      if (response.ok) {
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        setError(data.message || "Something went wrong.");
+      }
+    } catch (err) {
+      setError("Server error. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -101,16 +132,28 @@ const ResetPassword = () => {
         <h2 style={styles.title}>Reset Password</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter new password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             style={styles.input}
           />
-          <button type="submit" style={styles.submitButton}>Reset Password</button>
+          <div style={{ marginBottom: "10px", alignSelf: "flex-start" }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={() => setShowPassword(!showPassword)}
+              /> Show Password
+            </label>
+          </div>
+          <button type="submit" style={styles.submitButton} disabled={isSubmitting}>
+            {isSubmitting ? "Resetting..." : "Reset Password"}
+          </button>
         </form>
         {message && <p style={styles.message}>{message}</p>}
+        {error && <p style={styles.error}>{error}</p>}
       </div>
     </div>
   );
@@ -169,7 +212,7 @@ const styles = {
     color: "#333",
     fontWeight: "500",
     transition: "0.3s",
-    marginTop: "30px",
+    marginTop: "20px",
     boxSizing: "border-box",
   },
   message: {
