@@ -1,119 +1,159 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const UserList = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [users, setUsers] = useState([
-    { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", mobileNumber: "1234567890", role: "Admin" },
-    { id: 2, firstName: "Alice", lastName: "Brown", email: "alice@example.com", mobileNumber: "0987654321", role: "User" },
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  ]);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5;
 
   useEffect(() => {
-    if (location.state?.userData) {
-      const newUser = { ...location.state.userData, id: users.length + 1 };
-      setUsers((prevUsers) => [...prevUsers, newUser]);
-    }
-  }, [location.state]);
+    axios.get("http://localhost:8080/api/users")
+      .then(res => {
+        setUsers(res.data);
+        setFilteredUsers(res.data);
+      })
+      .catch(err => console.error("Failed to fetch users:", err));
+  }, []);
 
-  const deleteUser = (userId) => {
-    setUsers(users.filter((user) => user.id !== userId));
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
+  }, [searchTerm, users]);
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('User List Report', 14, 22);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+
+    const tableColumn = ["First Name", "Last Name", "Email", "Mobile", "Role"];
+    const tableRows = [];
+
+    filteredUsers.forEach(user => {
+      const rowData = [
+        user.firstName || "N/A",
+        user.lastName || "N/A",
+        user.email || "N/A",
+        user.mobileNumber || "N/A",
+        user.role || "User"
+      ];
+      tableRows.push(rowData);
+    });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+      theme: 'striped',
+      headStyles: { fillColor: [15, 192, 180] },
+    });
+
+    const date = new Date().toLocaleString();
+    doc.text(`Generated on: ${date}`, 14, doc.lastAutoTable.finalY + 10);
+    doc.save(`User_Report_${Date.now()}.pdf`);
+  };
+
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handleRoleChange = (index, newRole) => {
+    const updatedUsers = [...filteredUsers];
+    updatedUsers[indexOfFirstUser + index].role = newRole;
+    setFilteredUsers(updatedUsers);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>User List</h2>
-      <div style={styles.userListContainer}>
-        {users.length > 0 ? (
-          users.map((user) => (
-            <div key={user.id} style={styles.card}>
-              <p style={styles.text}><strong>First Name:</strong> {user.firstName}</p>
-              <p style={styles.text}><strong>Last Name:</strong> {user.lastName}</p>
-              <p style={styles.text}><strong>Email:</strong> {user.email}</p>
-              <p style={styles.text}><strong>Mobile Number:</strong> {user.mobileNumber}</p>
-              <p style={styles.text}><strong>Role:</strong> {user.role}</p>
-              <div style={styles.buttonContainer}>
-                <button style={styles.editButton} onClick={() => navigate(`/edit-user/${user.id}`, { state: { user } })}>
-                  Edit
-                </button>
-                <button style={styles.deleteButton} onClick={() => deleteUser(user.id)}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p style={styles.noUser}>No users registered yet.</p>
-        )}
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">User List</h2>
+        <button
+          onClick={generatePDF}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Generate PDF
+        </button>
+      </div>
+
+      <input
+        type="text"
+        placeholder="Search by name or email..."
+        className="w-full mb-4 p-2 border rounded"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      <table className="w-full table-auto border-collapse border border-gray-300 text-sm">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border px-2 py-2">First Name</th>
+            <th className="border px-2 py-2">Last Name</th>
+            <th className="border px-2 py-2">Email</th>
+            <th className="border px-2 py-2">Mobile</th>
+            <th className="border px-2 py-2">Password</th>
+            <th className="border px-2 py-2">Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentUsers.length > 0 ? (
+            currentUsers.map((user, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="border px-2 py-2">{user.firstName}</td>
+                <td className="border px-2 py-2">{user.lastName}</td>
+                <td className="border px-2 py-2">{user.email}</td>
+                <td className="border px-2 py-2">{user.mobileNumber}</td>
+                <td className="border px-2 py-2">{user.password}</td>
+                <td className="border px-2 py-2">
+                  <select
+                    value={user.role || "user"}
+                    onChange={(e) => handleRoleChange(index, e.target.value)}
+                    className="border rounded px-1 py-1"
+                  >
+                    <option value="user">User</option>
+                    <option value="vendor">Vendor</option>
+                  </select>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6" className="text-center py-4">No users found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* Pagination */}
+      <div className="mt-4 flex justify-center">
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+          <button
+            key={num}
+            onClick={() => paginate(num)}
+            className={`mx-1 px-3 py-1 rounded ${currentPage === num ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
+          >
+            {num}
+          </button>
+        ))}
       </div>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: "20px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#f4f4f4",
-    height: "100vh",
-  },
-  heading: {
-    fontSize: "24px",
-    color: "#333",
-    marginBottom: "20px",
-  },
-  userListContainer: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "15px",
-    justifyContent: "center",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-    width: "300px",
-    textAlign: "left",
-    marginBottom: "15px",
-  },
-  text: {
-    fontSize: "16px",
-    marginBottom: "10px",
-    color: "#555",
-  },
-  noUser: {
-    fontSize: "18px",
-    color: "#999",
-  },
-  buttonContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: "15px",
-  },
-  editButton: {
-    padding: "8px 15px",
-    backgroundColor: "#4CAF50",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-  deleteButton: {
-    padding: "8px 15px",
-    backgroundColor: "#f44336",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
 };
 
 export default UserList;
