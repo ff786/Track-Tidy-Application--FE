@@ -7,6 +7,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 const UserList = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -15,19 +16,21 @@ const UserList = () => {
   const usersPerPage = 5;
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/users")
-      .then(res => {
+    axios
+      .get("http://localhost:8080/api/users")
+      .then((res) => {
         setUsers(res.data);
         setFilteredUsers(res.data);
       })
-      .catch(err => console.error("Failed to fetch users:", err));
+      .catch((err) => console.error("Failed to fetch users:", err));
   }, []);
 
   useEffect(() => {
-    const filtered = users.filter(user =>
-      user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = users.filter(
+      (user) =>
+        user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredUsers(filtered);
     setCurrentPage(1);
@@ -36,20 +39,20 @@ const UserList = () => {
   const generatePDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text('User List Report', 14, 22);
+    doc.text("User List Report", 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
 
     const tableColumn = ["First Name", "Last Name", "Email", "Mobile", "Role"];
     const tableRows = [];
 
-    filteredUsers.forEach(user => {
+    filteredUsers.forEach((user) => {
       const rowData = [
         user.firstName || "N/A",
         user.lastName || "N/A",
         user.email || "N/A",
         user.mobileNumber || "N/A",
-        user.role || "User"
+        user.role || "User",
       ];
       tableRows.push(rowData);
     });
@@ -58,7 +61,7 @@ const UserList = () => {
       head: [tableColumn],
       body: tableRows,
       startY: 30,
-      theme: 'striped',
+      theme: "striped",
       headStyles: { fillColor: [15, 192, 180] },
     });
 
@@ -74,10 +77,24 @@ const UserList = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  const updateUserRole = (userId, newRole) => {
+    axios
+      .put(`http://localhost:8080/api/users/${userId}/role`, { role: newRole })
+      .then((res) => {
+        console.log("Role updated");
+      })
+      .catch((err) => console.error("Failed to update role:", err));
+  };
+
   const handleRoleChange = (index, newRole) => {
+    const globalIndex = indexOfFirstUser + index;
     const updatedUsers = [...filteredUsers];
-    updatedUsers[indexOfFirstUser + index].role = newRole;
+    const selectedUser = updatedUsers[globalIndex];
+    selectedUser.role = newRole;
     setFilteredUsers(updatedUsers);
+
+    // Optional: persist role change to backend
+    updateUserRole(selectedUser.id, newRole);
   };
 
   return (
@@ -107,7 +124,7 @@ const UserList = () => {
             <th className="border px-2 py-2">Last Name</th>
             <th className="border px-2 py-2">Email</th>
             <th className="border px-2 py-2">Mobile</th>
-            <th className="border px-2 py-2">Password</th>
+            {/* Removed password column */}
             <th className="border px-2 py-2">Role</th>
           </tr>
         </thead>
@@ -119,12 +136,11 @@ const UserList = () => {
                 <td className="border px-2 py-2">{user.lastName}</td>
                 <td className="border px-2 py-2">{user.email}</td>
                 <td className="border px-2 py-2">{user.mobileNumber}</td>
-                <td className="border px-2 py-2">{user.password}</td>
                 <td className="border px-2 py-2">
                   <select
                     value={user.role || "user"}
                     onChange={(e) => handleRoleChange(index, e.target.value)}
-                    className="border rounded px-1 py-1"
+                    className="border rounded px-2 py-1 bg-white"
                   >
                     <option value="user">User</option>
                     <option value="vendor">Vendor</option>
@@ -134,7 +150,9 @@ const UserList = () => {
             ))
           ) : (
             <tr>
-              <td colSpan="6" className="text-center py-4">No users found</td>
+              <td colSpan="5" className="text-center py-4">
+                No users found
+              </td>
             </tr>
           )}
         </tbody>
@@ -142,11 +160,15 @@ const UserList = () => {
 
       {/* Pagination */}
       <div className="mt-4 flex justify-center">
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
           <button
             key={num}
             onClick={() => paginate(num)}
-            className={`mx-1 px-3 py-1 rounded ${currentPage === num ? "bg-blue-500 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
+            className={`mx-1 px-3 py-1 rounded ${
+              currentPage === num
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 hover:bg-gray-300"
+            }`}
           >
             {num}
           </button>
