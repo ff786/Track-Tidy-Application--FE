@@ -8,6 +8,10 @@ const UserList = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // ✅ Retrieve the registered user from localStorage
+  const registeredUser = JSON.parse(localStorage.getItem("registeredUser"));
+  console.log("Logged-in User:", registeredUser); // Optional: Debugging
+
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,7 +97,6 @@ const UserList = () => {
     selectedUser.role = newRole;
     setFilteredUsers(updatedUsers);
 
-    // Optional: persist role change to backend
     updateUserRole(selectedUser.id, newRole);
   };
 
@@ -124,7 +127,6 @@ const UserList = () => {
             <th className="border px-2 py-2">Last Name</th>
             <th className="border px-2 py-2">Email</th>
             <th className="border px-2 py-2">Mobile</th>
-            {/* Removed password column */}
             <th className="border px-2 py-2">Role</th>
           </tr>
         </thead>

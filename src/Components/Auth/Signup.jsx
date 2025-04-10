@@ -55,6 +55,9 @@ const Signup = () => {
         const data = await response.json();
 
         if (response.ok) {
+          // Save user data to localStorage for later use
+          localStorage.setItem("registeredUser", JSON.stringify(values));
+
           alert("Signup Successful! Redirecting to login...");
           navigate("/", { state: { userData: values } }); // Pass user data to login page
         } else {
