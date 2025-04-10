@@ -2,7 +2,7 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-// Import components
+// Components
 import UserManagement from './Components/UserManagement/UserManagement';
 import EditVendorForm from './Components/UserManagement/EditVendorForm.jsx';
 import Login from './Components/Auth/Login.jsx';
@@ -14,45 +14,37 @@ import TrackTidyHomePage from './Home.jsx';
 import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
 import { ResetPassword } from './Components/Auth/ResetPassword.jsx';
 
-// Function to check user role
-const getUserRole = () => {
-  return localStorage.getItem("userRole");
-};
+// Function to get user role from localStorage
+const getUserRole = () => localStorage.getItem("userRole");
 
 const router = createBrowserRouter([
   { path: '/', element: <Login /> },
   { path: '/signup', element: <Signup /> },
   { path: '/dashboard', element: <TrackTidyHomePage /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
 
-  // Role-Based Protected Routes
+  // Protected Routes
   {
     path: '/user-management',
     element: getUserRole() === 'Admin' ? <UserManagement /> : <Login />
   },
   {
-    path: '/user-services',
-    element: <UserServices />
+    path: '/user-list',
+    element: (getUserRole() === 'Admin' || getUserRole() === 'User') ? <UsersList /> : <Login />
   },
   {
     path: '/edit-vendor/:id',
-    element: <EditVendorForm />
-  },
-  {
-    path: '/user-list',
-    element: getUserRole() === 'Admin' || getUserRole() === 'User' ? <UsersList /> : <Login />
+    element: getUserRole() === 'Admin' ? <EditVendorForm /> : <Login />
   },
   {
     path: '/edit-user/:id',
-    element: <EditUserForm />
+    element: getUserRole() === 'Admin' ? <EditUserForm /> : <Login />
   },
   {
-    path: '/forgot-password',
-    element: <ForgotPassword />
+    path: '/user-services',
+    element: <UserServices />
   },
-  {
-    path: '/reset-password',
-    element: <ResetPassword />
-  }
 ]);
 
 function App() {
