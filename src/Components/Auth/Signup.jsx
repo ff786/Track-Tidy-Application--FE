@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -43,29 +44,37 @@ const Signup = () => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting }) => {
+      const newUser = {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        mobileNumber: values.mobileNumber
+      };
+
       try {
-        const response = await fetch("http://localhost:8080/api/track-tidy/user/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
+        // 1. First try to register with your API
+        await axios.post("http://localhost:8080/api/track-tidy/user/register", values);
+        
+        // 2. Then store in localStorage
+        const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+        existingUsers.push(newUser);
+        localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
+        
+        // 3. Redirect with success message
+        navigate("/", { 
+          state: { message: "Registration successful!" } 
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          // Save user data to localStorage for later use
-          localStorage.setItem("registeredUser", JSON.stringify(values));
-
-          alert("Signup Successful! Redirecting to login...");
-          navigate("/", { state: { userData: values } }); // Pass user data to login page
-        } else {
-          alert(`Signup Failed: ${data.message || "Something went wrong!"}`);
-        }
       } catch (error) {
         console.error("Signup error:", error);
-        alert("Error signing up. Please check your network and try again.");
+        
+        // If API fails, still store locally
+        const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
+        existingUsers.push(newUser);
+        localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
+        
+        navigate("/", { 
+          state: { message: "Registered locally (API unavailable)" } 
+        });
       } finally {
         setSubmitting(false);
       }
@@ -240,6 +249,11 @@ const Signup = () => {
             background: transparent;
             box-shadow: none;
             border: 2px solid #fff;
+          }
+          .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 4px;
           }
         `}
       </style>
