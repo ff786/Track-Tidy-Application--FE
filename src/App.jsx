@@ -13,6 +13,7 @@ import EditUserForm from './Components/UserManagement/EditUserForm.jsx';
 import TrackTidyHomePage from './Home.jsx';
 import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
 import { ResetPassword } from './Components/Auth/ResetPassword.jsx';
+import ProtectedRouteAdmin from './Components/Auth/ProtectROuteAdmin.jsx';
 
 // Function to get user role from localStorage
 const getUserRole = () => localStorage.getItem("userRole");
@@ -25,34 +26,44 @@ const router = createBrowserRouter([
   { path: '/reset-password', element: <ResetPassword /> },
 
   // Protected Routes
-  {
-    path: '/user-management',
-    element: getUserRole() === 'Admin' ? <UserManagement /> : <Login />
-  },
+ 
   {
     path: '/user-list',
-    element: (getUserRole() === 'Admin' || getUserRole() === 'User') ? <UsersList /> : <Login />
+    element: (
+      <ProtectedRouteAdmin>
+        <UsersList />
+      </ProtectedRouteAdmin>
+    ),
+  },
+  {
+    path: '/user-management',
+    element: (
+      <ProtectedRouteAdmin>
+        <UserManagement />
+      </ProtectedRouteAdmin>
+    ),
   },
   {
     path: '/edit-vendor/:id',
-    element: getUserRole() === 'Admin' ? <EditVendorForm /> : <Login />
+    element: (
+      <ProtectedRouteAdmin>
+        <EditVendorForm />
+      </ProtectedRouteAdmin>
+    ),
   },
   {
     path: '/edit-user/:id',
-    element: getUserRole() === 'Admin' ? <EditUserForm /> : <Login />
-  },
-  {
-    path: '/user-services',
-    element: <UserServices />
+    element: (
+      <ProtectedRouteAdmin>
+        <EditUserForm />
+      </ProtectedRouteAdmin>
+    ),
   },
 ]);
 
 function App() {
-  return (
-    <div>
-      <RouterProvider router={router} />
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
+;

@@ -39,10 +39,10 @@ const Login = () => {
         if (values.email === adminEmail && values.password === adminPassword) {
           alert("Admin Login Successful! Navigating to Admin Dashboard.");
           sessionStorage.setItem('isAdmin', 'true'); // ✅ Set admin flag
-          navigate("/user-List"); // Navigate to admin dashboard
+          navigate("/user-list"); // Navigate to admin dashboard
           return; // Stop further processing if it's admin login
         }
-        sessionStorage.setItem('isAdmin', 'true'); // ✅ Set admin flag
+        sessionStorage.setItem('isAdmin', 'False'); // ✅ Set admin flag
         const data = await response.json();
         console.log("Login Response:",data);
         alert("Login Successful!");
