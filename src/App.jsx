@@ -1,73 +1,75 @@
-import React, { useState } from 'react'
-import './App.css'
+import React from 'react';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+
+// Components
+
+import EditVendorForm from './Components/UserManagement/EditVendorForm.jsx';
 import Login from './Components/Auth/Login.jsx';
-import TrackTidyHomePage from './Home.jsx';
-
-import UserServices from './Components/TrackServicesHome/UserServices.jsx'
-import UserList from './Components/UserManagement/UserList.jsx';
 import Signup from './Components/Auth/Signup.jsx';
-import AddInventory from './Components/HomeInventory/addInventory.jsx'
-import ViewInventory from './Components/HomeInventory/viewInventory.jsx'
-import UpdateInventory from './Components/HomeInventory/updateInventory.jsx'
-import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
-import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
+import UserServices from './Components/TrackServicesHome/UserServices.jsx';
+import UsersList from './Components/UserManagement/UserList.jsx';
+import TrackTidyHomePage from './Home.jsx';
+import AddInventory from './Components/HomeInventory/addInventory.jsx';
+import ViewInventory from './Components/HomeInventory/viewInventory.jsx';
+import UpdateInventory from './Components/HomeInventory/updateInventory.jsx';
+import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx';
+import InventoryPage from './Components/HomeInventory/inventoryPage.jsx';
 
-
-import {
-    createBrowserRouter,
-    RouterProvider
-} from 'react-router-dom'
+// Function to get user role from localStorage
+const getUserRole = () => localStorage.getItem("userRole");
 
 const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <div> <Login /> </div>
-    },
-    {
-        path: '/dashboard',
-        element: <div> <TrackTidyHomePage /> </div>
-    },
-    {
-        path: '/signup',
-        element: <div> <Signup /> </div>
-    },
-    {
-        path: '/user-management',
-        element: <UserList/>
-    },
-    {
-        path: '/user-services',
-        element: <div> <UserServices /> </div>
-    },
-    {
-        path: '/add-in',
-        element: <div> <AddInventory /> </div>
-    },
-    {
-        path: '/view-in',
-        element: <div> <ViewInventory /> </div>
-    },
-    {
-        path: '/update-in/:id',
-        element: <div> <UpdateInventory /> </div>
-    },
-    {
-        path: '/view-one-in/:id',
-        element: <div> <ViewOneInventory /> </div>
-    },
-    {
-        path: '/in-page',
-        element: <div> <InventoryPage /> </div>
-    },
-])
+  { 
+    path: '/', 
+    element: <Login /> 
+  },
+  { 
+    path: '/dashboard', 
+    element: <TrackTidyHomePage /> 
+  },
+  { 
+    path: '/signup', 
+    element: <Signup /> 
+  },
+
+  {
+    path: '/user-list',
+    element: sessionStorage.getItem('isAdmin') === 'true' ? <UsersList /> : <Navigate to="/" />
+  },
+  {
+    path: '/edit-vendor/:id',
+    element: getUserRole() === 'Admin' ? <EditVendorForm /> : <Login />
+  },
+
+ 
+  {
+    path: '/add-in',
+    element: <AddInventory />
+  },
+  {
+    path: '/view-in',
+    element: <ViewInventory />
+  },
+  {
+    path: '/update-in/:id',
+    element: <UpdateInventory />
+  },
+  {
+    path: '/view-one-in/:id',
+    element: <ViewOneInventory />
+  },
+  {
+    path: '/in-page',
+    element: <InventoryPage />
+  }
+]);
 
 function App() {
-
   return (
-      <div>
-          <RouterProvider router={router} />
-      </div>
-  )
+    <div>
+      <RouterProvider router={router} />
+    </div>
+  );
 }
 
 export default App;

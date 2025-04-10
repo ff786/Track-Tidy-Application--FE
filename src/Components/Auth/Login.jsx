@@ -38,11 +38,13 @@ const Login = () => {
         // Check if it's the admin login
         if (values.email === adminEmail && values.password === adminPassword) {
           alert("Admin Login Successful! Navigating to Admin Dashboard.");
-          navigate("/user-List"); // Navigate to admin dashboard
+          sessionStorage.setItem('isAdmin', 'true'); // ✅ Set admin flag
+          navigate("/user-list"); // Navigate to admin dashboard
           return; // Stop further processing if it's admin login
         }
+        sessionStorage.setItem('isAdmin', 'False'); // ✅ Set admin flag
         const data = await response.json();
-        console.log("Login Response:", response.data);
+        console.log("Login Response:",data);
         alert("Login Successful!");
         sessionStorage.setItem('access_token', data.access_token);
         navigate("/dashboard");
@@ -100,7 +102,7 @@ const Login = () => {
           </button>
 
           <div className="HSDforgot-password-link">
-            <a href="#" onClick={() => navigate("/forgot-password")}>
+            <a href="#" onClick={() => navigate("/Forgot-password")}>
               Forgot Password?
             </a>
           </div>
