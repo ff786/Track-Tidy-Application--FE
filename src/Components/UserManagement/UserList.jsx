@@ -26,7 +26,8 @@ const UserList = () => {
         firstName: user.firstName || user.username?.split(' ')[0],
         lastName: user.lastName || user.username?.split(' ')[1] || '',
         mobileNumber: user.mobileNumber || 'N/A',
-        role: user.role || 'user'
+        role: user.role || 'user',
+        companyName: user.companyName || ''
       }));
     } catch (err) {
       console.warn("API request failed, will try localStorage");
@@ -42,8 +43,8 @@ const UserList = () => {
       lastName: user.lastName,
       email: user.email,
       mobileNumber: user.mobileNumber,
-      role: 'user', // Default role for local users
-      companyName: '', // Default empty for local users
+      role: user.role || 'user',
+      companyName: user.companyName || '',
       source: 'localStorage'
     }));
   };
@@ -134,11 +135,12 @@ const UserList = () => {
       user.lastName || 'N/A',
       user.email,
       user.mobileNumber || 'N/A',
-      user.role || 'user'
+      user.role || 'user',
+      user.companyName || '-'
     ]);
 
     autoTable(doc, {
-      head: [['First Name', 'Last Name', 'Email', 'Mobile', 'Role']],
+      head: [['First Name', 'Last Name', 'Email', 'Mobile', 'Role', 'Company']],
       body: tableData,
       startY: 35,
       margin: { horizontal: margin },
@@ -184,7 +186,8 @@ const UserList = () => {
       (user.firstName && user.firstName.toLowerCase().includes(searchLower)) ||
       (user.lastName && user.lastName.toLowerCase().includes(searchLower)) ||
       (user.email && user.email.toLowerCase().includes(searchLower)) ||
-      (user.role && user.role.toLowerCase().includes(searchLower))
+      (user.role && user.role.toLowerCase().includes(searchLower)) ||
+      (user.companyName && user.companyName.toLowerCase().includes(searchLower))
     );
   });
 
@@ -210,7 +213,7 @@ const UserList = () => {
       }}
     >
       <motion.div
-        className="w-full max-w-4xl p-8 rounded-3xl"
+        className="w-full max-w-6xl p-8 rounded-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -264,7 +267,7 @@ const UserList = () => {
         <div className="mb-6">
           <input
             type="text"
-            placeholder="Search by name, email, or role..."
+            placeholder="Search by name, email, role or company..."
             className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
             value={searchTerm}
             onChange={(e) => {
@@ -289,6 +292,7 @@ const UserList = () => {
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Mobile</th>
                 <th className="px-4 py-3 text-left">Role</th>
+                <th className="px-4 py-3 text-left">Company</th>
                 <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -307,13 +311,13 @@ const UserList = () => {
                     <td className="px-4 py-3">{user.email}</td>
                     <td className="px-4 py-3">{user.mobileNumber}</td>
                     <td className="px-4 py-3">{user.role}</td>
+                    <td className="px-4 py-3">{user.role === 'vendor' ? user.companyName : '-'}</td>
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         {(user.role !== 'admin' || user.source === 'localStorage') && (
-                          // In UserList.jsx, modify the edit button:
                           <motion.button
                             onClick={() => navigate(`/edit-user/${user._id}`, {
-                              state: { user } // Pass the entire user object
+                              state: { user }
                             })}
                             className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
                             whileHover={{ scale: 1.1 }}
@@ -343,7 +347,7 @@ const UserList = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <td colSpan="6" className="py-6">
+                  <td colSpan="7" className="py-6">
                     {searchTerm ? 'No matching users found' : 'No users available'}
                   </td>
                 </motion.tr>

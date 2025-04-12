@@ -58,7 +58,6 @@ const EditUser = () => {
         }
     }, [id, location.state]);
 
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setUser(prev => ({
@@ -66,6 +65,7 @@ const EditUser = () => {
             [name]: value
         }));
     };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -77,7 +77,7 @@ const EditUser = () => {
                 email: user.email,
                 mobileNumber: user.mobileNumber,
                 role: user.role,
-                ...(user.role === 'vendor' && { companyName: user.companyName })
+                companyName: user.role === 'vendor' ? user.companyName : ''
             };
 
             // Check if this is a local user (ID starts with "local-")
@@ -92,8 +92,9 @@ const EditUser = () => {
                     ...updatedUsers[userIndex],
                     firstName: user.firstName,
                     lastName: user.lastName,
-                    mobileNumber: user.mobileNumber
-                    // Note: Don't update email for local users as it's used as identifier
+                    mobileNumber: user.mobileNumber,
+                    role: user.role,
+                    companyName: user.role === 'vendor' ? user.companyName : ''
                 };
 
                 // Save back to localStorage
@@ -207,7 +208,6 @@ const EditUser = () => {
                         )}
                     </div>
 
-
                     <div className="mb-4">
                         <label className="block text-gray-700 mb-2">Mobile Number</label>
                         <input
@@ -250,7 +250,7 @@ const EditUser = () => {
                     <div className="flex justify-between mt-6">
                         <motion.button
                             type="button"
-                            onClick={() => navigate('/users')}
+                            onClick={() => navigate('/user-list')}
                             className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
