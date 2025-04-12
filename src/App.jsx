@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 
 // Components
 
-import EditVendorForm from './Components/UserManagement/EditVendorForm.jsx';
+
 import Login from './Components/Auth/Login.jsx';
 import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
@@ -36,10 +36,7 @@ const router = createBrowserRouter([
     path: '/user-list',
     element: sessionStorage.getItem('isAdmin') === 'true' ? <UsersList /> : <Navigate to="/" />
   },
-  {
-    path: '/edit-vendor/:id',
-    element: getUserRole() === 'Admin' ? <EditVendorForm /> : <Login />
-  },
+  
 
  
   {
