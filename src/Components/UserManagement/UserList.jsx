@@ -6,7 +6,6 @@ import { Edit, Trash2, Download } from 'react-feather';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-
 const UserList = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -17,34 +16,6 @@ const UserList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  useEffect(() => {
-    if (location.state?.message) {
-      setSuccessMessage(location.state.message);
-      const timer = setTimeout(() => setSuccessMessage(''), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [location.state]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const apiUsers = await fetchApiUsers();
-        const localStorageUsers = getLocalStorageUsers();
-        const combinedUsers = combineUsers(apiUsers, localStorageUsers);
-        
-        setUsers(combinedUsers);
-      } catch (err) {
-        console.error("Error:", err);
-        setError('API failed - showing local users');
-        setUsers(getLocalStorageUsers());
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
 
   const fetchApiUsers = async () => {
     try {
@@ -65,91 +36,99 @@ const UserList = () => {
 
   const getLocalStorageUsers = () => {
     const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
-    
     return registeredUsers.map((user, index) => ({
-      _id: `local-${index}-${Date.now()}`, // Unique ID for each local user
+      _id: `local-${index}`,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
       mobileNumber: user.mobileNumber,
-      role: 'user',
+      role: 'user', // Default role for local users
+      companyName: '', // Default empty for local users
       source: 'localStorage'
     }));
   };
+
   const combineUsers = (apiUsers, localStorageUsers) => {
-    // Create a Set of existing emails from API users
     const existingEmails = new Set(apiUsers.map(user => user.email.toLowerCase()));
-    
-    // Track emails we've already seen from localStorage
     const seenLocalEmails = new Set();
-    
-    // Filter localStorage users to only include unique emails
+
     const uniqueLocalUsers = localStorageUsers.filter(user => {
       const emailLower = user.email.toLowerCase();
       const isUnique = !existingEmails.has(emailLower) && !seenLocalEmails.has(emailLower);
-      if (isUnique) {
-        seenLocalEmails.add(emailLower);
-      }
+      if (isUnique) seenLocalEmails.add(emailLower);
       return isUnique;
     });
-    
+
     return [...apiUsers, ...uniqueLocalUsers];
-  
-  
-    
   };
+
+  const refreshUsers = async () => {
+    setLoading(true);
+    try {
+      const apiUsers = await fetchApiUsers();
+      const localStorageUsers = getLocalStorageUsers();
+      const combinedUsers = combineUsers(apiUsers, localStorageUsers);
+      setUsers(combinedUsers);
+    } catch (err) {
+      console.error("Refresh error:", err);
+      setError('Failed to refresh - showing cached data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setSuccessMessage(location.state.message);
+      refreshUsers();
+      window.history.replaceState({}, document.title);
+      const timer = setTimeout(() => setSuccessMessage(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    refreshUsers();
+  }, []);
+
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure?')) {
+    if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         if (id.startsWith('local-')) {
-          // Delete from localStorage
           const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
-          
-          // Extract the index from the ID (assuming format is "local-index")
           const userIndex = parseInt(id.split('-')[1]);
-          
-          // Filter out the user by index
-          const updatedUsers = registeredUsers.filter((user, index) => index !== userIndex);
-          
+          const updatedUsers = registeredUsers.filter((_, index) => index !== userIndex);
           localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
         } else {
-          // Delete from API
           await axios.delete(`http://localhost:8080/user/delete/${id}`);
         }
-        
+
         setUsers(users.filter(user => user._id !== id));
-        setSuccessMessage('User deleted!');
+        setSuccessMessage('User deleted successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } catch (err) {
-        setError('Delete failed: ' + err.message);
+        setError('Delete failed: ' + (err.response?.data?.message || err.message));
       }
     }
   };
 
   const generatePDF = () => {
-    // Create new PDF with landscape orientation for better fit
-    const doc = new jsPDF({
-      orientation: "landscape"
-    });
-  
-    // Add title with styling
+    const doc = new jsPDF({ orientation: "landscape" });
+
     doc.setFontSize(20);
     doc.setTextColor(40);
     doc.setFont("helvetica", "bold");
     doc.text("User List Report", 14, 20);
-  
-    // Add subtitle with generation date
+
     doc.setFontSize(12);
     doc.setTextColor(100);
     doc.setFont("helvetica", "normal");
     doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 27);
-  
-    // Calculate available width (subtract left and right margins)
+
     const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 14; // 14mm left/right margin
+    const margin = 14;
     const availableWidth = pageWidth - (margin * 2);
-  
-    // Prepare table data
+
     const tableData = filteredUsers.map(user => [
       user.firstName || 'N/A',
       user.lastName || 'N/A',
@@ -157,52 +136,33 @@ const UserList = () => {
       user.mobileNumber || 'N/A',
       user.role || 'user'
     ]);
-  
-    // Generate table with full-page width
+
     autoTable(doc, {
       head: [['First Name', 'Last Name', 'Email', 'Mobile', 'Role']],
       body: tableData,
       startY: 35,
-      margin: { horizontal: margin }, // Set left/right margins
-      tableWidth: 'wrap', // Will use available width
+      margin: { horizontal: margin },
+      tableWidth: 'wrap',
       styles: {
         fontSize: 10,
-        cellPadding: 6, // Increased padding
-        overflow: 'linebreak',
+        cellPadding: 6,
         textColor: [40, 40, 40],
         fillColor: [255, 255, 255],
         lineWidth: 0.1,
         lineColor: [200, 200, 200]
       },
       headStyles: {
-        fillColor: [4, 95, 86], // Dark teal color
+        fillColor: [4, 95, 86],
         textColor: [255, 255, 255],
         fontStyle: 'bold',
         fontSize: 11,
-        cellPadding: 8 // Extra padding for headers
+        cellPadding: 8
       },
       alternateRowStyles: {
         fillColor: [240, 240, 240]
-      },
-      columnStyles: {
-        0: { cellWidth: 'auto' }, // First Name - auto width
-        1: { cellWidth: 'auto' }, // Last Name - auto width
-        2: { cellWidth: 'auto' }, // Email - will take more space
-        3: { cellWidth: 'auto' }, // Mobile
-        4: { cellWidth: 'auto' }  // Role
-      },
-      // This ensures columns expand to fill available space
-      horizontalPageBreak: true,
-      showHead: 'everyPage',
-      // Stretch columns proportionally
-      didParseCell: (data) => {
-        if (data.section === 'head') {
-          data.cell.styles.fontSize = 11;
-        }
       }
     });
-  
-    // Add page numbers
+
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
@@ -214,13 +174,9 @@ const UserList = () => {
         doc.internal.pageSize.height - 10
       );
     }
-  
-    // Save the PDF with date in filename
+
     doc.save(`user_list_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
-
- 
-
 
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
@@ -232,7 +188,6 @@ const UserList = () => {
     );
   });
 
-  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
@@ -254,7 +209,7 @@ const UserList = () => {
         background: 'linear-gradient(135deg,rgb(4, 95, 86) 0%,rgb(49, 231, 213) 50%, #ccfbf6 100%)',
       }}
     >
-      <motion.div 
+      <motion.div
         className="w-full max-w-4xl p-8 rounded-3xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -328,7 +283,7 @@ const UserList = () => {
             transition={{ delay: 0.3 }}
           >
             <thead>
-              <tr className="border-b border-white border-opacity-30">     
+              <tr className="border-b border-white border-opacity-30">
                 <th className="px-4 py-3 text-left">First Name</th>
                 <th className="px-4 py-3 text-left">Last Name</th>
                 <th className="px-4 py-3 text-left">Email</th>
@@ -354,15 +309,20 @@ const UserList = () => {
                     <td className="px-4 py-3">{user.role}</td>
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
-                        <motion.button
-                          onClick={() => navigate(`/edit-user/${user._id}`)}
-                          className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          title="Edit"
-                        >
-                          <Edit size={16} className="text-white" />
-                        </motion.button>
+                        {(user.role !== 'admin' || user.source === 'localStorage') && (
+                          // In UserList.jsx, modify the edit button:
+                          <motion.button
+                            onClick={() => navigate(`/edit-user/${user._id}`, {
+                              state: { user } // Pass the entire user object
+                            })}
+                            className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            title="Edit"
+                          >
+                            <Edit size={16} className="text-white" />
+                          </motion.button>
+                        )}
                         <motion.button
                           onClick={() => handleDelete(user._id)}
                           className="p-2 bg-red-500 rounded-full hover:bg-red-700 transition-colors"
