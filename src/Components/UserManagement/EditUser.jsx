@@ -229,7 +229,7 @@ const EditUser = () => {
                         >
                             <option value="user">User</option>
                             <option value="vendor">Vendor</option>
-                            <option value="admin">Admin</option>
+                            
                         </select>
                     </div>
 
@@ -260,7 +260,7 @@ const EditUser = () => {
 
                         <motion.button
                             type="submit"
-                            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+                            className="px-6 py-2 bg-green-900 text-white rounded-lg hover:bg-green-800 transition-colors"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >

@@ -7,10 +7,10 @@ import Signup from './Components/Auth/Signup.jsx';
 import UserServices from './Components/TrackServicesHome/UserServices.jsx';
 import UsersList from './Components/UserManagement/UserList.jsx';
 import TrackTidyHomePage from './Home.jsx';
-import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
-import { ResetPassword } from './Components/Auth/ResetPassword.jsx';
+import ResetPassword from './Components/Auth/ResetPassword.jsx';
 import EditUser from './Components/UserManagement/EditUser.jsx';
-
+import ForgotPassword from './Components/Auth/ForgotPassword.jsx';
+import OtpVerification from './Components/Auth/OtpVerification.jsx';
 // Function to check if user is admin
 const isAdmin = () => {
   return sessionStorage.getItem('isAdmin') === 'true' || 
@@ -23,6 +23,7 @@ const router = createBrowserRouter([
   { path: '/dashboard', element: <TrackTidyHomePage /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/otp-verification', element: <OtpVerification/>},
 
   // Protected Routes
   {
