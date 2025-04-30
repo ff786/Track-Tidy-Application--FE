@@ -18,9 +18,9 @@ const EditUser = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
+    const [mobileError, setMobileError] = useState('');
 
     useEffect(() => {
-        // First check if we have user data passed via state
         if (location.state?.user) {
             const userData = location.state.user;
             setUser({
@@ -33,7 +33,6 @@ const EditUser = () => {
             });
             setLoading(false);
         } else {
-            // Fallback to API fetch if no state data
             setLoading(true);
             const fetchUser = async () => {
                 try {
@@ -60,6 +59,17 @@ const EditUser = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        
+        if (name === 'mobileNumber') {
+            if (value && !/^\d*$/.test(value)) {
+                return;
+            }
+            
+            if (mobileError && value.length <= 10) {
+                setMobileError('');
+            }
+        }
+        
         setUser(prev => ({
             ...prev,
             [name]: value
@@ -69,6 +79,12 @@ const EditUser = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setMobileError('');
+
+        if (user.mobileNumber && user.mobileNumber.length !== 10) {
+            setMobileError('Mobile number must be exactly 10 digits');
+            return;
+        }
 
         try {
             const userData = {
@@ -80,13 +96,10 @@ const EditUser = () => {
                 companyName: user.role === 'vendor' ? user.companyName : ''
             };
 
-            // Check if this is a local user (ID starts with "local-")
             if (id.startsWith('local-')) {
-                // Handle local storage update
                 const registeredUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
                 const userIndex = parseInt(id.split('-')[1]);
 
-                // Create updated user list
                 const updatedUsers = [...registeredUsers];
                 updatedUsers[userIndex] = {
                     ...updatedUsers[userIndex],
@@ -97,10 +110,8 @@ const EditUser = () => {
                     companyName: user.role === 'vendor' ? user.companyName : ''
                 };
 
-                // Save back to localStorage
                 localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
             } else {
-                // Handle API update for non-local users
                 const response = await axios.put(`http://localhost:8080/user/update/${id}`, userData, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -215,8 +226,13 @@ const EditUser = () => {
                             name="mobileNumber"
                             value={user.mobileNumber}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg bg-white bg-opacity-70 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                            className={`w-full px-4 py-2 rounded-lg bg-white bg-opacity-70 border ${mobileError ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-teal-500`}
+                            maxLength="10"
+                            placeholder="10 digit mobile number"
                         />
+                        {mobileError && (
+                            <p className="text-red-500 text-sm mt-1">{mobileError}</p>
+                        )}
                     </div>
 
                     <div className="mb-4">
@@ -229,7 +245,6 @@ const EditUser = () => {
                         >
                             <option value="user">User</option>
                             <option value="vendor">Vendor</option>
-                            
                         </select>
                     </div>
 
