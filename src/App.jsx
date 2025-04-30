@@ -12,11 +12,21 @@ import ViewOneInventory from './Components/HomeInventory/ViewOneInventory.jsx'
 import InventoryPage from './Components/HomeInventory/inventoryPage.jsx'
 
 import ServiceRequest from './Components/AllServiceRequest/ServiceRequests.jsx'
+import TrackTidyHomePage from "./Components/TrackHome/HomeDashboard.jsx";
+import TrackTidyRequests from "./Components/TrackRequests/TrackTidyRequests.jsx";
+import TrackPackages from "./Components/TTPackages/TtPackage.jsx";
+import TrackTidyGrocery from "./Components/GroceryDisplay/GroceryMarketPlace.jsx";
+import HomeInventory from "./Components/InventoryHome/HomeInventory.jsx";
 
 import {
     createBrowserRouter,
     RouterProvider
 } from 'react-router-dom'
+import AboutUs from "./Components/AboutUs/AboutUs.jsx";
+import PrivacyPolicy from "./Components/PrivacyPolicy/PrivacyPolicy.jsx";
+import TermsAndConditions from "./Components/Terms&Conditions/Terms.jsx";
+
+
 
 const router = createBrowserRouter([
     {
@@ -28,12 +38,44 @@ const router = createBrowserRouter([
         element: <div> <Signup /> </div>
     },
     {
-        path: '/user-management',
-        element: <UserList/>
+        path: '/dashboard',
+        element: <div> <TrackTidyHomePage /> </div>
+    },
+    {
+        path: '/packages',
+        element: <div> <TrackPackages /> </div>
+    },
+    {
+        path: '/inventory',
+        element: <div> <HomeInventory /> </div>
+    },
+    {
+        path: '/requests',
+        element: <div> <TrackTidyRequests /> </div>
     },
     {
         path: '/user-services',
         element: <div> <UserServices /> </div>
+    },
+    {
+        path: '/grocery-home',
+        element: <div> <TrackTidyGrocery /> </div>
+    },
+    {
+        path: '/about-us',
+        element: <div> <AboutUs /> </div>
+    },
+    {
+        path: '/privacy-policy',
+        element: <div> <PrivacyPolicy /> </div>
+    },
+    {
+        path: '/terms-&-conditions',
+        element: <div> <TermsAndConditions /> </div>
+    },
+    {
+        path: '/user-management',
+        element: <UserList/>
     },
     {
         path: '/add-in',

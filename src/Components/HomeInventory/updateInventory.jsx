@@ -31,7 +31,7 @@ const UpdateInventory = () => {
   useEffect(() => {
     const fetchInventoryItem = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/track-tidy/inventory/update/${id}`);
+        const response = await axios.get(`http://localhost:8080/api/track-tidy/inventory/update?id=${id}`);
         const item = response.data;
         
         setFormData({

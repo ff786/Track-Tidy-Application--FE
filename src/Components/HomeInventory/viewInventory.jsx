@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Edit, Trash2, Eye, Plus, Download } from 'react-feather';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from "jspdf-autotable";
 
 const ViewInventory = () => {
   const navigate = useNavigate();
@@ -33,8 +33,8 @@ const ViewInventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this inventory item?')) {
       try {
-        await axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete/${id}`);
-        setInventory(inventory.filter(item => item._id !== id));
+        await axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`);
+        setInventory(inventory.filter(item => item.id !== id));
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to delete inventory item.');
       }
@@ -44,30 +44,24 @@ const ViewInventory = () => {
   const generatePDF = () => {
     const doc = new jsPDF();
     const date = new Date().toLocaleDateString();
-    
+
     // Title and headers
     doc.setFontSize(24).setFont("helvetica", "bold").setTextColor("#4B9CD3");
     doc.text("Track Tidy Inventory Report", 105, 15, { align: "center" });
-    
+
     doc.setFont("helvetica", "normal").setFontSize(12).setTextColor("#666");
     doc.text(`Report Generated: ${date}`, 105, 25, { align: "center" });
-    
+
     // Filtered data or all data
     const dataToExport = searchTerm ? filteredInventory : inventory;
-    
+
     // Table columns
-    const tableColumn = [
-      "Product ID",
-      "Name",
-      "Category",
-      "User ID",
-      "Quantity",
-      "Value",
-      "Status"
+    const headers = [
+      ["Product ID", "Name", "Category", "User ID", "Quantity", "Value", "Status"]
     ];
-    
-    // Table rows
-    const tableRows = dataToExport.map(item => [
+
+    // Table data
+    const data = dataToExport.map(item => [
       item.productId || 'N/A',
       item.productName || 'N/A',
       item.productCategory || 'N/A',
@@ -76,11 +70,11 @@ const ViewInventory = () => {
       `$${item.productValue || '0'}`,
       item.Faulted === 'Yes' ? 'Faulted' : 'Good'
     ]);
-    
-    // Add table to document
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
+
+    // Add table using autoTable plugin
+    autoTable(doc, {
+      head: headers,
+      body: data,
       startY: 40,
       styles: { fontSize: 9 },
       headStyles: {
@@ -98,9 +92,9 @@ const ViewInventory = () => {
         6: { cellWidth: 20 }
       }
     });
-    
+
     // Save the PDF
-    doc.save(`Inventory_Report_${date}.pdf`);
+    doc.save(`Inventory_Report_${date.replace(/\//g, '-')}.pdf`);
   };
 
   const filteredInventory = inventory.filter(item => {
@@ -199,7 +193,7 @@ const ViewInventory = () => {
           <input
             type="text"
             placeholder="Search by ID, name, category, user ID, quantity or value..."
-            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
+            className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -233,7 +227,7 @@ const ViewInventory = () => {
               {currentItems.length > 0 ? (
                 currentItems.map((item) => (
                   <motion.tr
-                    key={item._id}
+                    key={item.id}
                     className="text-gray-400 border-b border-white border-opacity-20 hover:bg-white hover:bg-opacity-10 transition-colors"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -266,7 +260,7 @@ const ViewInventory = () => {
                     <td className="px-4 py-3">
                       <div className="flex space-x-2">
                         <motion.button
-                          onClick={() => navigate(`/view-in/${item._id}`)}
+                          onClick={() => navigate(`/view-in/${item.id}`)}
                           className="p-2 bg-blue-500 rounded-full hover:bg-blue-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -275,7 +269,7 @@ const ViewInventory = () => {
                           <Eye size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
-                          onClick={() => navigate(`/update-in/${item._id}`)}
+                          onClick={() => navigate(`/update-in/${item.id}`)}
                           className="p-2 bg-yellow-500 rounded-full hover:bg-yellow-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
@@ -284,7 +278,7 @@ const ViewInventory = () => {
                           <Edit size={16} className="text-gray-500" />
                         </motion.button>
                         <motion.button
-                          onClick={() => handleDelete(item._id)}
+                          onClick={() => handleDelete(item.id)}
                           className="p-2 bg-red-500 rounded-full hover:bg-red-700 transition-colors"
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}

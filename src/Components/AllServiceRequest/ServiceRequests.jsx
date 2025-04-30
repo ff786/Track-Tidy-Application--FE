@@ -19,7 +19,20 @@ function ServiceRequest() {
                 console.error('Error fetching services:', error);
             });
 
-    }, [navigate]); // Added navigate to dependencies
+    }, [navigate]);
+
+    const handleDelete = (id) => {
+        // Delete Service by id
+        axios.delete(`http://localhost:8080/api/track-tidy/service/delete?id=${id}`)
+            .then(response => {
+                console.log(response.data);
+                // Update state to remove the deleted
+                setService(service.filter(item => item.id !== id));
+            })
+            .catch(error => {
+                console.error('Error deleting claim:', error);
+            });
+    };
 
     return (
         <div className="container mx-auto p-6 bg-white dark:bg-zinc-500">
@@ -51,12 +64,13 @@ function ServiceRequest() {
                             <td className="px-6 py-4">{item.referralCode}</td>
                             <td className="px-6 py-4">
                                 <div className="flex items-center">
-                                    <button className="text-green-600 hover:text-green-900 mr-2">
+                                    <button className="text-blue-600 hover:text-blue-900 mr-2">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 4h2m2 0h2a2 2 0 012 2v2m0 2v8a2 2 0 01-2 2h-8a2 2 0 01-2-2v-8m0-2V6a2 2 0 012-2h2m2 0v2m-4 10h4m-4 0v-4m4 4v-4" />
                                         </svg>
                                     </button>
-                                    <button className="text-red-600 hover:text-red-900">
+
+                                    <button onClick={() => handleDelete(item.id)} className="text-red-600 hover:text-red-900">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
