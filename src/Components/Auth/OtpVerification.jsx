@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const OtpVerification = ({ email, onBack }) => {
+const OtpVerification = () => {
+  const location = useLocation(); // Access location state
+  const { email, sendotp, onBack } = location.state || {}; // Destructure email and sendotp
   const [otp, setOtp] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -27,6 +29,7 @@ const OtpVerification = ({ email, onBack }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('OTP:', sendotp);
     setError('');
     setMessage('');
     setIsSubmitting(true);
@@ -37,50 +40,26 @@ const OtpVerification = ({ email, onBack }) => {
       return;
     }
 
+    if (otp !== sendotp.toString()) {
+      setError('Invalid OTP. Please try again.');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const response = await fetch('http://localhost:8080/api/auth/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate(`/reset-password?token=${data.token}`);
-      } else {
-        setError(data.error || 'OTP verification failed');
-      }
+      // If OTP matches, navigate to the reset password page
+      navigate(`/reset-password`, { state: { email } });
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const resendOtp = async () => {
-    setError('');
-    setMessage('');
-
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('New OTP sent to your email');
-        setTimeLeft(900); // Reset to 15 minutes
-      } else {
-        setError(data.error || 'Failed to resend OTP');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-    }
-  };
+  if (!email || !sendotp) {
+    setError('Invalid access. Please try again.');
+    return;
+  }
 
   return (
     <div style={{
@@ -160,7 +139,7 @@ const OtpVerification = ({ email, onBack }) => {
           </button>
           <button
             type="button"
-            onClick={resendOtp}
+            onClick={'' }
             disabled={timeLeft > 0}
             style={{
               padding: '0.75rem',

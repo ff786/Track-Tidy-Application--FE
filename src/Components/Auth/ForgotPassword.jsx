@@ -7,6 +7,7 @@ const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [Otp, setOtp] = useState('');
   const navigate = useNavigate();
 
   const validateEmail = (email) => {
@@ -24,15 +25,20 @@ const ForgotPassword = () => {
     }
 
     setIsSubmitting(true);
+    const Otp = Math.floor(100000 + Math.random() * 900000);
+    setOtp(Otp);
+    
     try {
-      const response = await axios.post('/api/track-tidy/user/otp/request', {
-        email: email,
-        password: 'dummyPassword'
+      console.log('Generated OTP:', Otp)
+      const response = await axios.post('http://localhost:8080/api/track-tidy/email/send', {
+        "to": email,
+        "subject": "Your OTP Code for Verification",
+        "body": `Dear User, Your One-Time Password ${Otp} for verification`
       });
 
       if (response.status === 200) {
         setMessage('OTP sent to your email');
-        navigate('/verify-otp', { state: { email } });
+        navigate('/otp-verification', { state: { email, sendotp: Otp } }); // Pass Otp as sendotp
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
