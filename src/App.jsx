@@ -25,6 +25,9 @@ import {
 import AboutUs from "./Components/AboutUs/AboutUs.jsx";
 import PrivacyPolicy from "./Components/PrivacyPolicy/PrivacyPolicy.jsx";
 import TermsAndConditions from "./Components/Terms&Conditions/Terms.jsx";
+import DashboardOverview from "./Components/AdminDashboards/DashBoardAdmin/dashboardAdmin.jsx";
+import AdminViewGrocery from "./Components/AdminDashboards/GroceryAdmin/GroceryAdmin.jsx";
+import PackagesAdmin from "./Components/AdminDashboards/PackagesAdmin/PackagesAdmin.jsx";
 
 
 
@@ -60,6 +63,10 @@ const router = createBrowserRouter([
     {
         path: '/grocery-home',
         element: <div> <TrackTidyGrocery /> </div>
+    },
+    {
+        path: '/view-grocery',
+        element: <div> <AdminViewGrocery /> </div>
     },
     {
         path: '/about-us',
@@ -100,6 +107,14 @@ const router = createBrowserRouter([
     {
         path: '/view-service',
         element: <div> <ServiceRequest /> </div>
+    },
+    {
+        path: '/admin/bgi/dashboard',
+        element: <div> <DashboardOverview /> </div>
+    },
+    {
+        path: '/view-packages',
+        element: <div> <PackagesAdmin /> </div>
     },
 ])
 

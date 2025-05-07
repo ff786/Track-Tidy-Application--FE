@@ -1,57 +1,171 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import UserForm from "./UserForm";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Trash2, Pencil } from 'lucide-react';
+import Papa from 'papaparse';
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import autoTable from 'jspdf-autotable';
 
-const VendorList = () => {
-  const [vendors, setVendors] = useState([]);
-  const navigate = useNavigate();
+function UserList() {
+    const [users, setUsers] = useState([]);
+    const [search, setSearch] = useState("");
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    setVendors([
-      { id: 1, name: "Jane Smith", email: "jane@example.com", role: "Vendor", company: "Acme Corp" },
-      { id: 2, name: "Mark Lee", email: "mark@example.com", role: "Vendor", company: "Tech Solutions" },
-    ]);
-  }, []);
+    useEffect(() => {
+        if (!sessionStorage.getItem("access_token")) {
+            navigate("/");
+        }
 
-  const addVendor = (newVendor) => {
-    setVendors([...vendors, newVendor]);
-  };
+        axios.get('http://localhost:8080/api/track-tidy/admin/getAll')
+            .then(response => {
+                console.log(response.data);
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+            });
+    }, [navigate]);
 
-  const deleteVendor = (vendorId) => {
-    setVendors(vendors.filter((vendor) => vendor.id !== vendorId));
-  };
+    const handleDelete = (id) => {
+        axios.delete(`http://localhost:8080/api/track-tidy/user/delete?id=${id}`)
+            .then(() => {
+                setUsers(users.filter(user => user.id !== id));
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+            });
+    };
 
-  const styles = {
-    container: { width: "80%", margin: "0 auto", padding: "20px", backgroundColor: "#f8f9fa", borderRadius: "10px" },
-    header: { fontSize: "2rem", fontWeight: "600", textAlign: "center", marginBottom: "20px", color: "#333" },
-    vendorList: { listStyleType: "none", padding: "0" },
-    vendorItem: { display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: "#fff", padding: "15px", margin: "10px 0", borderRadius: "8px" },
-    button: { padding: "8px 12px", fontSize: "0.875rem", border: "none", cursor: "pointer", borderRadius: "5px", transition: "0.3s" },
-    editButton: { backgroundColor: "#007bff", color: "white", marginRight: "10px" },
-    deleteButton: { backgroundColor: "#e74c3c", color: "white" },
-  };
+    const filteredUsers = users.filter(user =>
+        user.name?.toLowerCase().includes(search.toLowerCase()) ||
+        user.email?.toLowerCase().includes(search.toLowerCase())
+    );
 
-  return (
-    <div style={styles.container}>
-      <h2 style={styles.header}>Vendor Management</h2>
-      <UserForm addVendor={addVendor} />
-      <ul style={styles.vendorList}>
-        {vendors.map((vendor) => (
-          <li key={vendor.id} style={styles.vendorItem}>
-            <span>{vendor.name}</span>
-            <span>({vendor.email})</span>
-            <span>({vendor.company})</span>
-            <button style={{ ...styles.button, ...styles.editButton }} onClick={() => navigate(`/edit-vendor/${vendor.id}`, { state: { vendor } })}>
-              Edit
-            </button>
-            <button style={{ ...styles.button, ...styles.deleteButton }} onClick={() => deleteVendor(vendor.id)}>
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+    const generateCSV = () => {
+        const csvData = filteredUsers.map(user => ({
+            "User ID": user.id,
+            "Name": user.name,
+            "Email": user.email,
+            "Contact Number": user.mobileNumber,
+            "Role": user.role,
+            "Address": user.address,
+        }));
 
-export default VendorList;
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "user_list_report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+    const generatePDF = () => {
+        console.log('Generate PDF button clicked!');
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text("User List Report", 20, 20);
+
+        const tableColumn = [
+            "User ID", "Name", "Email", "Contact Number", "Role", "Address"
+        ];
+
+        const tableRows = filteredUsers.map(user => [
+            user.id,
+            user.name,
+            user.email,
+            user.mobileNumber,
+            user.role,
+            user.address
+        ]);
+
+        try {
+            autoTable(doc, {
+                head: [tableColumn],
+                body: tableRows,
+                startY: 30,
+                styles: { fontSize: 10 },
+                headStyles: { fillColor: [34, 139, 34] } // Optional green header
+            });
+            doc.save("user_list_report.pdf");
+            console.log('PDF generated successfully!');
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+        }
+    };
+
+    return (
+        <div className="p-6 bg-green-800 min-h-screen text-green-50">
+            <h2 className="text-2xl font-semibold mb-6">User List</h2>
+
+            {/* Search Bar */}
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search by Name or Email"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
+                />
+            </div>
+
+            {/* Generate Report Buttons */}
+            <div className="mb-6">
+                <button
+                    onClick={generateCSV}
+                    className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition mr-4"
+                >
+                    Generate CSV Report
+                </button>
+                <button
+                    onClick={generatePDF}
+                    className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition"
+                >
+                    Generate PDF Report
+                </button>
+            </div>
+
+            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg">
+                <table className="min-w-full text-sm text-left">
+                    <thead className="bg-green-700 text-green-100 uppercase text-xs">
+                    <tr>
+                        {["User ID", "Name", "Email", "Contact Number", "Role", "Address", "Action"].map((header, index) => (
+                            <th key={index} className="px-4 py-3 whitespace-nowrap">{header}</th>
+                        ))}
+                    </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-green-700">
+                    {filteredUsers.map((user, idx) => (
+                        <tr key={user.id} className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
+                            <td className="px-4 py-3">{user.id}</td>
+                            <td className="px-4 py-3">{user.name}</td>
+                            <td className="px-4 py-3">{user.email}</td>
+                            <td className="px-4 py-3">{user.mobileNumber}</td>
+                            <td className="px-4 py-3">{user.role}</td>
+                            <td className="px-4 py-3">{user.address}</td>
+                            <td className="px-4 py-3">
+                                <div className="flex space-x-3">
+                                    <button className="text-blue-400 hover:text-blue-200 transition">
+                                        <Pencil size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(user.id)}
+                                        className="text-red-400 hover:text-red-200 transition"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}
+
+export default UserList;

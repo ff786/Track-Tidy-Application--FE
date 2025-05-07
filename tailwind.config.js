@@ -4,6 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        emerald: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          // ... other shades
+          800: '#065f46',
+          900: '#064e3b',
+          950: '#022c22',
+        },
         PrimaryColor: "#14b8a6",
         SecondaryColor: "#0d9488",
         DarkColor: "#0f766e",

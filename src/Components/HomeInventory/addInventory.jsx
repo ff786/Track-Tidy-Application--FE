@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';2
-import { Camera, Upload, X } from 'react-feather';
+import { Camera, Upload, X, Calendar, DollarSign, Package, Tag, Layers, FileText, Loader } from 'lucide-react';
 
-const addInventory = () => {
-
-  const navigate = useNavigate();
-
+const AddInventory = ({ setIsModalOpen }) => {
   const [formData, setFormData] = useState({
     productName: "",
     userId: "",
@@ -14,19 +9,16 @@ const addInventory = () => {
     quantity: "",
     purchaseDate: "",
     productValue: "",
-    warrantyDate: "",
+    WarrantyPeriod : "",
     productCategory: "",
     ProductImage: null,
-    Faulted: "",
   });
-
 
   const [imagePreview, setImagePreview] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-
-  // Get today's date in YYYY-MM-DD format for the date input min attribute
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const today = new Date().toISOString().split('T')[0];
 
   const handleChange = (e) => {
@@ -35,12 +27,13 @@ const addInventory = () => {
       const file = files[0];
       setFormData({ ...formData, [name]: file });
 
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
       };
-      reader.readAsDataURL(file);
+      if (file) {
+        reader.readAsDataURL(file);
+      }
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -68,351 +61,288 @@ const addInventory = () => {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    // Reset previous errors and messages
+    setError('');
+    setSuccessMessage('');
 
-    const errors = validate();
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
+    // Validate form
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("productName", formData.productName);
-    formDataToSend.append("userId", formData.userId);
-    formDataToSend.append("productId", formData.productId);
-    formDataToSend.append("quantity", formData.quantity);
-    formDataToSend.append("purchaseDate", formData.purchaseDate);
-    formDataToSend.append("productValue", formData.productValue);
-    formDataToSend.append("warrantyDate", formData.warrantyDate);
-    formDataToSend.append("productCategory", formData.productCategory);
-    formDataToSend.append("ProductImage", formData.ProductImage);
-    formDataToSend.append("Faulted", formData.Faulted);
+    setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/track-tidy/inventory/create", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
-        },
-        body: formDataToSend,
+      // Create FormData object for multipart/form-data submission (needed for file upload)
+      const submitData = new FormData();
+
+      // Append all form fields to FormData
+      Object.keys(formData).forEach(key => {
+        if (key === 'ProductImage' && formData[key]) {
+          submitData.append(key, formData[key]);
+        } else if (formData[key] !== null && formData[key] !== '') {
+          submitData.append(key, formData[key]);
+        }
       });
 
-      if (response.ok) {
-        alert("Details Added to DB");
-        navigate("/view-in");
-      } else {
-        alert("Failed to submit form");
+      // Make API request
+      const response = await fetch('http://localhost:8080/api/track-tidy/inventory/create', {
+        method: 'POST',
+        body: submitData,
+        // Don't set Content-Type header - fetch will automatically set it with boundary for FormData
+      });
+
+      // Handle response
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Error: ${response.status}`);
       }
-    } catch (error) {
-      alert("Failed to submit. Please try again later.");
+
+      const result = await response.json();
+      setSuccessMessage('Inventory item added successfully!');
+
+      // Close modal after short delay
+      setTimeout(() => {
+        setIsModalOpen(false);
+      }, 1500);
+
+    } catch (err) {
+      console.error('Error adding inventory:', err);
+      setError(err.message || 'Failed to add inventory item. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-
-
-
   return (
-    <div
-      className="w-full flex items-center justify-center p-4 min-h-screen"
-      style={{
-        background: 'linear-gradient(90deg, #e2e2e2, rgba(6, 147, 133, 0.51))',
-      }}
-    >
-      <motion.div
-        className="w-full max-w-2xl p-8 rounded-3xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.7)',
-          backdropFilter: 'blur(10px)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="text-center mb-8"
+      <div className="w-full flex items-center justify-center p-4 min-h-screen">
+        {/* Modal background */}
+        <div
+            className="fixed inset-0 bg-gray-800 bg-opacity-70 backdrop-blur-sm flex justify-center items-center"
+            onClick={() => setIsModalOpen(false)} // Close modal when clicking outside
         >
-          <h2 className="text-3xl font-bold mb-2">
-            Add New Inventory Item
-          </h2>
-          <p className="text-gray-600">
-            Fill in the details to add a new item to inventory
-          </p>
-        </motion.div>
-
-        {error && (
-          <motion.div
-            className="bg-red-100 bg-opacity-90 border border-red-400 text-red-700 px-4 py-2 rounded-lg mb-4"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+          {/* Modal content - Landscape orientation */}
+          <div
+              className="w-full max-w-5xl bg-gradient-to-br from-green-800 to-green-900 text-white rounded-3xl shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
           >
-            {error}
-          </motion.div>
-        )}
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="bg-green-700 p-6 border-b border-green-600">
+                <h2 className="text-3xl font-bold text-center">Add New Inventory Item</h2>
+                <p className="text-green-200 text-center mt-1">Complete the form to add a new item to your inventory</p>
+              </div>
 
-        <form id="inventoryForm" onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <input
-                type="text"
-                name="productName"
-                required
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-bleck placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                placeholder="Product Name"
-                value={formData.productName}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-            </motion.div>
+              {/* Error message */}
+              {error && (
+                  <div className="mx-6 mt-4 bg-red-500 bg-opacity-20 border border-red-400 text-red-100 px-4 py-2 rounded-lg">
+                    {error}
+                  </div>
+              )}
 
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <input
-                type="text"
-                name="userId"
-                required
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                placeholder="User ID"
-                value={formData.userId}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <input
-                type="text"
-                name="productId"
-                required
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                placeholder="Product ID"
-                value={formData.productId}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-              {errors.productId && <p className="text-red-500 text-xs mt-1">{errors.productId}</p>}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <input
-                type="number"
-                name="quantity"
-                required
-                min="1"
-                className="w-full px-4 py-2 rounded-full border border-gray-200 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
-                placeholder="Quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-              {errors.quantity && <p className="text-red-500 text-xs mt-1">{errors.quantity}</p>}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 }}
-            >
-              <label className="text-gray-500">Purchase Date</label>
-              <input
-                type="date"
-                name="purchaseDate"
-                required
-                min={today} // Prevent selecting past dates
-                className="w-full px-4 py-2 rounded-full border border-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent"
-                placeholder="Purchase Date"
-                value={formData.purchaseDate}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <input
-                type="number"
-                name="productValue"
-                required
-                min="1"
-                className="mt-4 w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                placeholder="Product Value"
-                value={formData.productValue}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-              {errors.productValue && <p className="text-red-500 text-xs mt-1">{errors.productValue}</p>}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.9 }}
-            >
-            <label className="text-gray-500">Warranty Date</label>
-              <input
-                type="date"
-                name="warrantyDate"
-                required
-                className="w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                placeholder="Warranty Date"
-                value={formData.warrantyDate}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.0 }}
-            >
-              <select
-                name="productCategory"
-                required
-                className="mt-4 w-full px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                value={formData.productCategory}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              >
-                <option value="" disabled hidden>Select Category</option>
-                <option value="Electronics" className="text-gray-700">Electronics</option>
-                <option value="Furniture" className="text-gray-700">Furniture</option>
-                <option value="Office Supplies" className="text-gray-700">Home Appliance</option>
-              </select>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.2 }}
-            >
-              <select
-                name="Faulted"
-                required
-                className="w-1/2 px-4 py-2 rounded-full bg-opacity-20 border border-white border-opacity-30 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                value={formData.Faulted}
-                onChange={handleChange}
-                style={{ backdropFilter: 'blur(5px)' }}
-              >
-                 <option value=""  disabled hidden>Working Condition</option>
-                <option value="No" className="text-gray-700">Not Faulted </option>
-                <option value="Yes" className="text-gray-700">Faulted</option>
-              </select>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.1 }}
-              className="md:col-span-2"
-            >
-              <label className="block mb-2 text-gray-600">Product Image</label>
-              {!imagePreview ? (
-                <div className="flex items-center justify-center w-full">
-                  <label htmlFor="ProductImage" className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-opacity-20 hover:bg-opacity-30 transition-all">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Camera className="w-8 h-8 mb-1" style={{ color: '#0d9488' }} />
-                      <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-                      <p className="text-xs text-gray-500">PNG, JPG or WEBP (max. 2MB)</p>
+              <div className="p-6 flex-1 overflow-auto">
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-5">
+                    {/* Product Name */}
+                    <div className="relative">
+                      <label htmlFor="productName" className="block text-green-200 mb-2 font-medium">
+                        <Package size={16} className="inline mr-2" /> Product Name
+                      </label>
+                      <input
+                          type="text"
+                          name="productName"
+                          id="productName"
+                          value={formData.productName}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                      {errors.productName && <p className="text-red-300 text-sm mt-1">{errors.productName}</p>}
                     </div>
-                    <input
-                      type="file"
-                      id="ProductImage"
-                      name="ProductImage"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleChange}
-                    />
-                  </label>
-                </div>
-              ) : (
-                <div className="relative">
-                  <div className="rounded-lg overflow-hidden border border-white border-opacity-30 bg-opacity-10">
-                    <div className="flex items-center justify-between px-3 py-2 bg-opacity-20">
-                      <div className="flex items-center">
-                        <Upload size={16} className="text-white mr-2" />
-                        <span className="text-sm text-white truncate max-w-xs">
-                          {formData.ProductImage?.name || "Product Image"}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={removeImage}
-                        className="text-red-500 hover:text-red-300 focus:outline-none transition-colors"
-                      >
-                        <X size={28} />
-                      </button>
+
+                    {/* Product ID */}
+                    <div className="relative">
+                      <label htmlFor="productId" className="block text-green-200 mb-2 font-medium">
+                        <Tag size={16} className="inline mr-2" /> Product ID
+                      </label>
+                      <input
+                          type="text"
+                          name="productId"
+                          id="productId"
+                          value={formData.productId}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                      {errors.productId && <p className="text-red-300 text-sm mt-1">{errors.productId}</p>}
                     </div>
-                    <div className="flex justify-center p-2 bg-opacity-10">
-                      <img
-                        src={imagePreview}
-                        alt="Product preview"
-                        className="h-40 object-contain"
+
+                    {/* Quantity */}
+                    <div className="relative">
+                      <label htmlFor="quantity" className="block text-green-200 mb-2 font-medium">
+                        <Layers size={16} className="inline mr-2" /> Quantity
+                      </label>
+                      <input
+                          type="number"
+                          name="quantity"
+                          id="quantity"
+                          value={formData.quantity}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                      {errors.quantity && <p className="text-red-300 text-sm mt-1">{errors.quantity}</p>}
+                    </div>
+
+                    {/* Purchase Date */}
+                    <div className="relative">
+                      <label htmlFor="purchaseDate" className="block text-green-200 mb-2 font-medium">
+                        <Calendar size={16} className="inline mr-2" /> Purchase Date
+                      </label>
+                      <input
+                          type="date"
+                          name="purchaseDate"
+                          id="purchaseDate"
+                          value={formData.purchaseDate}
+                          onChange={handleChange}
+                          max={today}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
                       />
                     </div>
                   </div>
-                </div>
-              )}
-              {errors.ProductImage && <p className="text-red-500 text-xs mt-1">{errors.ProductImage}</p>}
-            </motion.div>
-          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3 }}
-            className="mt-6 flex justify-between"
-          >
-            <motion.button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-6 py-2 rounded-full bg-gray-500 text-white font-semibold hover:bg-gray-600 transition-all"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Cancel
-            </motion.button>
-            <motion.button
-              type="submit"
-              className="px-6 py-2 rounded-full font-semibold transition-all"
-              style={{
-                background: 'linear-gradient(to right, #5eeadb, #99f6ec)',
-                boxShadow: '0 4px 10px rgba(93, 234, 219, 0.3)'
-              }}
-              whileHover={{ scale: 1.02, boxShadow: '0 6px 15px rgba(93, 234, 219, 0.4)' }}
-              whileTap={{ scale: 0.98 }}
-              disabled={loading}
-            >
-              {loading ? 'Adding Item...' : 'Add Inventory Item'}
-            </motion.button>
-          </motion.div>
-        </form>
-      </motion.div>
-    </div>
+                  {/* Right Column */}
+                  <div className="space-y-5">
+                    {/* Product Value */}
+                    <div className="relative">
+                      <label htmlFor="productValue" className="block text-green-200 mb-2 font-medium">
+                        <DollarSign size={16} className="inline mr-2" /> Product Value
+                      </label>
+                      <input
+                          type="number"
+                          name="productValue"
+                          id="productValue"
+                          value={formData.productValue}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                      {errors.productValue && <p className="text-red-300 text-sm mt-1">{errors.productValue}</p>}
+                    </div>
+
+                    {/* Warranty Period */}
+                    <div className="relative">
+                      <label htmlFor="WarrantyPeriod" className="block text-green-200 mb-2 font-medium">
+                        <FileText size={16} className="inline mr-2" /> Warranty Period
+                      </label>
+                      <input
+                          type="number"
+                          name="WarrantyPeriod"
+                          id="WarrantyPeriod"
+                          placeholder="In Months"
+                          value={formData.WarrantyPeriod}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                    </div>
+
+                    {/* Product Category */}
+                    <div className="relative">
+                      <label htmlFor="productCategory" className="block text-green-200 mb-2 font-medium">
+                        <Tag size={16} className="inline mr-2" /> Product Category
+                      </label>
+                      <input
+                          type="text"
+                          name="productCategory"
+                          id="productCategory"
+                          value={formData.productCategory}
+                          onChange={handleChange}
+                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
+                          required
+                      />
+                    </div>
+
+                    {/* Image Upload */}
+                    <div className="relative">
+                      <label className="block text-green-200 mb-2 font-medium">
+                        <Camera size={16} className="inline mr-2" /> Product Image
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <label className="flex-1 flex items-center justify-center p-3 border-2 border-dashed border-green-500 rounded-lg bg-green-800 bg-opacity-30 hover:bg-opacity-50 cursor-pointer">
+                          <Upload size={20} className="mr-2" />
+                          <span>Choose File</span>
+                          <input
+                              type="file"
+                              name="ProductImage"
+                              accept="image/*"
+                              onChange={handleChange}
+                              className="hidden"
+                              required
+                          />
+                        </label>
+
+                        {imagePreview ? (
+                            <div className="relative h-16 w-16 rounded-lg overflow-hidden">
+                              <img src="/api/placeholder/64/64" alt="Preview" className="h-full w-full object-cover" />
+                              <button
+                                  type="button"
+                                  onClick={removeImage}
+                                  className="absolute top-0 right-0 bg-red-500 rounded-full p-1 shadow-lg"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                        ) : (
+                            <div className="h-16 w-16 rounded-lg bg-green-700 flex items-center justify-center">
+                              <Camera size={24} />
+                            </div>
+                        )}
+                      </div>
+                      {errors.ProductImage && <p className="text-red-300 text-sm mt-1">{errors.ProductImage}</p>}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex justify-center space-x-4 mt-8">
+                  <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                      className={`${
+                          isLoading ? 'bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'
+                      } text-white font-medium px-8 py-3 rounded-full shadow-lg flex items-center justify-center transition-colors duration-200`}
+                  >
+                    {isLoading ? (
+                        <>
+                          <Loader size={18} className="animate-spin mr-2" />
+                          Submitting...
+                        </>
+                    ) : (
+                        'Submit'
+                    )}
+                  </button>
+
+                  <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="bg-gray-600 text-white font-medium px-8 py-3 rounded-full shadow-lg"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
   );
 };
 
-export default addInventory;
+export default AddInventory;

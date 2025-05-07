@@ -183,7 +183,7 @@ const ServiceInput = () => {
                                         </option>
                                         <option value="HomeCleaning">Home Cleaning</option>
                                         <option value="SofaCleaning">Sofa Cleaning</option>
-                                        <option value="CarpetCleaning">Carpet Cleaning</option>
+                                        <option value="CarpetCleaning">Carpet Cleaning </option>
                                         <option value="MattressCleaning">Mattress Cleaning</option>
                                         <option value="AirConditioning">Air Conditioning</option>
                                         <option value="WashingMachine">Washing Machine Repairing</option>

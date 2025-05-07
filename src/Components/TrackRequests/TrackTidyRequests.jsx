@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TopHeader from "../common/TopHeader/TopHeader.jsx";
 import { motion } from "framer-motion"; // Assuming you have framer-motion installed
 
@@ -23,6 +24,13 @@ const TrackTidyRequests = () => {
     const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
     const [showModal, setShowModal] = useState(false);
     const [requestToCancel, setRequestToCancel] = useState(null);
+    const [open, setOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleNavigate = (path) => {
+        navigate(path);
+        setOpen(false); // Close dropdown after navigation
+    };
 
     // Handle responsive layout
     useEffect(() => {
@@ -260,13 +268,59 @@ const TrackTidyRequests = () => {
                                     activeTab === 'inventory' ? 'Inventory Requests' :
                                         activeTab === 'service' ? 'Service Requests' : 'Grocery Requests'}
                             </h1>
-                            <div className="mt-2 md:mt-0">
-                                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            <div className="relative mt-2 md:mt-0">
+                                <button
+                                    onClick={() => setOpen(!open)}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg shadow transition-colors flex items-center"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5 mr-1"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                        />
                                     </svg>
                                     New Request
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4 ml-2"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
                                 </button>
+
+                                {open && (
+                                    <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg z-20">
+                                        <button
+                                            onClick={() => handleNavigate('/inventory')}
+                                            className="w-full text-left px-4 py-2 hover:bg-green-100 text-gray-800"
+                                        >
+                                            Inventory
+                                        </button>
+                                        <button
+                                            onClick={() => handleNavigate('/user-services')}
+                                            className="w-full text-left px-4 py-2 hover:bg-green-100 text-gray-800"
+                                        >
+                                            Services
+                                        </button>
+                                        <button
+                                            onClick={() => handleNavigate('/grocery-home')}
+                                            className="w-full text-left px-4 py-2 hover:bg-green-100 text-gray-800"
+                                        >
+                                            Grocery
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

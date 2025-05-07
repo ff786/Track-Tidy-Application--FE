@@ -4,6 +4,7 @@ import TopHeader from "../common/TopHeader/TopHeader.jsx";
 import Footer from "../common/Footer/Footer.jsx";
 import ChatBot from "react-chatbotify";
 import TrackTidyChatbot from "../TrackTidyAI/TrackTidyAI.jsx";
+import {App} from "antd";
 
 const TrackPackages = () => {
 
@@ -14,6 +15,78 @@ const TrackPackages = () => {
     // Handle plan selection
     const selectPlan = (planName) => {
         setSelectedPlan(planName);
+    };
+
+    /*const handleSubscribe = async () => {
+
+        try {
+            const response = await fetch("http://localhost:8080/api/track-tidy/package/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                },
+                body: JSON.stringify({})
+            });
+
+            if (!response.ok) {
+                throw new Error("Subscription failed");
+            }
+        } catch (error) {
+            setErrors({ submit: error.message });
+        }
+    };*/
+
+    const handleSubscribe = async () => {
+        let packageData = {
+            packageType: selectedPlan,
+            groceryValue: 0,
+            serviceValue: 0,
+            inventoryValue: 0,
+            packageValue: 0,
+            subscribedDate: new Date().toISOString().split("T")[0], // yyyy-mm-dd
+        };
+        // Define values based on selected plan
+        switch (selectedPlan) {
+            case "Basic":
+                packageData.groceryValue = 15000;
+                packageData.serviceValue = 10000;
+                packageData.inventoryValue = 5000;
+                break;
+            case "Ultra":
+                packageData.groceryValue = 30000;
+                packageData.serviceValue = 20000;
+                packageData.inventoryValue = 20000;
+                break;
+            case "Premium":
+                packageData.groceryValue = 50000;
+                packageData.serviceValue = 35000;
+                packageData.inventoryValue = 25000;
+                break;
+            default:
+                return alert("Invalid package selected.");
+        }
+        packageData.packageValue =
+            packageData.groceryValue +
+            packageData.serviceValue +
+            packageData.inventoryValue;
+        // Build URL-encoded params
+        const queryParams = new URLSearchParams(packageData).toString();
+        try {
+            const response = await fetch(
+                `http://localhost:8080/api/track-tidy/package/create?${queryParams}`,
+                {
+                    method: "POST",
+                }
+            );
+            if (!response.ok) throw new Error("Request failed");
+            const result = await response.json();
+            alert("Subscription successful!");
+            console.log(result);
+        } catch (error) {
+            alert("Subscription failed");
+            console.error(error);
+        }
     };
 
     // Close modal when clicking outside
@@ -41,7 +114,8 @@ const TrackPackages = () => {
         };
     }, [showChatbot]);
 
-    return (<>
+    return (
+        <>
             <TopHeader/>
             <div className="min-h-screen bg-gradient-to-b from-green-50 to-gray-100">
                 {/* Header */}
@@ -309,8 +383,9 @@ const TrackPackages = () => {
                                     Change Selection
                                 </button>
                                 <button
+                                    onClick={handleSubscribe}
                                     className="py-2 px-4 bg-green-800 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                                    Proceed to Payment
+                                    Subscribe To Package
                                 </button>
                             </div>
                         </div>)}
@@ -377,12 +452,14 @@ const TrackPackages = () => {
                             </button>
                             <TrackTidyChatbot/>
                         </div>
-                    </div>)}
-
+                    </div>
+                )}
                 {/* Footer */}
                 <Footer/>
             </div>
-        </>);
-}
+
+        </>
+    );
+};
 
 export default TrackPackages;
