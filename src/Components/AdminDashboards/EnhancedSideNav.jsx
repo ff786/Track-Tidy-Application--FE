@@ -8,6 +8,7 @@ import {
     Settings, ShieldCheck, HelpCircle, Lock, Unlock, ChevronRight, Box
 } from 'lucide-react';
 import AdminViewGrocery from "./GroceryAdmin/GroceryAdmin.jsx";
+import PackagesAdmin from "./PackagesAdmin/PackagesAdmin.jsx";
 
 // Demo component to showcase the sidebar
 const SideNavPreview = () => {
@@ -33,8 +34,8 @@ const SideNavPreview = () => {
             section: 'Admin',
             links: [
                 { to: '/settings', icon: <Settings size={20} />, label: 'Settings' },
-                { to: '/privacy', icon: <ShieldCheck size={20} />, label: 'Privacy Policy' },
-                { to: '/about', icon: <HelpCircle size={20} />, label: 'About Us' }
+                { to: '/privacy-policy', icon: <ShieldCheck size={20} />, label: 'Privacy Policy' },
+                { to: '/about-us', icon: <HelpCircle size={20} />, label: 'About Us' }
             ]
         }
     ];
@@ -82,6 +83,8 @@ const SideNavPreview = () => {
                         return <UserList />;
                         case '/view-grocery':
                             return <AdminViewGrocery />;
+                            case '/view-packages':
+                                return <PackagesAdmin />;
             default:
                 return (
                     <>
@@ -300,7 +303,7 @@ const SideNavPreview = () => {
             backgroundColor: '#f3f4f6',
             borderRadius: '5px',
             marginBottom: '0.5rem',
-            height: 'max-content',
+            height: 'max-screen',
             overflowY: 'auto', // Add scrolling if content is too long
         }
     };

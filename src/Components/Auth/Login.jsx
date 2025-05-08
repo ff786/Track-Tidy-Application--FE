@@ -2,10 +2,18 @@ import React from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../../service/AuthContext.jsx";
 
-const Login = () => {
+const Login = (userData) => {
   const navigate = useNavigate();
+  const { login } = useAuth();
+
+  if (userData?.email) {
+    setUser(userData);
+    localStorage.setItem('track-tidy_user', JSON.stringify(userData));
+  } else {
+    console.warn('Invalid login data:', userData);
+  }
 
   const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email format").required("Email is required"),
@@ -21,35 +29,46 @@ const Login = () => {
     onSubmit: async (values) => {
       console.log("Login Data:", values);
 
+      // Admin check before hitting API
+      const adminEmail = "admin@example.com";
+      const adminPassword = "adminPassword123";
+
+      if (values.email === adminEmail && values.password === adminPassword) {
+        alert("Admin Login Successful! Navigating to Admin Dashboard.");
+        sessionStorage.setItem('isAdmin', 'true');
+        navigate("/admin/bgi/dashboard");
+        return;
+      }
+
+      sessionStorage.setItem('isAdmin', 'false');
+
       try {
-        // Sending the login request to backend
         const response = await fetch('http://localhost:8080/api/track-tidy/user/request/token', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
 
-        // Admin credentials check before sending the request
-        const adminEmail = "admin@example.com"; // Replace with the actual admin email
-        const adminPassword = "adminPassword123"; // Replace with the actual admin password
-
-        // Check if it's the admin login
-        if (values.email === adminEmail && values.password === adminPassword) {
-          alert("Admin Login Successful! Navigating to Admin Dashboard.");
-          sessionStorage.setItem('isAdmin', 'true'); // ✅ Set admin flag
-          navigate("/user-list"); // Navigate to admin dashboard
-          return; // Stop further processing if it's admin login
+        if (!response.ok) {
+          throw new Error("Login failed");
         }
-        sessionStorage.setItem('isAdmin', 'False'); // ✅ Set admin flag
+
         const data = await response.json();
-        console.log("Login Response:",data);
-        alert("Login Successful!");
+        console.log("Login Response:", data);
+
+        // Save token & user to session/local storage if needed
         sessionStorage.setItem('access_token', data.access_token);
+
+        // ⚡ Login via AuthContext (set global user)
+        login({
+          email: data.userDetails.email,
+          name: data.userDetails.firstName,
+        });
+
+        alert("Login Successful!");
         navigate("/dashboard");
       } catch (error) {
-        console.error("Login failed:", error.response?.data || error.message);
+        console.error("Login failed:", error.message);
         alert("Login Failed! Please check your credentials.");
       }
     },

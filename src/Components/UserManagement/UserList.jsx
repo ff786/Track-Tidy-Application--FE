@@ -38,18 +38,17 @@ function UserList() {
     };
 
     const filteredUsers = users.filter(user =>
-        user.name?.toLowerCase().includes(search.toLowerCase()) ||
+        user.firstName?.toLowerCase().includes(search.toLowerCase()) ||
         user.email?.toLowerCase().includes(search.toLowerCase())
     );
 
     const generateCSV = () => {
         const csvData = filteredUsers.map(user => ({
-            "User ID": user.id,
-            "Name": user.name,
+            "First Name": user.firstName,
+            "Last Name": user.lastName,
             "Email": user.email,
             "Contact Number": user.mobileNumber,
             "Role": user.role,
-            "Address": user.address,
         }));
 
         const csv = Papa.unparse(csvData);
@@ -69,16 +68,15 @@ function UserList() {
         doc.text("User List Report", 20, 20);
 
         const tableColumn = [
-            "User ID", "Name", "Email", "Contact Number", "Role", "Address"
+            "First Name", "Last Name", "Email", "Contact Number", "Role"
         ];
 
         const tableRows = filteredUsers.map(user => [
-            user.id,
-            user.name,
+            user.firstName,
+            user.lastName,
             user.email,
             user.mobileNumber,
             user.role,
-            user.address
         ]);
 
         try {
@@ -97,7 +95,7 @@ function UserList() {
     };
 
     return (
-        <div className="p-6 bg-green-800 min-h-screen text-green-50">
+        <div className="p-6 bg-green-800 text-green-50 rounded-xl pb-6 max-h-fit">
             <h2 className="text-2xl font-semibold mb-6">User List</h2>
 
             {/* Search Bar */}
@@ -127,11 +125,11 @@ function UserList() {
                 </button>
             </div>
 
-            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg">
+            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg max-h-fit overflow-y-scroll">
                 <table className="min-w-full text-sm text-left">
-                    <thead className="bg-green-700 text-green-100 uppercase text-xs">
+                    <thead className="bg-green-700 text-green-100 uppercase text-xs position-relative">
                     <tr>
-                        {["User ID", "Name", "Email", "Contact Number", "Role", "Address", "Action"].map((header, index) => (
+                        {["First Name", "Last Name", "Email", "Contact Number", "Role", "Action"].map((header, index) => (
                             <th key={index} className="px-4 py-3 whitespace-nowrap">{header}</th>
                         ))}
                     </tr>
@@ -140,12 +138,11 @@ function UserList() {
                     <tbody className="divide-y divide-green-700">
                     {filteredUsers.map((user, idx) => (
                         <tr key={user.id} className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
-                            <td className="px-4 py-3">{user.id}</td>
-                            <td className="px-4 py-3">{user.name}</td>
+                            <td className="px-4 py-3">{user.firstName}</td>
+                            <td className="px-4 py-3">{user.lastName}</td>
                             <td className="px-4 py-3">{user.email}</td>
                             <td className="px-4 py-3">{user.mobileNumber}</td>
                             <td className="px-4 py-3">{user.role}</td>
-                            <td className="px-4 py-3">{user.address}</td>
                             <td className="px-4 py-3">
                                 <div className="flex space-x-3">
                                     <button className="text-blue-400 hover:text-blue-200 transition">

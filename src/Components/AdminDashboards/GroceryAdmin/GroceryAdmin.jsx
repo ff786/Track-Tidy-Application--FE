@@ -175,7 +175,7 @@ const AdminViewGrocery = () => {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg">
+            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg max-h-screen overflow-y-scroll">
                 <table className="min-w-full text-sm text-left">
                     <thead className="bg-green-700 text-green-100 uppercase text-xs">
                     <tr>

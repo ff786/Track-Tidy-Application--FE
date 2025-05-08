@@ -5,7 +5,6 @@ import Plumbing from "../../assets/plumbingsvrc.png";
 const ServiceInput = () => {
     const [serviceDesc, setServiceDesc] = useState("");
     const [serviceType, setServiceType] = useState("");
-    const [memberId, setMemberId] = useState("");
     const [memberName, setName] = useState("");
     const [address, setAddress] = useState("");
     const [email, setEmail] = useState("");
@@ -47,10 +46,6 @@ const ServiceInput = () => {
     const validateStep2 = () => {
         const newErrors = {};
 
-        if (!memberId.trim()) {
-            newErrors.memberId = "Member ID is required";
-        }
-
         if (!memberName.trim()) {
             newErrors.memberName = "Name is required";
         }
@@ -86,7 +81,6 @@ const ServiceInput = () => {
 
         const formData = new URLSearchParams();
         formData.append("jobDescription", serviceDesc);
-        formData.append("memberId", memberId);
         formData.append("memberName", memberName);
         formData.append("address", address);
         formData.append("email", email);
@@ -113,7 +107,6 @@ const ServiceInput = () => {
             // Reset form
             setServiceDesc("");
             setServiceType("");
-            setMemberId("");
             setName("");
             setAddress("");
             setEmail("");
@@ -224,19 +217,6 @@ const ServiceInput = () => {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div>
-                                    <input
-                                        className={`w-full px-4 py-2 border ${errors.memberId ? 'border-red-500' : 'border-gray-300'} rounded shadow focus:outline-none focus:ring focus:border-green-100 text-gray-700`}
-                                        type="text"
-                                        placeholder="Member ID *"
-                                        value={memberId}
-                                        onChange={(e) => setMemberId(e.target.value)}
-                                    />
-                                    {errors.memberId && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.memberId}</p>
-                                    )}
-                                </div>
-
                                 <div>
                                     <input
                                         className={`w-full px-4 py-2 border ${errors.memberName ? 'border-red-500' : 'border-gray-300'} rounded shadow focus:outline-none focus:ring focus:border-green-100 text-gray-700`}

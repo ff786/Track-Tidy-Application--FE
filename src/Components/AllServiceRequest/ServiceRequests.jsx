@@ -86,7 +86,7 @@ function ServiceRequest() {
             "Service Description": item.serviceDesc,
             "Member Name": item.memberName,
             "Email": item.email,
-            "Contact Number": item.contactNumber,
+            "Contact Number": item.phoneNumber,
             "Address": item.address,
             "Referral Code": item.referralCode,
         }));
@@ -118,7 +118,7 @@ function ServiceRequest() {
         ];
         const tableRows = filteredService.map(item => [
             item.memberId, item.serviceType, item.serviceDesc, item.memberName,
-            item.email, item.contactNumber, item.address, item.referralCode
+            item.email, item.phoneNumber, item.address, item.referralCode
         ]);
 
         try {
@@ -165,7 +165,7 @@ function ServiceRequest() {
                 </button>
             </div>
 
-            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg">
+            <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg max-h-screen overflow-y-scroll">
                 <table className="min-w-full text-sm text-left">
                     <thead className="bg-green-700 text-green-100 uppercase text-xs">
                     <tr>
@@ -185,7 +185,7 @@ function ServiceRequest() {
                                     <td className="px-4 py-3"><input value={editedData.serviceDesc} onChange={(e) => handleInputChange(e, 'serviceDesc')} className="px-2 py-1 rounded text-green-900" /></td>
                                     <td className="px-4 py-3"><input value={editedData.memberName} onChange={(e) => handleInputChange(e, 'memberName')} className="px-2 py-1 rounded text-green-900" /></td>
                                     <td className="px-4 py-3"><input value={editedData.email} onChange={(e) => handleInputChange(e, 'email')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.contactNumber} onChange={(e) => handleInputChange(e, 'contactNumber')} className="px-2 py-1 rounded text-green-900" /></td>
+                                    <td className="px-4 py-3"><input value={editedData.phoneNumber} onChange={(e) => handleInputChange(e, 'phoneNumber')} className="px-2 py-1 rounded text-green-900" /></td>
                                     <td className="px-4 py-3"><input value={editedData.address} onChange={(e) => handleInputChange(e, 'address')} className="px-2 py-1 rounded text-green-900" /></td>
                                     <td className="px-4 py-3"><input value={editedData.referralCode} onChange={(e) => handleInputChange(e, 'referralCode')} className="px-2 py-1 rounded text-green-900" /></td>
                                     <td className="px-4 py-3">
@@ -206,7 +206,7 @@ function ServiceRequest() {
                                     <td className="px-4 py-3">{item.serviceDesc}</td>
                                     <td className="px-4 py-3">{item.memberName}</td>
                                     <td className="px-4 py-3">{item.email}</td>
-                                    <td className="px-4 py-3">{item.contactNumber}</td>
+                                    <td className="px-4 py-3">{item.phoneNumber}</td>
                                     <td className="px-4 py-3">{item.address}</td>
                                     <td className="px-4 py-3">{item.referralCode}</td>
                                     <td className="px-4 py-3">

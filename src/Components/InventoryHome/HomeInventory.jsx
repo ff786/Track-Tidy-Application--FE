@@ -301,10 +301,10 @@ const HomeInventory = () => {
 
                 {/* Weekly Bestsellers */}
                 <div className="mb-12">
-                    <h2 className="text-4xl text-center font-bold mb-4 text-gray-900">Weekly bestsellers</h2>
+                    <h2 className="text-4xl text-center font-bold mb-4 text-gray-900">Our Products</h2>
 
                     <div className="flex border-b border-gray-200 mb-6">
-                        {['All', 'Kitchen', 'Bathroom', 'Bedroom', 'Living Room'].map((tab) => (
+                        {['All', 'Kitchen', 'Bathroom', 'Bedroom', 'Living Room', 'Laundry', 'Smart Home', 'Home Office', 'Outdoor'].map((tab) => (
                             <div
                                 key={tab}
                                 className={`cursor-pointer py-2 px-4 font-medium transition-colors duration-300 ${
@@ -367,7 +367,7 @@ const HomeInventory = () => {
                     </div>
                 </div>
 
-                {/* Shopping by Brands */}
+                {/* Shopping by Brands
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Shopping by brands</h2>
                 <p className="text-gray-500 mb-6">Discover top products from your favorite brands</p>
 
@@ -386,7 +386,7 @@ const HomeInventory = () => {
                             />
                         </div>
                     ))}
-                </div>
+                </div>*/}
             </motion.div>
             <Footer />
         </>

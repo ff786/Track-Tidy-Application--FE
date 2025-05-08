@@ -28,6 +28,7 @@ import TermsAndConditions from "./Components/Terms&Conditions/Terms.jsx";
 import DashboardOverview from "./Components/AdminDashboards/DashBoardAdmin/dashboardAdmin.jsx";
 import AdminViewGrocery from "./Components/AdminDashboards/GroceryAdmin/GroceryAdmin.jsx";
 import PackagesAdmin from "./Components/AdminDashboards/PackagesAdmin/PackagesAdmin.jsx";
+import AccountManagement from "./Components/UserAccountManagent/AccountManagement.jsx";
 
 
 
@@ -115,6 +116,10 @@ const router = createBrowserRouter([
     {
         path: '/view-packages',
         element: <div> <PackagesAdmin /> </div>
+    },
+    {
+        path: '/account',
+        element: <div> <AccountManagement /> </div>
     },
 ])
 

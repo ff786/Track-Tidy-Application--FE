@@ -22,20 +22,19 @@ function TrackTidyChatbot() {
         setIsTyping(true);
 
         try {
-            const response = await axios.post('http://localhost:8080/api/chat', {
-                model: 'gpt-3.5-turbo',
-                messages: [...messages, userMessage],
-                max_tokens: 50,
+            const response = await axios.post('http://localhost:8080/api/track-tidy/track-ai/generate-package', {
+                codeSnippet: input
             });
 
-            const assistantMessage = response.data.choices[0].message.content;
+            const assistantMessage = response.data; // Just take the whole string
             setMessages((prev) => [...prev, { role: 'assistant', content: assistantMessage }]);
         } catch (error) {
-            console.error("Error:", error); // Log the error to help with debugging
+            console.error("Error:", error);
             setMessages((prev) => [...prev, { role: 'assistant', content: '⚠️ Oops! Something went wrong. Please try again.' }]);
         } finally {
             setIsTyping(false);
         }
+
     };
 
     const handleKeyDown = (e) => {

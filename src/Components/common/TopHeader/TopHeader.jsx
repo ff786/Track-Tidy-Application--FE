@@ -2,17 +2,55 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Home, Settings, FileText, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../../service/AuthContext.jsx';
 
-function TopHeader({ user }) {
+function TopHeader() {
+    const { user, logout } = useAuth();
     const [activeLink, setActiveLink] = useState('/');
     const [isOpen, setIsOpen] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [packageType, setPackageType] = useState('Loading...');
+    const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const location = useLocation();
-    const dropdownRef = useRef(null);
 
     useEffect(() => {
         setActiveLink(location.pathname);
     }, [location]);
+
+    // Fetch user info
+    useEffect(() => {
+        if (user?.email) {
+            fetch('http://localhost:8080/api/track-tidy/admin/getAll')
+                .then((res) => res.json())
+                .then((data) => {
+
+                    const matchedUser = data.find((u) => u.email === user.email);
+                    if (matchedUser) {
+                        setUserInfo(matchedUser);
+                    }
+                })
+                .catch((err) => console.error('Failed to fetch user info', err));
+        }
+    }, [user]);//This is done finallyyyyyyyyy
+
+    // Fetch package info for this user
+    useEffect(() => {
+        if (user?.email) {
+            fetch('http://localhost:8080/api/track-tidy/package/getAll')
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    const matchedPackage = data.find((pkg) => pkg.userId === user.email);
+                    if (matchedPackage) {
+                        setPackageType(matchedPackage.packageType);
+                    } else {
+                        setPackageType('No Package');
+                    }
+                })
+                .catch((err) => console.error('Failed to fetch package info', err));
+        }
+    }, [user]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -24,14 +62,15 @@ function TopHeader({ user }) {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLinkClick = (href) => {
-        setActiveLink(href);
-        navigate(href);
+    const handleLinkClick = (path) => {
+        setActiveLink(path);
+        navigate(path);
     };
 
     const toggleDropdown = () => setIsOpen((prev) => !prev);
 
     const handleLogout = () => {
+        logout();
         navigate('/');
     };
 
@@ -44,12 +83,8 @@ function TopHeader({ user }) {
         >
             <div className="max-w-auto mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo & Navigation */}
                     <div className="flex items-center gap-6">
-                        <div
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => handleLinkClick('/dashboard')}
-                        >
+                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleLinkClick('/dashboard')}>
                             <Home className="h-6 w-6 text-green-900 hover:text-green-600 transition" />
                             <span className="text-xl font-bold text-gray-800">TrackTidy</span>
                         </div>
@@ -81,7 +116,7 @@ function TopHeader({ user }) {
                         </div>
                     </div>
 
-                    {/* User Avatar & Dropdown */}
+                    {/* Avatar + Dropdown */}
                     <div className="relative" ref={dropdownRef}>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -89,7 +124,7 @@ function TopHeader({ user }) {
                             onClick={toggleDropdown}
                             className="w-10 h-10 rounded-full bg-green-800 text-white flex items-center justify-center hover:bg-green-700 text-lg font-semibold"
                         >
-                            {user?.name?.charAt(0).toUpperCase() || "U"}
+                            {userInfo?.firstName?.charAt(0).toUpperCase() || 'U'}
                         </motion.button>
 
                         <AnimatePresence>
@@ -101,16 +136,19 @@ function TopHeader({ user }) {
                                     transition={{ duration: 0.2 }}
                                     className="absolute right-0 mt-2 w-72 bg-green-100 bg-opacity-80 backdrop-blur-sm shadow-lg rounded-xl z-50 border border-gray-900"
                                 >
-                                    {/* Header */}
-                                    <div className="flex flex-row justify-between p-4 bg-green-50 rounded-lg border-b-2 border-gray-900">
-                                        <p className="text-sm font-medium text-gray-900">{user?.name || 'User Name'}</p>
-                                        <p className="text-xs text-gray-900">(PackageType)</p>
+                                    <div className="flex flex-col gap-2 p-4 bg-green-50 rounded-xl border-b-2 border-gray-900">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-base font-semibold text-gray-900">
+                                                {userInfo ? `${userInfo.firstName} ${userInfo.lastName}` : 'User'}
+                                            </p>
+                                            <span className="text-sm font-medium text-green-800 bg-green-200 px-3 py-1 rounded-full">
+                                                {packageType}
+                                            </span>
+                                        </div>
                                     </div>
-
-                                    {/* Menu Items */}
                                     <div className="py-2">
                                         <button
-                                            onClick={() => navigate("/account")}
+                                            onClick={() => navigate('/account')}
                                             className="w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-100 transition"
                                         >
                                             <Settings className="w-5 h-5 text-gray-900" />
@@ -118,7 +156,7 @@ function TopHeader({ user }) {
                                         </button>
 
                                         <button
-                                            onClick={() => navigate("/requests")}
+                                            onClick={() => navigate('/requests')}
                                             className="w-full px-4 py-2 text-left flex items-center gap-3 hover:bg-gray-100 transition"
                                         >
                                             <FileText className="w-5 h-5 text-gray-600" />

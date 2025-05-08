@@ -77,6 +77,9 @@ const TrackPackages = () => {
                 `http://localhost:8080/api/track-tidy/package/create?${queryParams}`,
                 {
                     method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`,
+                    },
                 }
             );
             if (!response.ok) throw new Error("Request failed");

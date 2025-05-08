@@ -198,7 +198,7 @@ const AddInventory = ({ setIsModalOpen }) => {
                       {errors.quantity && <p className="text-red-300 text-sm mt-1">{errors.quantity}</p>}
                     </div>
 
-                    {/* Purchase Date */}
+                    {/* Purchase Date
                     <div className="relative">
                       <label htmlFor="purchaseDate" className="block text-green-200 mb-2 font-medium">
                         <Calendar size={16} className="inline mr-2" /> Purchase Date
@@ -213,7 +213,7 @@ const AddInventory = ({ setIsModalOpen }) => {
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
                       />
-                    </div>
+                    </div>*/}
                   </div>
 
                   {/* Right Column */}
@@ -227,6 +227,7 @@ const AddInventory = ({ setIsModalOpen }) => {
                           type="number"
                           name="productValue"
                           id="productValue"
+                          placeholder="Product Value Rs"
                           value={formData.productValue}
                           onChange={handleChange}
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
@@ -257,56 +258,66 @@ const AddInventory = ({ setIsModalOpen }) => {
                       <label htmlFor="productCategory" className="block text-green-200 mb-2 font-medium">
                         <Tag size={16} className="inline mr-2" /> Product Category
                       </label>
-                      <input
-                          type="text"
+                      <select
                           name="productCategory"
                           id="productCategory"
                           value={formData.productCategory}
                           onChange={handleChange}
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
-                      />
+                      >
+                        <option value="" disabled>Select a category</option>
+                        <option value="kitchen">Kitchen</option>
+                        <option value="bathroom">Bathroom</option>
+                        <option value="bedroom">Bedroom</option>
+                        <option value="livingRoom">Living Room</option>
+                        <option value="laundry">Laundry</option>
+                        <option value="smartHome">Smart Home</option>
+                        <option value="homeOffice">Home Office</option>
+                        <option value="outdoor">Outdoor</option>
+                      </select>
                     </div>
 
-                    {/* Image Upload */}
-                    <div className="relative">
-                      <label className="block text-green-200 mb-2 font-medium">
-                        <Camera size={16} className="inline mr-2" /> Product Image
-                      </label>
-                      <div className="flex items-center space-x-2">
-                        <label className="flex-1 flex items-center justify-center p-3 border-2 border-dashed border-green-500 rounded-lg bg-green-800 bg-opacity-30 hover:bg-opacity-50 cursor-pointer">
-                          <Upload size={20} className="mr-2" />
-                          <span>Choose File</span>
-                          <input
-                              type="file"
-                              name="ProductImage"
-                              accept="image/*"
-                              onChange={handleChange}
-                              className="hidden"
-                              required
-                          />
-                        </label>
-
-                        {imagePreview ? (
-                            <div className="relative h-16 w-16 rounded-lg overflow-hidden">
-                              <img src="/api/placeholder/64/64" alt="Preview" className="h-full w-full object-cover" />
-                              <button
-                                  type="button"
-                                  onClick={removeImage}
-                                  className="absolute top-0 right-0 bg-red-500 rounded-full p-1 shadow-lg"
-                              >
-                                <X size={14} />
-                              </button>
-                            </div>
-                        ) : (
-                            <div className="h-16 w-16 rounded-lg bg-green-700 flex items-center justify-center">
-                              <Camera size={24} />
-                            </div>
-                        )}
-                      </div>
-                      {errors.ProductImage && <p className="text-red-300 text-sm mt-1">{errors.ProductImage}</p>}
-                    </div>
                   </div>
+                </div>
+
+                {/* Image Upload */}
+                <div className="relative mt-5">
+                  <label className="block text-green-200 mb-2 font-medium">
+                    <Camera size={16} className="inline mr-2" /> Product Image
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <label className="flex-1 flex items-center justify-center p-3 border-2 border-dashed border-green-500 rounded-lg bg-green-800 bg-opacity-30 hover:bg-opacity-50 cursor-pointer">
+                      <Upload size={20} className="mr-2" />
+                      <span>Choose File</span>
+                      <input
+                          type="file"
+                          name="ProductImage"
+                          accept="image/*"
+                          onChange={handleChange}
+                          className="hidden"
+                          required
+                      />
+                    </label>
+
+                    {imagePreview ? (
+                        <div className="relative h-12 w-16 rounded-lg overflow-hidden">
+                          <img src="/api/placeholder/64/64" alt="Preview" className="h-full w-full object-cover" />
+                          <button
+                              type="button"
+                              onClick={removeImage}
+                              className="absolute top-0 right-0 bg-red-500 rounded-full p-1 shadow-lg"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                    ) : (
+                        <div className="h-16 w-16 rounded-lg bg-green-700 flex items-center justify-center">
+                          <Camera size={24} />
+                        </div>
+                    )}
+                  </div>
+                  {errors.ProductImage && <p className="text-red-300 text-sm mt-1">{errors.ProductImage}</p>}
                 </div>
 
                 {/* Buttons */}
