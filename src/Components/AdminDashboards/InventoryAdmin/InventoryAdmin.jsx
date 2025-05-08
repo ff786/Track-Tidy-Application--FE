@@ -78,7 +78,7 @@ function AdminViewInventory() {
 
     const filteredInventory = inventory.filter(item =>
         (item.productName?.toLowerCase() ?? '').includes(search.toLowerCase()) ||
-        (item.category?.toLowerCase() ?? '').includes(search.toLowerCase())
+        (item.productCategory?.toLowerCase() ?? '').includes(search.toLowerCase())
     );
 
     const generateCSV = () => {

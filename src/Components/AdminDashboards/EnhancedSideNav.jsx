@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ServiceRequest from "../AllServiceRequest/ServiceRequests.jsx";
 import AdminViewInventory from "./InventoryAdmin/InventoryAdmin.jsx";
 import UserList from "../UserManagement/UserList.jsx";
+import { useAuth } from '../../service/AuthContext.jsx';
 
 import {
     Home, PackageSearch, Wrench, ShoppingCart, UserCog,
@@ -9,6 +10,8 @@ import {
 } from 'lucide-react';
 import AdminViewGrocery from "./GroceryAdmin/GroceryAdmin.jsx";
 import PackagesAdmin from "./PackagesAdmin/PackagesAdmin.jsx";
+import PrivacyPolicy from "../PrivacyPolicy/PrivacyPolicy.jsx";
+import AboutUs from "../AboutUs/AboutUs.jsx";
 
 // Demo component to showcase the sidebar
 const SideNavPreview = () => {
@@ -17,6 +20,7 @@ const SideNavPreview = () => {
     const [userData, setUserData] = useState(null);
     const sidebarRef = useRef(null);
     const [activePath, setActivePath] = useState('/');
+    const { user } = useAuth();
 
     const navItems = [
         {
@@ -33,9 +37,7 @@ const SideNavPreview = () => {
         {
             section: 'Admin',
             links: [
-                { to: '/settings', icon: <Settings size={20} />, label: 'Settings' },
-                { to: '/privacy-policy', icon: <ShieldCheck size={20} />, label: 'Privacy Policy' },
-                { to: '/about-us', icon: <HelpCircle size={20} />, label: 'About Us' }
+                { to: '/settings', icon: <Settings size={20} />, label: 'Settings' }
             ]
         }
     ];
@@ -53,12 +55,28 @@ const SideNavPreview = () => {
         if (!isSidebarLocked) setIsExpanded(true);
     };
 
-    useEffect(() => {
+    /*useEffect(() => {
         setUserData({
             firstName: 'John Doe',
             email: 'john.doe@example.com',
         });
-    }, []);
+    }, []);*/
+
+    // Fetch user info
+    useEffect(() => {
+        if (user?.email) {
+            fetch('http://localhost:8080/api/track-tidy/admin/getAll')
+                .then((res) => res.json())
+                .then((data) => {
+
+                    const matchedUser = data.find((u) => u.email === user.email);
+                    if (matchedUser) {
+                        setUserData(matchedUser);
+                    }
+                })
+                .catch((err) => console.error('Failed to fetch user info', err));
+        }
+    }, [user]);
 
     useEffect(() => {
         const sidebar = sidebarRef.current;

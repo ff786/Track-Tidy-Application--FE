@@ -4,7 +4,6 @@ import { Camera, Upload, X, Calendar, DollarSign, Package, Tag, Layers, FileText
 const AddInventory = ({ setIsModalOpen }) => {
   const [formData, setFormData] = useState({
     productName: "",
-    userId: "",
     productId: "",
     quantity: "",
     purchaseDate: "",

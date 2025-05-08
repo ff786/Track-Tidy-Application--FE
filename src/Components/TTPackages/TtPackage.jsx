@@ -17,62 +17,66 @@ const TrackPackages = () => {
         setSelectedPlan(planName);
     };
 
-    /*const handleSubscribe = async () => {
-
-        try {
-            const response = await fetch("http://localhost:8080/api/track-tidy/package/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
-                },
-                body: JSON.stringify({})
-            });
-
-            if (!response.ok) {
-                throw new Error("Subscription failed");
-            }
-        } catch (error) {
-            setErrors({ submit: error.message });
-        }
-    };*/
-
     const handleSubscribe = async () => {
-        let packageData = {
-            packageType: selectedPlan,
-            groceryValue: 0,
-            serviceValue: 0,
-            inventoryValue: 0,
-            packageValue: 0,
-            subscribedDate: new Date().toISOString().split("T")[0], // yyyy-mm-dd
-        };
-        // Define values based on selected plan
-        switch (selectedPlan) {
-            case "Basic":
-                packageData.groceryValue = 15000;
-                packageData.serviceValue = 10000;
-                packageData.inventoryValue = 5000;
-                break;
-            case "Ultra":
-                packageData.groceryValue = 30000;
-                packageData.serviceValue = 20000;
-                packageData.inventoryValue = 20000;
-                break;
-            case "Premium":
-                packageData.groceryValue = 50000;
-                packageData.serviceValue = 35000;
-                packageData.inventoryValue = 25000;
-                break;
-            default:
-                return alert("Invalid package selected.");
-        }
-        packageData.packageValue =
-            packageData.groceryValue +
-            packageData.serviceValue +
-            packageData.inventoryValue;
-        // Build URL-encoded params
-        const queryParams = new URLSearchParams(packageData).toString();
         try {
+            // First check if user already has a package
+            const checkResponse = await fetch(
+                "http://localhost:8080/api/track-tidy/package/getAll",
+                {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`,
+                    },
+                }
+            );
+
+            const checkResult = await checkResponse.json();
+
+            if (checkResponse.ok && checkResult.hasPackage) {
+                // User already has a package
+                alert("You already have an active package subscription. Please manage your existing package first.");
+                return;
+            }
+
+            // Continue with package subscription if no existing package
+            let packageData = {
+                packageType: selectedPlan,
+                groceryValue: 0,
+                serviceValue: 0,
+                inventoryValue: 0,
+                packageValue: 0,
+                subscribedDate: new Date().toISOString().split("T")[0], // yyyy-mm-dd
+            };
+
+            // Define values based on selected plan
+            switch (selectedPlan) {
+                case "Basic":
+                    packageData.groceryValue = 15000;
+                    packageData.serviceValue = 10000;
+                    packageData.inventoryValue = 5000;
+                    break;
+                case "Ultra":
+                    packageData.groceryValue = 30000;
+                    packageData.serviceValue = 20000;
+                    packageData.inventoryValue = 20000;
+                    break;
+                case "Premium":
+                    packageData.groceryValue = 50000;
+                    packageData.serviceValue = 35000;
+                    packageData.inventoryValue = 25000;
+                    break;
+                default:
+                    return alert("Invalid package selected.");
+            }
+
+            packageData.packageValue =
+                packageData.groceryValue +
+                packageData.serviceValue +
+                packageData.inventoryValue;
+
+            // Build URL-encoded params
+            const queryParams = new URLSearchParams(packageData).toString();
+
             const response = await fetch(
                 `http://localhost:8080/api/track-tidy/package/create?${queryParams}`,
                 {
@@ -82,12 +86,14 @@ const TrackPackages = () => {
                     },
                 }
             );
+
             if (!response.ok) throw new Error("Request failed");
+
             const result = await response.json();
             alert("Subscription successful!");
             console.log(result);
         } catch (error) {
-            alert("Subscription failed");
+            alert("Subscription failed: " + (error.message || "Unknown error"));
             console.error(error);
         }
     };
