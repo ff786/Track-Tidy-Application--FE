@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import TopHeader from "../common/TopHeader/TopHeader.jsx";
 import Footer from "../common/Footer/Footer.jsx";
-import bgCategory from "../../assets/bgCategory.png";
-import HOME from "../../assets/HOME.png";
 import kitchen from "../../assets/kitchen.png";
 import bathroom from "../../assets/bathroom.png";
 import bedRoom from "../../assets/bedRoom.png";
@@ -15,11 +13,20 @@ import outdoor from "../../assets/Outdoor.png";
 import ModHome from "../../assets/ModHome.png";
 import Home1Main from "../../assets/Home1Main.png";
 import SmartHome from "../../assets/SmartHome.png";
-
+import {useAuth} from "../../service/AuthContext.jsx";
 
 const HomeInventory = () => {
     const [activeTab, setActiveTab] = useState('All');
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [cart, setCart] = useState([]);
+    const [showCart, setShowCart] = useState(false);
+    const [packageInfo, setPackageInfo] = useState(null);
+    const [remainingBudget, setRemainingBudget] = useState(0);
+    const [budgetExceeded, setBudgetExceeded] = useState(false);
+    const { user } = useAuth();
 
     const sliderContent = [
         {
@@ -41,7 +48,6 @@ const HomeInventory = () => {
             bgGradient: "from-blue-700 to-blue-500",
             image: SmartHome,
         },
-
     ];
 
     // Auto-rotate slider
@@ -53,7 +59,80 @@ const HomeInventory = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Sample data
+    // Fetch products from API
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch('http://localhost:8080/api/track-tidy/inventory/getAll');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                setProducts(data);
+                setLoading(false);
+            } catch (err) {
+                console.error("Error fetching products:", err);
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    // Fetch user's package information
+    useEffect(() => {
+        if (user?.email) {
+            const fetchPackageInfo = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/api/track-tidy/package/getAll?userId=${user.userId}`);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    /*console.log("Fetched data from package API:", data); // ✅ Log full response*/
+
+                    if (Array.isArray(data)) {
+                        const matchedPackage = data.find(pkg => pkg.email === user.userId);
+                        /*console.log("Matched package for user:", matchedPackage); // ✅ Log matched package*/
+
+                        setPackageInfo(matchedPackage);
+
+                        if (matchedPackage?.inventoryValue) {
+                            /*console.log("Inventory Value:", matchedPackage.inventoryValue); // ✅ Log inventory value*/
+                            setRemainingBudget(parseFloat(matchedPackage.inventoryValue));
+                        }
+                    }
+
+                } catch (err) {
+                    console.error("Error fetching package info:", err);
+                }
+            };
+
+            fetchPackageInfo();
+        }
+    }, [user]);
+
+
+
+    // Calculate remaining budget whenever cart changes
+    useEffect(() => {
+        if (packageInfo && packageInfo.inventoryValue) {
+            const cartTotal = cart.reduce((total, item) =>
+                total + (parseFloat(item.productValue) * item.cartQuantity), 0);
+
+            const remaining = parseFloat(packageInfo.inventoryValue) - cartTotal;
+            setRemainingBudget(remaining);
+            setBudgetExceeded(remaining < 0);
+        }
+    }, [cart, packageInfo]);
+
+    // Sample data for categories
     const categories = [
         {name: 'Kitchen', image: kitchen },
         {name: 'Bathroom', image: bathroom },
@@ -65,131 +144,129 @@ const HomeInventory = () => {
         {name: 'Outdoor', image: outdoor },
     ];
 
-    const products = [
-        {
-            id: 1,
-            name: 'BrewMaster Pro',
-            brand: 'Elettra',
-            price: 129.99,
-            rating: 4.8,
-            image: '/placeholder-coffee-maker.jpg',
-            onSale: true,
-            colors: ['#333', '#d4d4d4', '#c87f0a'],
-            category: 'Kitchen'
-        },
-        {
-            id: 2,
-            name: 'BlendTech Max',
-            brand: 'HomeGenius',
-            price: 89.99,
-            rating: 4.5,
-            image: '/placeholder-blender.jpg',
-            onSale: false,
-            colors: ['#333', '#e74c3c'],
-            category: 'Kitchen'
-        },
-        {
-            id: 3,
-            name: 'PureAir 3000',
-            brand: 'CleanHome',
-            price: 199.99,
-            rating: 4.9,
-            image: '/placeholder-air-purifier.jpg',
-            onSale: true,
-            colors: ['#fff', '#333'],
-            category: 'Living Room'
-        },
-        {
-            id: 4,
-            name: 'ThermoSense',
-            brand: 'SmartLiving',
-            price: 149.99,
-            rating: 4.7,
-            image: '/placeholder-thermostat.jpg',
-            onSale: false,
-            colors: ['#333', '#d4d4d4'],
-            category: 'Smart Home'
-        },
-        {
-            id: 5,
-            name: 'CleanRobo Plus',
-            brand: 'TechHome',
-            price: 299.99,
-            rating: 4.6,
-            image: '/placeholder-vacuum.jpg',
-            onSale: true,
-            colors: ['#333', '#fff'],
-            category: 'Living Room'
-        },
-        {
-            id: 6,
-            name: 'CoolSmart XL',
-            brand: 'FrostTech',
-            price: 1299.99,
-            rating: 4.9,
-            image: '/placeholder-refrigerator.jpg',
-            onSale: false,
-            colors: ['#d4d4d4', '#333'],
-            category: 'Kitchen'
-        },
-        {
-            id: 7,
-            name: 'SoundSphere',
-            brand: 'AudioMax',
-            price: 179.99,
-            rating: 4.7,
-            image: '/placeholder-speaker.jpg',
-            onSale: true,
-            colors: ['#333', '#3498db', '#e74c3c'],
-            category: 'Living Room'
-        },
-        {
-            id: 8,
-            name: 'StyleDry Pro',
-            brand: 'BeautyTech',
-            price: 89.99,
-            rating: 4.5,
-            image: '/placeholder-hairdryer.jpg',
-            onSale: false,
-            colors: ['#e74c3c', '#333', '#d4d4d4'],
-            category: 'Bathroom'
-        },
-        {
-            id: 9,
-            name: 'LumiBright',
-            brand: 'HomeLight',
-            price: 59.99,
-            rating: 4.4,
-            image: '/placeholder-lamp.jpg',
-            onSale: true,
-            colors: ['#d4d4d4', '#333'],
-            category: 'Bedroom'
-        },
-        {
-            id: 10,
-            name: 'DentalCare Pro',
-            brand: 'SmileTech',
-            price: 79.99,
-            rating: 4.8,
-            image: '/placeholder-toothbrush.jpg',
-            onSale: false,
-            colors: ['#3498db', '#e74c3c', '#333'],
-            category: 'Bathroom'
-        }
-    ];
-
-    const brands = [
-        {name: 'Elettra', label: 'NEW', logo: '/placeholder-brand1.jpg'},
-        {name: 'HomeGenius', label: 'TOP', logo: '/placeholder-brand2.jpg'},
-        {name: 'SmartLiving', label: 'BEST', logo: '/placeholder-brand3.jpg'},
-        {name: 'CleanHome', label: 'TOP', logo: '/placeholder-brand4.jpg'},
-        {name: 'TechHome', label: 'NEW', logo: '/placeholder-brand5.jpg'}
-    ];
-
-    // Filter products based on active tab
+    // Filter products based on active tab (with case-insensitive comparison)
     const filteredProducts = activeTab === 'All'
         ? products
-        : products.filter(product => product.category === activeTab);
+        : products.filter(product => {
+            const category = product.productCategory || "";
+            // Case-insensitive comparison and handling spaces
+            return category.toLowerCase() === activeTab.toLowerCase() ||
+                category.replace(/\s+/g, '') === activeTab.replace(/\s+/g, '') ||
+                category.replace(/\s+/g, '').toLowerCase() === activeTab.replace(/\s+/g, '').toLowerCase();
+        });
+
+    // Add to cart function
+    const addToCart = (product) => {
+        // Check if product has available quantity
+        if (product.quantity <= 0) {
+            alert("Sorry, this product is out of stock!");
+            return;
+        }
+
+        // Update products array with reduced quantity
+        setProducts(prevProducts =>
+            prevProducts.map(p =>
+                p.productId === product.productId
+                    ? {...p, quantity: p.quantity - 1}
+                    : p
+            )
+        );
+
+        // Check if product is already in cart
+        const existingProduct = cart.find(item => item.productId === product.productId);
+
+        if (existingProduct) {
+            // Update quantity if already in cart
+            setCart(prevCart =>
+                prevCart.map(item =>
+                    item.productId === product.productId
+                        ? {...item, cartQuantity: item.cartQuantity + 1}
+                        : item
+                )
+            );
+        } else {
+            // Add new product to cart
+            setCart(prevCart => [...prevCart, {...product, cartQuantity: 1}]);
+        }
+    };
+
+    // Remove from cart function
+    const removeFromCart = (productId) => {
+        // Find the product in the cart
+        const cartItem = cart.find(item => item.productId === productId);
+
+        if (!cartItem) return;
+
+        // Update products array to restore quantity
+        setProducts(prevProducts =>
+            prevProducts.map(p =>
+                p.productId === productId
+                    ? {...p, quantity: p.quantity + cartItem.cartQuantity}
+                    : p
+            )
+        );
+
+        // Remove from cart
+        setCart(prevCart => prevCart.filter(item => item.productId !== productId));
+    };
+
+    // Adjust quantity in cart
+    const adjustQuantity = (productId, amount) => {
+        const product = products.find(p => p.productId === productId);
+        const cartItem = cart.find(item => item.productId === productId);
+
+        if (!product || !cartItem) return;
+
+        if (amount > 0 && product.quantity <= 0) {
+            alert("Sorry, no more stock available for this product!");
+            return;
+        }
+
+        // Update products array
+        setProducts(prevProducts =>
+            prevProducts.map(p =>
+                p.productId === productId
+                    ? {...p, quantity: p.quantity - amount}
+                    : p
+            )
+        );
+
+        // Update cart
+        const newCartQuantity = cartItem.cartQuantity + amount;
+
+        if (newCartQuantity <= 0) {
+            // Remove from cart if quantity becomes 0 or negative
+            removeFromCart(productId);
+        } else {
+            setCart(prevCart =>
+                prevCart.map(item =>
+                    item.productId === productId
+                        ? {...item, cartQuantity: newCartQuantity}
+                        : item
+                )
+            );
+        }
+    };
+
+    // Calculate cart total
+    const cartTotal = cart.reduce((total, item) =>
+        total + (parseFloat(item.productValue) * item.cartQuantity), 0);
+
+    // Submit inventory request
+    const submitInventoryRequest = () => {
+        if (budgetExceeded) {
+            alert("Your request exceeds the available budget. Please adjust your cart.");
+            return;
+        }
+
+        // Here you would send the cart data to your API
+        console.log("Submitting inventory request with items:", cart);
+        alert("Inventory request submitted successfully!");
+
+        // Reset cart and close modal
+        setCart([]);
+        setShowCart(false);
+    };
 
     return (
         <>
@@ -201,6 +278,21 @@ const HomeInventory = () => {
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.5 }}
             >
+                {/* Cart Button */}
+                <div className="fixed top-20 right-4 z-50">
+                    <button
+                        onClick={() => setShowCart(true)}
+                        className="bg-green-800 hover:bg-green-700 text-white rounded-full p-3 shadow-lg flex items-center"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span className="ml-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
+                            {cart.reduce((total, item) => total + item.cartQuantity, 0)}
+                        </span>
+                    </button>
+                </div>
+
                 {/* Hero Banner Slider */}
                 <motion.div
                     className="relative overflow-hidden h-90 md:h-90 lg:h-96 rounded-lg mb-8 md:mb-12"
@@ -224,9 +316,6 @@ const HomeInventory = () => {
                                     alt={slide.title}
                                     className="absolute inset-0 w-full h-full object-fit-cover z-0 opacity-70"
                                 />
-
-                                {/* Dark overlay
-                                <div className="absolute inset-0 bg-black z-10 opacity-50"></div>*/}
 
                                 {/* Text content */}
                                 <motion.div className="relative z-20 p-4 md:p-8 text-white flex flex-col justify-center text-start h-full">
@@ -282,6 +371,7 @@ const HomeInventory = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 transition={{ duration: 0.3 }}
+                                onClick={() => setActiveTab(category.name)}
                             >
                                 <img
                                     src={category.image || `/api/placeholder/200/200`}
@@ -297,14 +387,12 @@ const HomeInventory = () => {
                     </div>
                 </motion.div>
 
-
-
-                {/* Weekly Bestsellers */}
+                {/* Products Section */}
                 <div className="mb-12">
                     <h2 className="text-4xl text-center font-bold mb-4 text-gray-900">Our Products</h2>
 
-                    <div className="flex border-b border-gray-200 mb-6">
-                        {['All', 'Kitchen', 'Bathroom', 'Bedroom', 'Living Room', 'Laundry', 'Smart Home', 'Home Office', 'Outdoor'].map((tab) => (
+                    <div className="flex overflow-x-auto border-b border-gray-200 mb-6">
+                        {['All', ...categories.map(cat => cat.name)].map((tab) => (
                             <div
                                 key={tab}
                                 className={`cursor-pointer py-2 px-4 font-medium transition-colors duration-300 ${
@@ -319,74 +407,214 @@ const HomeInventory = () => {
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-9 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredProducts.map((product) => (
-                            <div key={product.id}
-                                 className="bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                                <div className="h-40 bg-gray-100 relative flex items-center justify-center">
-                                    <img
-                                        src={product.image || `/api/placeholder/160/160`}
-                                        alt={product.name}
-                                        className="max-w-full max-h-full object-contain"
-                                    />
-                                    <button
-                                        className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-500 hover:text-white transition-colors duration-300">
-                                        ♡
-                                    </button>
-                                </div>
-                                <div className="p-4">
-                                    <h3 className="font-semibold text-gray-800">{product.name}</h3>
-                                    <p className="text-sm text-gray-500 mb-2">{product.brand}</p>
-                                    {product.onSale && (
-                                        <span
-                                            className="bg-green-500 text-white text-xs py-1 px-2 rounded inline-block mb-2">
-                    Sale
-                  </span>
-                                    )}
-                                    <div className="flex justify-between items-center">
-                                        <span
-                                            className="font-semibold text-green-700">${product.price.toFixed(2)}</span>
-                                        <span
-                                            className="flex items-center text-amber-400 text-sm">{product.rating} ★</span>
+                    {loading ? (
+                        <div className="flex justify-center items-center h-40">
+                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-800"></div>
+                        </div>
+                    ) : error ? (
+                        <div className="text-center text-red-500 p-4">
+                            <p>Error: {error}</p>
+                            <p>Please check your API connection and try again.</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 text-start justify-between">
+                            {filteredProducts.length > 0 ? (
+                                filteredProducts.map((product) => (
+                                    <div key={product.productId}
+                                         className="bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                                        <div className="h-40 bg-gray-100 relative flex items-center justify-center">
+                                            {product.productImageBase64 ? (
+                                                <img
+                                                    src={product.productImageBase64 || `/api/placeholder/160/160`}
+                                                    alt={product.productName}
+                                                    className="max-w-full max-h-full object-contain"
+                                                />
+                                            ) : (
+                                            "No Image"
+                                            )}
+                                            {/* Stock indicator */}
+                                            {product.quantity <= 0 && (
+                                                <div className="absolute top-0 right-0 bg-red-500 text-white text-xs px-2 py-1">
+                                                    Out of Stock
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-gray-800">{product.productName}</h3>
+                                            <p className="text-m text-gray-500 mb-2">Category: {product.productCategory}</p>
+                                            <div className="text-xs text-gray-500 mb-2">
+                                                <p>Quantity: {product.quantity}</p>
+                                                <p>Warranty: {product.warrantyPeriod} Months</p>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-semibold text-green-700">LKR {parseFloat(product.productValue).toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-2 flex justify-center">
+                                            <button
+                                                onClick={() => addToCart(product)}
+                                                disabled={product.quantity <= 0}
+                                                className={`w-full py-2 px-4 rounded ${
+                                                    product.quantity <= 0
+                                                        ? 'bg-gray-300 cursor-not-allowed'
+                                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                                } transition-colors duration-300 flex items-center justify-center`}
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                Add to cart
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-1 mt-2">
-                                        {product.colors.map((color, index) => (
-                                            <div
-                                                key={index}
-                                                className="w-4 h-4 rounded-full cursor-pointer hover:scale-125 transition-transform duration-200"
-                                                style={{
-                                                    backgroundColor: color,
-                                                    border: color === '#fff' ? '1px solid #ddd' : 'none'
-                                                }}
-                                            ></div>
-                                        ))}
-                                    </div>
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-8 text-gray-500">
+                                    No products found in this category.
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
-                {/* Shopping by Brands
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">Shopping by brands</h2>
-                <p className="text-gray-500 mb-6">Discover top products from your favorite brands</p>
+                {/* Cart Modal */}
+                {showCart && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                        <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-90vh overflow-auto">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-bold">Your Cart</h2>
+                                <button
+                                    onClick={() => setShowCart(false)}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
 
-                <div className="grid grid-cols-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    {brands.map((brand, index) => (
-                        <div key={index}
-                             className="relative h-36 bg-white rounded-lg shadow-md flex items-center justify-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                                <span
-                                    className="absolute top-3 left-3 bg-green-500 text-white text-xs font-semibold py-1 px-3 rounded-full">
-                                  {brand.label}
-                                </span>
-                            <img
-                                src={brand.logo || `/api/placeholder/150/80`}
-                                alt={brand.name}
-                                className="max-w-4/5 max-h-4/5 object-contain"
-                            />
+                            {/* Budget Information */}
+                            <div className={`mb-4 p-3 rounded-lg ${budgetExceeded ? 'bg-red-100' : 'bg-green-100'}`}>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Package Budget:</span>
+                                    <span className="font-bold">
+                                        LKR {packageInfo ? parseFloat(packageInfo.inventoryValue).toFixed(2) : '0.00'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Cart Total:</span>
+                                    <span className="font-bold">LKR {cartTotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Remaining Budget:</span>
+                                    <span className={`font-bold ${budgetExceeded ? 'text-red-600' : 'text-green-600'}`}>
+                                        LKR {remainingBudget.toFixed(2)}
+                                    </span>
+                                </div>
+                                {budgetExceeded && (
+                                    <p className="text-red-600 text-sm mt-2">
+                                        Warning: Your cart total exceeds your available budget.
+                                    </p>
+                                )}
+                            </div>
+
+                            {cart.length === 0 ? (
+                                <div className="text-center py-8 text-gray-500">
+                                    Your cart is empty. Add some products to get started!
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="overflow-x-auto">
+                                        <table className="min-w-full bg-white">
+                                            <thead>
+                                            <tr className="bg-gray-100">
+                                                <th className="py-2 px-4 text-left">Product</th>
+                                                <th className="py-2 px-4 text-left">Price</th>
+                                                <th className="py-2 px-4 text-left">Quantity</th>
+                                                <th className="py-2 px-4 text-left">Subtotal</th>
+                                                <th className="py-2 px-4 text-left">Action</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {cart.map((item) => (
+                                                <tr key={item.productId} className="border-b">
+                                                    <td className="py-2 px-4">
+                                                        <div className="flex items-center">
+                                                            <img
+                                                                src={item.ProductImage || `/api/placeholder/50/50`}
+                                                                alt={item.productName}
+                                                                className="w-12 h-12 object-cover mr-3"
+                                                            />
+                                                            <div>
+                                                                <p className="font-medium">{item.productName}</p>
+                                                                <p className="text-xs text-gray-500">{item.productCategory}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2 px-4">
+                                                        LKR {parseFloat(item.productValue).toFixed(2)}
+                                                    </td>
+                                                    <td className="py-2 px-4">
+                                                        <div className="flex items-center">
+                                                            <button
+                                                                onClick={() => adjustQuantity(item.productId, -1)}
+                                                                className="bg-gray-200 px-2 py-1 rounded-l"
+                                                            >
+                                                                -
+                                                            </button>
+                                                            <span className="px-4">{item.cartQuantity}</span>
+                                                            <button
+                                                                onClick={() => adjustQuantity(item.productId, 1)}
+                                                                className="bg-gray-200 px-2 py-1 rounded-r"
+                                                                disabled={products.find(p => p.productId === item.productId)?.quantity <= 0}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2 px-4">
+                                                        LKR {(parseFloat(item.productValue) * item.cartQuantity).toFixed(2)}
+                                                    </td>
+                                                    <td className="py-2 px-4">
+                                                        <button
+                                                            onClick={() => removeFromCart(item.productId)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div className="mt-6 flex justify-between items-center">
+                                        <button
+                                            onClick={() => setShowCart(false)}
+                                            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded transition-colors duration-300"
+                                        >
+                                            Continue Shopping
+                                        </button>
+                                        <button
+                                            onClick={submitInventoryRequest}
+                                            disabled={budgetExceeded || cart.length === 0}
+                                            className={`py-2 px-6 rounded font-medium ${
+                                                budgetExceeded || cart.length === 0
+                                                    ? 'bg-gray-300 cursor-not-allowed'
+                                                    : 'bg-green-600 hover:bg-green-700 text-white'
+                                            } transition-colors duration-300`}
+                                        >
+                                            Submit Inventory Request
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                    ))}
-                </div>*/}
+                    </div>
+                )}
             </motion.div>
             <Footer />
         </>

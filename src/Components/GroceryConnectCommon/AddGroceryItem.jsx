@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Camera, Upload, X, Calendar, DollarSign, Package, Tag, Loader, Layers } from 'lucide-react';
 
 const AddGroceryItem = ({ setIsModalOpen }) => {
+
     const [formData, setFormData] = useState({
         itemName: "",
         price: "",
@@ -117,6 +118,10 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
             setIsLoading(false);
         }
     };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    }
 
     return (
         <div className="w-full flex items-center justify-center p-4 min-h-screen">

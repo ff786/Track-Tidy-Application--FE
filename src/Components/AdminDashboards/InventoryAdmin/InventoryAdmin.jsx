@@ -51,7 +51,20 @@ function AdminViewInventory() {
     const handleSave = (id) => {
         if (!window.confirm("Are you sure you want to save these changes?")) return;
 
-        axios.put(`http://localhost:8080/api/track-tidy/inventory/update?id=${id}`, editedItem)
+        const formData = new FormData();
+        formData.append("productName", editedItem.productName);
+        formData.append("productId", editedItem.productId);
+        formData.append("quantity", editedItem.quantity);
+        formData.append("productValue", editedItem.productValue);
+        formData.append("productCategory", editedItem.productCategory);
+        formData.append("ProductImage", editedItem.ProductImage);
+
+        axios.put(`http://localhost:8080/api/track-tidy/inventory/update/${id}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+            }
+        })
             .then(() => {
                 setInventory(inventory.map(item =>
                     item.id === id ? { ...item, ...editedItem } : item
@@ -59,9 +72,10 @@ function AdminViewInventory() {
                 setEditMode(null); // Exit edit mode
             })
             .catch(error => {
-                console.error('Error updating inventory item:', error);
+                console.error('Error updating inventory item:', error.response?.data || error.message);
             });
     };
+
 
     const handleCancelClick = () => {
         setEditMode(null); // Reset to cancel editing
@@ -78,7 +92,7 @@ function AdminViewInventory() {
 
     const filteredInventory = inventory.filter(item =>
         (item.productName?.toLowerCase() ?? '').includes(search.toLowerCase()) ||
-        (item.category?.toLowerCase() ?? '').includes(search.toLowerCase())
+        (item.productCategory?.toLowerCase() ?? '').includes(search.toLowerCase())
     );
 
     const generateCSV = () => {
@@ -245,12 +259,22 @@ function AdminViewInventory() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <input
-                                                type="img"
+                                                type="file"
+                                                accept="image/*"
+                                                name="ProductImage"
+                                                onChange={(e) =>
+                                                    setEditedItem({ ...editedItem, ProductImage: e.target.files[0] })
+                                                }
+                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
+                                            />
+                                            {/*<input
+                                                type="file"
+                                                accept="image/*"
                                                 name="ProductImage"
                                                 value={editedItem.ProductImage || item.ProductImage}
                                                 onChange={handleChange}
-                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
-                                            />
+
+                                            />*/}
                                         </td>
                                         <td className="px-4 py-3">
                                             <button
@@ -276,8 +300,8 @@ function AdminViewInventory() {
                                         <td className="px-4 py-3">{item.warrantyPeriod}</td>
                                         <td className="px-4 py-3">{item.productValue}</td>
                                         <td className="px-4 py-3">
-                                            {item.ProductImage ? (
-                                                <img src={item.ProductImage} alt="Product" className="w-16 h-16 object-cover rounded" />
+                                            {item.productImageBase64 ? (
+                                                <img src={item.productImageBase64} alt="Product" className="w-16 h-16 object-cover rounded" />
                                             ) : (
                                                 "No Image"
                                             )}
