@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Camera, Upload, X, Calendar, DollarSign, Package, Tag, Layers, FileText, Loader } from 'lucide-react';
 
 const AddInventory = ({ setIsModalOpen }) => {
+
   const [formData, setFormData] = useState({
     productName: "",
     productId: "",
@@ -196,23 +197,6 @@ const AddInventory = ({ setIsModalOpen }) => {
                       />
                       {errors.quantity && <p className="text-red-300 text-sm mt-1">{errors.quantity}</p>}
                     </div>
-
-                    {/* Purchase Date
-                    <div className="relative">
-                      <label htmlFor="purchaseDate" className="block text-green-200 mb-2 font-medium">
-                        <Calendar size={16} className="inline mr-2" /> Purchase Date
-                      </label>
-                      <input
-                          type="date"
-                          name="purchaseDate"
-                          id="purchaseDate"
-                          value={formData.purchaseDate}
-                          onChange={handleChange}
-                          max={today}
-                          className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
-                          required
-                      />
-                    </div>*/}
                   </div>
 
                   {/* Right Column */}

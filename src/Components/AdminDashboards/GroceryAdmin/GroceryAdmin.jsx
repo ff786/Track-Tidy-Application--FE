@@ -69,12 +69,6 @@ const AdminViewGrocery = () => {
         setIsModalOpen(true);
     };
 
-    const handleModalClose = () => {
-        setSelectedItem(null);
-        setIsModalOpen(false);
-        fetchGroceryItems(); // Refresh after modal close
-    };
-
     useEffect(() => {
         fetchGroceryItems();
     }, []);
@@ -309,12 +303,7 @@ const AdminViewGrocery = () => {
                 </table>
             </div>
 
-            {isModalOpen && (
-                <AddGroceryItem
-                    onClose={handleModalClose}
-                    selectedItem={selectedItem}
-                />
-            )}
+            {isModalOpen && <AddGroceryItem setIsModalOpen={setIsModalOpen} />}
         </div>
     );
 };
