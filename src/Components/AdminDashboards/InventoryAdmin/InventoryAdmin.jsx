@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddInventory from "../../HomeInventory/addInventory.jsx";
-import Swal from 'sweetalert2';
+
 
 function AdminViewInventory() {
     const [inventory, setInventory] = useState([]);
@@ -118,9 +118,10 @@ function AdminViewInventory() {
         });
     };
 
+
     const handleCancelClick = () => {
-        setEditMode(null); // Reset to cancel editing
-        setEditedItem({}); // Clear the edited item data
+        setEditMode(null);
+        setEditedItem({});
     };
 
     const handleChange = (e) => {
@@ -343,7 +344,7 @@ function AdminViewInventory() {
                                         <td className="px-4 py-3">{item.quantity}</td>
                                         <td className="px-4 py-3">{item.productId}</td>
                                         <td className="px-4 py-3">{item.warrantyPeriod}</td>
-                                        <td className="px-4 py-3">{item.productValue}</td>
+                                        <td className="px-4 py-3">Rs. {item.productValue}</td>
                                         <td className="px-4 py-3">
                                             {item.productImageBase64 ? (
                                                 <img src={item.productImageBase64} alt="Product" className="w-16 h-16 object-cover rounded" />

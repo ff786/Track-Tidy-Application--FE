@@ -29,17 +29,29 @@ function ServiceRequest() {
         const confirmSave = window.confirm("Are you sure you want to save the changes?");
         if (!confirmSave) return;
 
-        try {
-            await axios.put(`http://localhost:8080/api/track-tidy/service/update?id=${id}`, editedData);
-            setService(prev =>
-                prev.map(item => (item.id === id ? { ...editedData } : item))
-            );
-            setEditRowId(null);
-            setEditedData({});
-        } catch (error) {
-            console.error('Error updating service:', error);
-            alert("Failed to update service. Please try again.");
-        }
+        const formData = new FormData();
+        formData.append('userId', editedData.userId);
+        formData.append('serviceType', editedData.serviceType);
+        formData.append('serviceDesc', editedData.serviceDesc);
+        formData.append('memberName', editedData.memberName);
+        formData.append('email', editedData.email);
+        formData.append('phoneNumber', editedData.phoneNumber);
+        formData.append('address', editedData.address);
+        formData.append('referralCode', editedData.referralCode);
+
+        axios.put(`http://localhost:8080/api/track-tidy/service/update/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+            }
+        })
+            .then(() => {
+                setService(prev =>
+                    prev.map(item => (item.id === id ? { ...editedData } : item))
+                );
+                setEditRowId(null);
+                setEditedData({});
+            });
     };
 
     const handleCancelClick = () => {
@@ -81,7 +93,7 @@ function ServiceRequest() {
     const generateCSV = () => {
         console.log('Generate CSV button clicked!');
         const csvData = filteredService.map(item => ({
-            "Member ID": item.memberId,
+            "Member ID": item.userId,
             "Service Type": item.serviceType,
             "Service Description": item.serviceDesc,
             "Member Name": item.memberName,
@@ -180,28 +192,50 @@ function ServiceRequest() {
                         <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
                             {editRowId === item.id ? (
                                 <>
-                                    <td className="px-4 py-3"><input value={editedData.memberId} onChange={(e) => handleInputChange(e, 'memberId')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.serviceType} onChange={(e) => handleInputChange(e, 'serviceType')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.serviceDesc} onChange={(e) => handleInputChange(e, 'serviceDesc')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.memberName} onChange={(e) => handleInputChange(e, 'memberName')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.email} onChange={(e) => handleInputChange(e, 'email')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.phoneNumber} onChange={(e) => handleInputChange(e, 'phoneNumber')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.address} onChange={(e) => handleInputChange(e, 'address')} className="px-2 py-1 rounded text-green-900" /></td>
-                                    <td className="px-4 py-3"><input value={editedData.referralCode} onChange={(e) => handleInputChange(e, 'referralCode')} className="px-2 py-1 rounded text-green-900" /></td>
+                                    <td className="px-4 py-3">
+                                        <input
+                                            value={editedData.userId}
+                                            disabled
+                                            className="px-2 py-1 rounded text-green-900 bg-gray-100 cursor-not-allowed"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-3"><input value={editedData.serviceType}
+                                                                     onChange={(e) => handleInputChange(e, 'serviceType')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.serviceDesc}
+                                                                     onChange={(e) => handleInputChange(e, 'serviceDesc')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.memberName}
+                                                                     onChange={(e) => handleInputChange(e, 'memberName')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.email}
+                                                                     onChange={(e) => handleInputChange(e, 'email')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.phoneNumber}
+                                                                     onChange={(e) => handleInputChange(e, 'phoneNumber')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.address}
+                                                                     onChange={(e) => handleInputChange(e, 'address')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
+                                    <td className="px-4 py-3"><input value={editedData.referralCode}
+                                                                     onChange={(e) => handleInputChange(e, 'referralCode')}
+                                                                     className="px-2 py-1 rounded text-green-900"/></td>
                                     <td className="px-4 py-3">
                                         <div className="flex space-x-3">
-                                            <button onClick={() => handleSaveClick(item.id)} className="text-green-400 hover:text-green-200 transition">
-                                                <Check size={18} />
+                                            <button onClick={() => handleSaveClick(item.id)}
+                                                    className="text-green-400 hover:text-green-200 transition">
+                                                <Check size={18}/>
                                             </button>
-                                            <button onClick={handleCancelClick} className="text-red-400 hover:text-red-200 transition">
-                                                <X size={18} />
+                                            <button onClick={handleCancelClick}
+                                                    className="text-red-400 hover:text-red-200 transition">
+                                                <X size={18}/>
                                             </button>
                                         </div>
                                     </td>
                                 </>
                             ) : (
                                 <>
-                                    <td className="px-4 py-3">{item.memberId}</td>
+                                    <td className="px-4 py-3">{item.userId}</td>
                                     <td className="px-4 py-3">{item.serviceType}</td>
                                     <td className="px-4 py-3">{item.serviceDesc}</td>
                                     <td className="px-4 py-3">{item.memberName}</td>
