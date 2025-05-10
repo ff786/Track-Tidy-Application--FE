@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import TopHeader from "../common/TopHeader/TopHeader.jsx";
 import Footer from "../common/Footer/Footer.jsx";
@@ -14,6 +14,7 @@ import ModHome from "../../assets/ModHome.png";
 import Home1Main from "../../assets/Home1Main.png";
 import SmartHome from "../../assets/SmartHome.png";
 import {useAuth} from "../../service/AuthContext.jsx";
+import Swal from 'sweetalert2';
 
 const HomeInventory = () => {
     const [activeTab, setActiveTab] = useState('All');
@@ -27,6 +28,7 @@ const HomeInventory = () => {
     const [remainingBudget, setRemainingBudget] = useState(0);
     const [budgetExceeded, setBudgetExceeded] = useState(false);
     const { user } = useAuth();
+    const productsRef = useRef(null);
 
     const sliderContent = [
         {
@@ -253,19 +255,54 @@ const HomeInventory = () => {
         total + (parseFloat(item.productValue) * item.cartQuantity), 0);
 
     // Submit inventory request
-    const submitInventoryRequest = () => {
+    const submitInventoryRequest = async () => {
         if (budgetExceeded) {
-            alert("Your request exceeds the available budget. Please adjust your cart.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Budget Exceeded',
+                text: 'Your request exceeds the available budget. Please adjust your cart.',
+                confirmButtonColor: '#15803d'
+            });
             return;
         }
 
-        // Here you would send the cart data to your API
-        console.log("Submitting inventory request with items:", cart);
-        alert("Inventory request submitted successfully!");
+        try {
+            // Show loading state
+            Swal.fire({
+                title: 'Submitting Request',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        // Reset cart and close modal
-        setCart([]);
-        setShowCart(false);
+            // Here you would send the cart data to your API
+            console.log("Submitting inventory request with items:", cart);
+            
+            // Show success message
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Inventory request submitted successfully!',
+                confirmButtonColor: '#15803d',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Reset cart and close modal
+            setCart([]);
+            setShowCart(false);
+
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: 'Failed to submit inventory request. Please try again.',
+                confirmButtonColor: '#15803d'
+            });
+        }
     };
 
     return (
@@ -371,7 +408,13 @@ const HomeInventory = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 transition={{ duration: 0.3 }}
-                                onClick={() => setActiveTab(category.name)}
+                                onClick={() => {
+                                    setActiveTab(category.name);
+                                    productsRef.current?.scrollIntoView({ 
+                                        behavior: 'smooth',
+                                        block: 'start'
+                                    });
+                                }}
                             >
                                 <img
                                     src={category.image || `/api/placeholder/200/200`}
@@ -388,7 +431,7 @@ const HomeInventory = () => {
                 </motion.div>
 
                 {/* Products Section */}
-                <div className="mb-12">
+                <div className="mb-12" ref={productsRef}>
                     <h2 className="text-4xl text-center font-bold mb-4 text-gray-900">Our Products</h2>
 
                     <div className="flex overflow-x-auto border-b border-gray-200 mb-6">

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Swal from 'sweetalert2';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -52,29 +53,54 @@ const Signup = () => {
       };
 
       try {
+        // Show loading alert
+        Swal.fire({
+          title: 'Registering...',
+          text: 'Please wait',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         // 1. First try to register with your API
         await axios.post("http://localhost:8080/api/track-tidy/user/register", values);
         
-        // 2. Then store in localStorage
+        // 2. Store in localStorage
         const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
         existingUsers.push(newUser);
         localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
         
-        // 3. Redirect with success message
-        navigate("/", { 
-          state: { message: "Registration successful!" } 
+        // 3. Show success message and redirect
+        await Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'You can now login to your account',
+          confirmButtonColor: '#15803d',
+          timer: 2000,
+          showConfirmButton: false
         });
+        
+        navigate("/");
+        
       } catch (error) {
         console.error("Signup error:", error);
         
-        // If API fails, still store locally
+        // Store locally if API fails
         const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
         existingUsers.push(newUser);
         localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
         
-        navigate("/", { 
-          state: { message: "Registered locally (API unavailable)" } 
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Partial Success',
+          text: 'Registered locally (API unavailable). Some features may be limited.',
+          confirmButtonColor: '#15803d',
+          confirmButtonText: 'Continue to Login'
         });
+        
+        navigate("/");
       } finally {
         setSubmitting(false);
       }

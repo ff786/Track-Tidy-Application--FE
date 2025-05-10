@@ -1,4 +1,5 @@
 import React from "react";
+import Swal from 'sweetalert2';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -34,9 +35,17 @@ const Login = (userData) => {
       const adminPassword = "adminPassword123";
 
       if (values.email === adminEmail && values.password === adminPassword) {
-        alert("Admin Login Successful! Navigating to Admin Dashboard.");
-        sessionStorage.setItem('isAdmin', 'true');
-        navigate("/admin/bgi/dashboard");
+        Swal.fire({
+          icon: 'success',
+          title: 'Admin Login Successful!',
+          text: 'Redirecting to Admin Dashboard...',
+          timer: 1500,
+          showConfirmButton: false,
+          allowOutsideClick: false
+        }).then(() => {
+          sessionStorage.setItem('isAdmin', 'true');
+          navigate("/admin/bgi/dashboard");
+        });
         return;
       }
 
@@ -56,20 +65,35 @@ const Login = (userData) => {
         const data = await response.json();
         console.log("Login Response:", data);
 
-        // Save token & user to session/local storage if needed
+        // Save token & user to session/local storage
         sessionStorage.setItem('access_token', data.access_token);
 
-        // ⚡ Login via AuthContext (set global user)
+        // Login via AuthContext
         login({
           email: data.userDetails.email,
           name: data.userDetails.firstName,
         });
 
-        alert("Login Successful!");
-        navigate("/dashboard");
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful!',
+          text: 'Welcome back!',
+          timer: 1500,
+          showConfirmButton: false,
+          allowOutsideClick: false
+        }).then(() => {
+          navigate("/dashboard");
+        });
+
       } catch (error) {
         console.error("Login failed:", error.message);
-        alert("Login Failed! Please check your credentials.");
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: 'Please check your credentials and try again.',
+          confirmButtonColor: '#15803d',
+          confirmButtonText: 'Try Again'
+        });
       }
     },
   });

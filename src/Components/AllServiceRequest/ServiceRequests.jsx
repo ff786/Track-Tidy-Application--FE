@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 function ServiceRequest() {
 
@@ -26,32 +27,53 @@ function ServiceRequest() {
     };
 
     const handleSaveClick = async (id) => {
-        const confirmSave = window.confirm("Are you sure you want to save the changes?");
-        if (!confirmSave) return;
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to save these changes?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, save it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append('userId', editedData.userId);
+                formData.append('serviceType', editedData.serviceType);
+                formData.append('serviceDesc', editedData.serviceDesc);
+                formData.append('memberName', editedData.memberName);
+                formData.append('email', editedData.email);
+                formData.append('phoneNumber', editedData.phoneNumber);
+                formData.append('address', editedData.address);
+                formData.append('referralCode', editedData.referralCode);
 
-        const formData = new FormData();
-        formData.append('userId', editedData.userId);
-        formData.append('serviceType', editedData.serviceType);
-        formData.append('serviceDesc', editedData.serviceDesc);
-        formData.append('memberName', editedData.memberName);
-        formData.append('email', editedData.email);
-        formData.append('phoneNumber', editedData.phoneNumber);
-        formData.append('address', editedData.address);
-        formData.append('referralCode', editedData.referralCode);
-
-        axios.put(`http://localhost:8080/api/track-tidy/service/update/${id}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                axios.put(`http://localhost:8080/api/track-tidy/service/update/${id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                    }
+                })
+                .then(() => {
+                    setService(prev =>
+                        prev.map(item => (item.id === id ? { ...editedData } : item))
+                    );
+                    setEditRowId(null);
+                    setEditedData({});
+                    Swal.fire(
+                        'Saved!',
+                        'Your changes have been saved successfully.',
+                        'success'
+                    );
+                })
+                .catch(error => {
+                    Swal.fire(
+                        'Error!',
+                        'Failed to save changes.',
+                        'error'
+                    );
+                });
             }
-        })
-            .then(() => {
-                setService(prev =>
-                    prev.map(item => (item.id === id ? { ...editedData } : item))
-                );
-                setEditRowId(null);
-                setEditedData({});
-            });
+        });
     };
 
     const handleCancelClick = () => {
@@ -76,13 +98,35 @@ function ServiceRequest() {
     }, [navigate]);
 
     const handleDelete = (id) => {
-        axios.delete(`http://localhost:8080/api/track-tidy/service/delete?id=${id}`)
-            .then(() => {
-                setService(service.filter(item => item.id !== id));
-            })
-            .catch(error => {
-                console.error('Error deleting service:', error);
-            });
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`http://localhost:8080/api/track-tidy/service/delete?id=${id}`)
+                    .then(() => {
+                        setService(service.filter(item => item.id !== id));
+                        Swal.fire(
+                            'Deleted!',
+                            'Service request has been deleted.',
+                            'success'
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error deleting service:', error);
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete service request.',
+                            'error'
+                        );
+                    });
+            }
+        });
     };
 
     const filteredService = service.filter(item =>
@@ -91,58 +135,91 @@ function ServiceRequest() {
     );
 
     const generateCSV = () => {
-        console.log('Generate CSV button clicked!');
-        const csvData = filteredService.map(item => ({
-            "Member ID": item.userId,
-            "Service Type": item.serviceType,
-            "Service Description": item.serviceDesc,
-            "Member Name": item.memberName,
-            "Email": item.email,
-            "Contact Number": item.phoneNumber,
-            "Address": item.address,
-            "Referral Code": item.referralCode,
-        }));
+        try {
+            console.log('Generate CSV button clicked!');
+            const csvData = filteredService.map(item => ({
+                "Member ID": item.userId,
+                "Service Type": item.serviceType,
+                "Service Description": item.serviceDesc,
+                "Member Name": item.memberName,
+                "Email": item.email,
+                "Contact Number": item.phoneNumber,
+                "Address": item.address,
+                "Referral Code": item.referralCode,
+            }));
 
-        const csvString = Papa.unparse(csvData); // Use Papa.unparse directly
+            const csvString = Papa.unparse(csvData); // Use Papa.unparse directly
 
-        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", "service_requests_report.csv");
-        link.style.visibility = 'hidden'; // Make link invisible
-        document.body.appendChild(link); // Append to the document
-        link.click();
-        document.body.removeChild(link); // Clean up
-        URL.revokeObjectURL(url); // Release the object URL
-        console.log('CSV Data generated successfully!');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", "service_requests_report.csv");
+            link.style.visibility = 'hidden'; // Make link invisible
+            document.body.appendChild(link); // Append to the document
+            link.click();
+            document.body.removeChild(link); // Clean up
+            URL.revokeObjectURL(url); // Release the object URL
+            console.log('CSV Data generated successfully!');
+            Swal.fire(
+                'Success!',
+                'CSV report has been generated successfully.',
+                'success'
+            );
+        } catch (error) {
+            console.error('Error generating CSV:', error);
+            Swal.fire(
+                'Error!',
+                'Failed to generate CSV report.',
+                'error'
+            );
+        }
     };
 
     const generatePDF = () => {
-        console.log('Generate PDF button clicked!');
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text("Service Requests Report", 20, 20);
-
-        const tableColumn = [
-            "Member ID", "Service Type", "Service Description", "Member Name",
-            "Email", "Contact Number", "Address", "Referral Code"
-        ];
-        const tableRows = filteredService.map(item => [
-            item.memberId, item.serviceType, item.serviceDesc, item.memberName,
-            item.email, item.phoneNumber, item.address, item.referralCode
-        ]);
-
         try {
-            autoTable(doc, { // Use autoTable directly
-                head: [tableColumn],
-                body: tableRows,
-                startY: 30
-            });
-            doc.save("service_requests_report.pdf");
-            console.log('PDF generated successfully!');
+            console.log('Generate PDF button clicked!');
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text("Service Requests Report", 20, 20);
+
+            const tableColumn = [
+                "Member ID", "Service Type", "Service Description", "Member Name",
+                "Email", "Contact Number", "Address", "Referral Code"
+            ];
+            const tableRows = filteredService.map(item => [
+                item.memberId, item.serviceType, item.serviceDesc, item.memberName,
+                item.email, item.phoneNumber, item.address, item.referralCode
+            ]);
+
+            try {
+                autoTable(doc, { // Use autoTable directly
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 30
+                });
+                doc.save("service_requests_report.pdf");
+                console.log('PDF generated successfully!');
+                Swal.fire(
+                    'Success!',
+                    'PDF report has been generated successfully.',
+                    'success'
+                );
+            } catch (error) {
+                console.error("Error generating PDF:", error);
+                Swal.fire(
+                    'Error!',
+                    'Failed to generate PDF report.',
+                    'error'
+                );
+            }
         } catch (error) {
-            console.error("Error generating PDF:", error);
+            console.error('Error generating PDF:', error);
+            Swal.fire(
+                'Error!',
+                'Failed to generate PDF report.',
+                'error'
+            );
         }
     };
 
