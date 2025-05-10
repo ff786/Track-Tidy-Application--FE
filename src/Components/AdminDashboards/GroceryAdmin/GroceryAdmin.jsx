@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddGroceryItem from "../../GroceryConnectCommon/AddGroceryItem.jsx";
+import {useNavigate} from "react-router-dom";
 
 const AdminViewGrocery = () => {
     const [groceryItems, setGroceryItems] = useState([]);
@@ -13,24 +14,41 @@ const AdminViewGrocery = () => {
     const [editedItem, setEditedItem] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const navigate = useNavigate();
 
-    const fetchGroceryItems = async () => {
+    useEffect( () => {
+        if (!sessionStorage.getItem("access_token")) {
+            navigate("/"); // Redirect to login if no token
+        }
+
+        axios.get('http://localhost:8080/api/track-tidy/grocery/getAll')
+            .then(response => {
+                    setGroceryItems(response.data);
+                })
+                .catch(error => {
+                    console.error('Error fetching grocery items:', error);
+                });
+    }, [navigate]);
+
+    /*const fetchGroceryItems = async () => {
         try {
             const res = await axios.get("http://localhost:8080/api/track-tidy/grocery/getAll");
             setGroceryItems(res.data);
         } catch (error) {
             console.error("Failed to fetch grocery items:", error);
         }
-    };
+    };*/
 
-    const deleteItem = async (id) => {
+    const handleDeleteItem = async (id) => {
         if (!window.confirm("Are you sure you want to delete this item?")) return;
-        try {
-            await axios.delete(`http://localhost:8080/api/track-tidy/grocery/delete?id=${id}`);
-            fetchGroceryItems();
-        } catch (error) {
-            console.error("Failed to delete grocery item:", error);
-        }
+
+        axios.delete(`http://localhost:8080/api/track-tidy/grocery/delete?id=${id}`)
+            .then(() => {
+                setGroceryItems(groceryItems.filter(item => item.id !== id));
+            })
+            .catch(error => {
+                console.error('Error deleting grocery item:', error);
+            });
     };
 
     const handleEdit = (id, item) => {
@@ -40,15 +58,30 @@ const AdminViewGrocery = () => {
 
     const handleSave = (id) => {
         if (!window.confirm("Are you sure you want to save these changes?")) return;
-        axios.put(`http://localhost:8080/api/track-tidy/grocery/update?id=${id}`, editedItem)
+
+        const formData = new FormData();
+        formData.append("itemName", editedItem.itemName);
+        formData.append("price", editedItem.price);
+        formData.append("productId", editedItem.productId);
+        formData.append("quantity", editedItem.quantity);
+        formData.append("expiryDate", editedItem.expiryDate);
+        formData.append("itemImage", editedItem.itemImage ? editedItem.itemImage : null);
+        formData.append("id", id);
+
+        axios.put(`http://localhost:8080/api/track-tidy/grocery/update/${id}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+            }
+        })
             .then(() => {
                 setGroceryItems(groceryItems.map(item =>
                     item.id === id ? { ...item, ...editedItem } : item
                 ));
-                setEditMode(null);
+                setEditMode(null); //Exit edit mode
             })
             .catch(error => {
-                console.error('Error updating grocery item:', error);
+                console.error('Error updating grocery item:', error.response?.data || error.message);
             });
     };
 
@@ -69,9 +102,9 @@ const AdminViewGrocery = () => {
         setIsModalOpen(true);
     };
 
-    useEffect(() => {
+    /*useEffect(() => {
         fetchGroceryItems();
-    }, []);
+    }, []);*/
 
     const filteredGroceryItems = groceryItems.filter(item =>
         (item.itemName?.toLowerCase() ?? '').includes(search.toLowerCase()) ||
@@ -231,7 +264,7 @@ const AdminViewGrocery = () => {
                                         </td>
                                         <td className="px-4 py-3">
                                             <input
-                                                type="text"
+                                                type="date"
                                                 name="expiryDate"
                                                 value={editedItem.expiryDate || item.expiryDate}
                                                 onChange={handleChange}
@@ -240,10 +273,12 @@ const AdminViewGrocery = () => {
                                         </td>
                                         <td className="px-4 py-3">
                                             <input
-                                                type="text"
+                                                type="file"
                                                 name="itemImage"
                                                 value={editedItem.itemImage || item.itemImage}
-                                                onChange={handleChange}
+                                                onChange={(e) =>
+                                                    setEditedItem({...editedItem, itemImage: e.target.files[0] })
+                                                }
                                                 className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
                                             />
                                         </td>
@@ -270,9 +305,9 @@ const AdminViewGrocery = () => {
                                         <td className="px-4 py-3">{item.quantity}</td>
                                         <td className="px-4 py-3">{item.expiryDate}</td>
                                         <td className="px-4 py-3">
-                                            {item.itemImage ? (
+                                            {item.productImageBase64 ? (
                                                 <img
-                                                    src={item.itemImage}
+                                                    src={item.productImageBase64}
                                                     alt="Grocery"
                                                     className="h-12 w-12 object-cover rounded"
                                                 />
@@ -288,7 +323,7 @@ const AdminViewGrocery = () => {
                                                 <Pencil size={18} />
                                             </button>
                                             <button
-                                                onClick={() => deleteItem(item.id)}
+                                                onClick={() => handleDeleteItem(item.id)}
                                                 className="text-red-500 hover:text-red-600"
                                             >
                                                 <Trash2 size={18} />

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 import Plumbing from "../../assets/plumbingsvrc.png";
+import { useAuth } from "../../service/AuthContext.jsx";
 
 const ServiceInput = () => {
+    const { user } = useAuth();
     const [serviceDesc, setServiceDesc] = useState("");
     const [serviceType, setServiceType] = useState("");
     const [memberName, setName] = useState("");

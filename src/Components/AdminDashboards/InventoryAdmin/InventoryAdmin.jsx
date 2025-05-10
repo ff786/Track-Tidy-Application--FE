@@ -13,8 +13,8 @@ function AdminViewInventory() {
     const [search, setSearch] = useState("");
     const [editMode, setEditMode] = useState(null); // Track the currently edited item
     const [editedItem, setEditedItem] = useState({}); // Track the edited data
-    const [showModal, setShowModal] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editedData, setEditedData] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -71,7 +71,8 @@ function AdminViewInventory() {
                 setInventory(inventory.map(item =>
                     item.id === id ? { ...item, ...editedItem } : item
                 ));
-                setEditMode(null); // Exit edit mode
+                setEditMode(null);
+                setEditedData({});
             })
             .catch(error => {
                 console.error('Error updating inventory item:', error.response?.data || error.message);
@@ -80,8 +81,8 @@ function AdminViewInventory() {
 
 
     const handleCancelClick = () => {
-        setEditMode(null); // Reset to cancel editing
-        setEditedItem({}); // Clear the edited item data
+        setEditMode(null);
+        setEditedItem({});
     };
 
     const handleChange = (e) => {
@@ -300,7 +301,7 @@ function AdminViewInventory() {
                                         <td className="px-4 py-3">{item.quantity}</td>
                                         <td className="px-4 py-3">{item.productId}</td>
                                         <td className="px-4 py-3">{item.warrantyPeriod}</td>
-                                        <td className="px-4 py-3">{item.productValue}</td>
+                                        <td className="px-4 py-3">Rs. {item.productValue}</td>
                                         <td className="px-4 py-3">
                                             {item.productImageBase64 ? (
                                                 <img src={item.productImageBase64} alt="Product" className="w-16 h-16 object-cover rounded" />
