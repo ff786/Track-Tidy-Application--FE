@@ -44,8 +44,13 @@ const AddInventory = ({ setIsModalOpen }) => {
                     setFormData({ ...formData, [name]: value });
                 }
             }
+        } else if (name === 'quantity') {
+            const numValue = parseInt(value);
+            if (numValue >= 0 || value === '') {  // Changed from > 0 to >= 1
+                setFormData({ ...formData, [name]: value });
+            }
         } else {
-            // For quantity and warranty period - only positive whole numbers
+            // For warranty period - only positive whole numbers
             const numValue = parseInt(value);
             if (numValue > 0 || value === '') {
                 setFormData({ ...formData, [name]: value });
@@ -69,8 +74,8 @@ const AddInventory = ({ setIsModalOpen }) => {
     if (!formData.productId) {
       newErrors.productId = 'Product ID is required';
     }
-    if (!formData.quantity || formData.quantity <= 0) {
-      newErrors.quantity = 'Quantity must be greater than 0';
+    if (!formData.quantity || formData.quantity < 1) {  // Changed from <= 0 to < 1
+      newErrors.quantity = 'Quantity must be at least 1';
     }
     if (!formData.productValue || formData.productValue <= 0) {
       newErrors.productValue = 'Product value must be greater than 0';
@@ -210,13 +215,13 @@ const AddInventory = ({ setIsModalOpen }) => {
                           type="number"
                           name="quantity"
                           id="quantity"
-                          min="1"
+                          min="0" 
                           value={formData.quantity}
                           onChange={handleChange}
                           onWheel={(e) => e.target.blur()} // Prevent mousewheel from changing value
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
-                          placeholder="Enter quantity (min: 1)"
+                          placeholder="Enter quantity (min: 0)"
                       />
                       {errors.quantity && <p className="text-red-300 text-sm mt-1">{errors.quantity}</p>}
                     </div>
@@ -310,22 +315,22 @@ const AddInventory = ({ setIsModalOpen }) => {
                       />
                     </label>
 
-                    {imagePreview ? (
-                        <div className="relative h-12 w-16 rounded-lg overflow-hidden">
-                          <img src="/api/placeholder/64/64" alt="Preview" className="h-full w-full object-cover" />
-                          <button
-                              type="button"
-                              onClick={removeImage}
-                              className="absolute top-0 right-0 bg-red-500 rounded-full p-1 shadow-lg"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                    ) : (
-                        <div className="h-16 w-16 rounded-lg bg-green-700 flex items-center justify-center">
-                          <Camera size={24} />
-                        </div>
-                    )}
+                     {imagePreview ? (
+                                                                    <div className="relative h-16 w-16 rounded-lg overflow-hidden">
+                                                                        <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={removeImage}
+                                                                            className="absolute top-0 right-0 bg-red-500 rounded-full p-1 shadow-lg"
+                                                                        >
+                                                                            <X size={14} />
+                                                                        </button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="h-16 w-16 rounded-lg bg-green-700 flex items-center justify-center">
+                                                                        <Camera size={24} />
+                                                                    </div>
+                                                                )}
                   </div>
                   {errors.ProductImage && <p className="text-red-300 text-sm mt-1">{errors.ProductImage}</p>}
                 </div>
