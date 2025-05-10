@@ -57,7 +57,9 @@ function AdminViewInventory() {
         formData.append("quantity", editedItem.quantity);
         formData.append("productValue", editedItem.productValue);
         formData.append("productCategory", editedItem.productCategory);
-        formData.append("ProductImage", editedItem.ProductImage);
+        formData.append("ProductImage", editedItem.ProductImage ? editedItem.ProductImage : null);
+        formData.append("warrantyPeriod", editedItem.warrantyPeriod);
+        formData.append("id", id);
 
         axios.put(`http://localhost:8080/api/track-tidy/inventory/update/${id}`, formData, {
             headers: {

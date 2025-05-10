@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
 function TrackTidyChatbot() {
+
     const [messages, setMessages] = useState([
         { role: 'assistant', content: "👋 Hey! I'm TrackTidy Assistant. What are your main preferences focused onto?" }
     ]);
@@ -15,6 +16,7 @@ function TrackTidyChatbot() {
 
     const sendMessage = async () => {
         if (!input.trim()) return;
+        console.log('Sending message...', input.trim());
 
         const userMessage = { role: 'user', content: input };
         setMessages((prev) => [...prev, userMessage]);
@@ -22,11 +24,17 @@ function TrackTidyChatbot() {
         setIsTyping(true);
 
         try {
-            const response = await axios.post('http://localhost:8080/api/track-tidy/track-ai/generate-package', {
-                codeSnippet: input
-            });
+            const response = await axios.post(
+                'http://localhost:8080/api/track-tidy/track-ai/generate-package',
+                { userPromptRequest: input }, // ✅ matches UserPromptRequest field
+                {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
 
-            const assistantMessage = response.data; // Just take the whole string
+            const assistantMessage = response.data;
             setMessages((prev) => [...prev, { role: 'assistant', content: assistantMessage }]);
         } catch (error) {
             console.error("Error:", error);
@@ -34,7 +42,6 @@ function TrackTidyChatbot() {
         } finally {
             setIsTyping(false);
         }
-
     };
 
     const handleKeyDown = (e) => {

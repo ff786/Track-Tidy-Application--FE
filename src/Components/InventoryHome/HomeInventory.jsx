@@ -541,7 +541,7 @@ const HomeInventory = () => {
                                                     <td className="py-2 px-4">
                                                         <div className="flex items-center">
                                                             <img
-                                                                src={item.ProductImage || `/api/placeholder/50/50`}
+                                                                src={item.productImageBase64 || `/api/placeholder/50/50`}
                                                                 alt={item.productName}
                                                                 className="w-12 h-12 object-cover mr-3"
                                                             />
