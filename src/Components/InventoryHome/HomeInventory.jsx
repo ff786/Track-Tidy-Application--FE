@@ -118,8 +118,6 @@ const HomeInventory = () => {
         }
     }, [user]);
 
-
-
     // Calculate remaining budget whenever cart changes
     useEffect(() => {
         if (packageInfo && packageInfo.inventoryValue) {

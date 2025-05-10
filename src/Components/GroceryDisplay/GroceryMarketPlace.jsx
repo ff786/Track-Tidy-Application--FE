@@ -12,6 +12,9 @@ const TrackTidyGrocery = () => {
     const [cart, setCart] = useState([]);
     const [showCart, setShowCart] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [packageInfo, setPackageInfo] = useState(null);
+    const [remainingBudget, setRemainingBudget] = useState(0);
+    const [budgetExceeded, setBudgetExceeded] = useState(false);
     const { user } = useAuth();
 
     // Slider content
@@ -36,6 +39,53 @@ const TrackTidyGrocery = () => {
         image: 'https://images.unsplash.com/photo-1624720114708-0cbd6ee41f4e?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     },
 ];
+
+    // Fetch user's package information
+    useEffect(() => {
+        if (user?.email) {
+            const fetchPackageInfo = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/api/track-tidy/package/getAll?userId=${user.userId}`);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    /*console.log("Fetched data from package API:", data); // ✅ Log full response*/
+
+                    if (Array.isArray(data)) {
+                        const matchedPackage = data.find(pkg => pkg.email === user.userId);
+                        /*console.log("Matched package for user:", matchedPackage); // ✅ Log matched package*/
+
+                        setPackageInfo(matchedPackage);
+
+                        if (matchedPackage?.inventoryValue) {
+                            /*console.log("Inventory Value:", matchedPackage.inventoryValue); // ✅ Log inventory value*/
+                            setRemainingBudget(parseFloat(matchedPackage.inventoryValue));
+                        }
+                    }
+
+                } catch (err) {
+                    console.error("Error fetching package info:", err);
+                }
+            };
+
+            fetchPackageInfo();
+        }
+    }, [user]);
+
+    // Calculate remaining budget whenever cart changes
+    useEffect(() => {
+        if (packageInfo && packageInfo.inventoryValue) {
+            const cartTotal = cart.reduce((total, item) =>
+                total + (parseFloat(item.productValue) * item.cartQuantity), 0);
+
+            const remaining = parseFloat(packageInfo.inventoryValue) - cartTotal;
+            setRemainingBudget(remaining);
+            setBudgetExceeded(remaining < 0);
+        }
+    }, [cart, packageInfo]);
 
     // Auto-rotate slider
     useEffect(() => {
@@ -92,9 +142,6 @@ const TrackTidyGrocery = () => {
         image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80' 
     },
 ];
-
-    // Filter products based on active tab
-    const filteredProducts = products;
 
     // Add to cart function
     const addToCart = (product) => {
@@ -305,7 +352,6 @@ const TrackTidyGrocery = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 transition={{ duration: 0.3 }}
-                                onClick={() => setActiveTab(category.name)}
                             >
                                 <img
                                     src={category.image}
@@ -343,9 +389,9 @@ const TrackTidyGrocery = () => {
                                     >
                                         {/* Image Container */}
                                         <div className="h-48 w-full bg-gray-100 relative flex items-center justify-center">
-                                            {product.image ? (
+                                            {product.productImageBase64 ? (
                                                 <img
-                                                    src={product.image}
+                                                    src={product.productImageBase64}
                                                     alt={product.name}
                                                     className="h-full w-full object-cover"
                                                 />
@@ -360,29 +406,19 @@ const TrackTidyGrocery = () => {
                                                     Out of Stock
                                                 </div>
                                             )}
-                                            {/* Discount badge */}
-                                            {product.discount && (
-                                                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                                                    {product.discount} OFF
-                                                </div>
-                                            )}
                                         </div>
 
                                         {/* Product Details */}
                                         <div className="p-4 flex-grow flex flex-col">
                                             <h3 className="font-semibold text-gray-800 text-lg mb-2">{product.name}</h3>
-                                            <p className="text-sm text-gray-500 mb-2">Category: {product.category}</p>
                                             <div className="text-sm text-gray-500 mb-2">
                                                 <p>Quantity: {product.quantity} {product.unit || 'units'}</p>
                                                 {product.weight && <p>Weight: {product.weight}</p>}
                                             </div>
                                             <div className="mt-auto">
                                                 <div className="flex justify-between items-center mb-2">
-                                                    {product.originalPrice ? (
+                                                    {product.price ? (
                                                         <>
-                                                            <span className="text-gray-400 line-through text-sm">
-                                                                ${parseFloat(product.originalPrice).toFixed(2)}
-                                                            </span>
                                                             <span className="ml-2 font-bold text-green-700">
                                                                 ${parseFloat(product.price).toFixed(2)}
                                                             </span>
@@ -434,12 +470,29 @@ const TrackTidyGrocery = () => {
                                 </button>
                             </div>
 
-                            {/* Cart Summary */}
-                            <div className="mb-4 p-3 rounded-lg bg-green-100">
+                            {/* Budget Information */}
+                            <div className={`mb-4 p-3 rounded-lg ${budgetExceeded ? 'bg-red-100' : 'bg-green-100'}`}>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Package Budget:</span>
+                                    <span className="font-bold">
+                                        LKR {packageInfo ? parseFloat(packageInfo.inventoryValue).toFixed(2) : '0.00'}
+                                    </span>
+                                </div>
                                 <div className="flex justify-between items-center">
                                     <span className="font-medium">Cart Total:</span>
-                                    <span className="font-bold">${cartTotal.toFixed(2)}</span>
+                                    <span className="font-bold">LKR {cartTotal.toFixed(2)}</span>
                                 </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Remaining Budget:</span>
+                                    <span className={`font-bold ${budgetExceeded ? 'text-red-600' : 'text-green-600'}`}>
+                                        LKR {remainingBudget.toFixed(2)}
+                                    </span>
+                                </div>
+                                {budgetExceeded && (
+                                    <p className="text-red-600 text-sm mt-2">
+                                        Warning: Your cart total exceeds your available budget.
+                                    </p>
+                                )}
                             </div>
 
                             {cart.length === 0 ? (
@@ -465,7 +518,7 @@ const TrackTidyGrocery = () => {
                                                     <td className="py-2 px-4">
                                                         <div className="flex items-center">
                                                             <img
-                                                                src={item.image || `/api/placeholder/50/50`}
+                                                                src={item.productImageBase64 || `/api/placeholder/50/50`}
                                                                 alt={item.name}
                                                                 className="w-12 h-12 object-cover mr-3"
                                                             />
@@ -531,7 +584,7 @@ const TrackTidyGrocery = () => {
                                                     : 'bg-green-600 hover:bg-green-700 text-white'
                                             } transition-colors duration-300`}
                                         >
-                                            Proceed to Checkout
+                                            Submit Order
                                         </button>
                                     </div>
                                 </>
