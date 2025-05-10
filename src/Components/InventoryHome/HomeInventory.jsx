@@ -417,20 +417,25 @@ const HomeInventory = () => {
                             <p>Please check your API connection and try again.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4 text-start justify-between">
+                        <div className="grid grid-cols-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                             {filteredProducts.length > 0 ? (
                                 filteredProducts.map((product) => (
-                                    <div key={product.productId}
-                                         className="bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-                                        <div className="h-40 bg-gray-100 relative flex items-center justify-center">
+                                    <div 
+                                        key={product.productId}
+                                        className="bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-full"
+                                    >
+                                        {/* Image Container */}
+                                        <div className="h-48 w-full bg-gray-100 relative flex items-center justify-center">
                                             {product.productImageBase64 ? (
                                                 <img
                                                     src={product.productImageBase64 || `/api/placeholder/160/160`}
                                                     alt={product.productName}
-                                                    className="max-w-full max-h-full object-contain"
+                                                    className="h-full w-full object-cover"
                                                 />
                                             ) : (
-                                            "No Image"
+                                                <div className="flex items-center justify-center h-full w-full text-gray-400">
+                                                    No Image
+                                                </div>
                                             )}
                                             {/* Stock indicator */}
                                             {product.quantity <= 0 && (
@@ -439,32 +444,36 @@ const HomeInventory = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="p-4">
-                                            <h3 className="font-semibold text-gray-800">{product.productName}</h3>
-                                            <p className="text-m text-gray-500 mb-2">Category: {product.productCategory}</p>
-                                            <div className="text-xs text-gray-500 mb-2">
+
+                                        {/* Product Details */}
+                                        <div className="p-4 flex-grow flex flex-col">
+                                            <h3 className="font-semibold text-gray-800 text-lg mb-2">{product.productName}</h3>
+                                            <p className="text-sm text-gray-500 mb-2">Category: {product.productCategory}</p>
+                                            <div className="text-sm text-gray-500 mb-2">
                                                 <p>Quantity: {product.quantity}</p>
                                                 <p>Warranty: {product.warrantyPeriod} Months</p>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-semibold text-green-700">LKR {parseFloat(product.productValue).toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-2 flex justify-center">
-                                            <button
-                                                onClick={() => addToCart(product)}
-                                                disabled={product.quantity <= 0}
-                                                className={`w-full py-2 px-4 rounded ${
-                                                    product.quantity <= 0
-                                                        ? 'bg-gray-300 cursor-not-allowed'
-                                                        : 'bg-green-600 hover:bg-green-700 text-white'
-                                                } transition-colors duration-300 flex items-center justify-center`}
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                                </svg>
-                                                Add to cart
-                                            </button>
+                                            <div className="mt-auto">
+    <div className="flex justify-between items-center mb-2">
+        <span className="font-semibold text-green-700">
+            LKR {parseFloat(product.productValue).toFixed(2)}
+        </span>
+    </div>
+    <button
+        onClick={() => addToCart(product)}
+        disabled={product.quantity <= 0}
+        className={`w-full py-1.5 px-3 rounded text-sm ${
+            product.quantity <= 0
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+        } transition-colors duration-300 flex items-center justify-center`}
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        Add to cart
+    </button>
+</div>
                                         </div>
                                     </div>
                                 ))
