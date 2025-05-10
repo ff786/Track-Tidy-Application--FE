@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddInventory from "../../HomeInventory/addInventory.jsx";
+import Swal from 'sweetalert2';
 
 
 function AdminViewInventory() {
@@ -13,7 +14,6 @@ function AdminViewInventory() {
     const [search, setSearch] = useState("");
     const [editMode, setEditMode] = useState(null); // Track the currently edited item
     const [editedItem, setEditedItem] = useState({}); // Track the edited data
-    const [showModal, setShowModal] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const navigate = useNavigate();
 
