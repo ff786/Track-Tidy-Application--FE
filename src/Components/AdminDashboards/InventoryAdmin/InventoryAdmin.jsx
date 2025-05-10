@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddInventory from "../../HomeInventory/addInventory.jsx";
-
+import Swal from 'sweetalert2';
 
 function AdminViewInventory() {
     const [inventory, setInventory] = useState([]);
@@ -32,15 +32,35 @@ function AdminViewInventory() {
     }, [navigate]);
 
     const handleDelete = (id) => {
-        if (!window.confirm("Are you sure you want to delete this item?")) return;
-
-        axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`)
-            .then(() => {
-                setInventory(inventory.filter(item => item.id !== id));
-            })
-            .catch(error => {
-                console.error('Error deleting inventory item:', error);
-            });
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d', // green-700
+            cancelButtonColor: '#dc2626', // red-600
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`)
+                    .then(() => {
+                        setInventory(inventory.filter(item => item.id !== id));
+                        Swal.fire(
+                            'Deleted!',
+                            'Item has been deleted successfully.',
+                            'success'
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error deleting inventory item:', error);
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete the item.',
+                            'error'
+                        );
+                    });
+            }
+        });
     };
 
     const handleEdit = (id, item) => {
@@ -49,35 +69,54 @@ function AdminViewInventory() {
     };
 
     const handleSave = (id) => {
-        if (!window.confirm("Are you sure you want to save these changes?")) return;
+        Swal.fire({
+            title: 'Save Changes?',
+            text: "Do you want to save these changes?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, save it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append("productName", editedItem.productName);
+                formData.append("productId", editedItem.productId);
+                formData.append("quantity", editedItem.quantity);
+                formData.append("productValue", editedItem.productValue);
+                formData.append("productCategory", editedItem.productCategory);
+                formData.append("ProductImage", editedItem.ProductImage ? editedItem.ProductImage : null);
+                formData.append("warrantyPeriod", editedItem.warrantyPeriod);
+                formData.append("id", id);
 
-        const formData = new FormData();
-        formData.append("productName", editedItem.productName);
-        formData.append("productId", editedItem.productId);
-        formData.append("quantity", editedItem.quantity);
-        formData.append("productValue", editedItem.productValue);
-        formData.append("productCategory", editedItem.productCategory);
-        formData.append("ProductImage", editedItem.ProductImage ? editedItem.ProductImage : null);
-        formData.append("warrantyPeriod", editedItem.warrantyPeriod);
-        formData.append("id", id);
-
-        axios.put(`http://localhost:8080/api/track-tidy/inventory/update/${id}`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                axios.put(`http://localhost:8080/api/track-tidy/inventory/update/${id}`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                    }
+                })
+                    .then(() => {
+                        setInventory(inventory.map(item =>
+                            item.id === id ? { ...item, ...editedItem } : item
+                        ));
+                        setEditMode(null);
+                        Swal.fire(
+                            'Saved!',
+                            'Your changes have been saved successfully.',
+                            'success'
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error updating inventory item:', error.response?.data || error.message);
+                        Swal.fire(
+                            'Error!',
+                            'Failed to update the item.',
+                            'error'
+                        );
+                    });
             }
-        })
-            .then(() => {
-                setInventory(inventory.map(item =>
-                    item.id === id ? { ...item, ...editedItem } : item
-                ));
-                setEditMode(null); // Exit edit mode
-            })
-            .catch(error => {
-                console.error('Error updating inventory item:', error.response?.data || error.message);
-            });
+        });
     };
-
 
     const handleCancelClick = () => {
         setEditMode(null); // Reset to cancel editing

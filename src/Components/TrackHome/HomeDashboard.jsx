@@ -66,32 +66,32 @@ const TrackTidyHomePage = () => {
         icon: Smartphone,
         title: "Electronics Tracking",
         description: "Catalog all your electronic devices with purchase dates, warranty information, and service history.",
-        path: "/electronics"
+        path: "/inventory"
     }, {
         icon: Coffee,
         title: "Home Appliances",
         description: "Track kitchen appliances, laundry machines, and other home essentials with maintenance schedules.",
-        path: "/appliances"
+        path: "/inventory"
     }, {
         icon: Home,
         title: "Furniture Inventory",
         description: "Manage your furniture collection with details on materials, dimensions, and care instructions.",
-        path: "/furniture"
+        path: "/inventory"
     }, {
         icon: Settings,
         title: "Service Connections",
         description: "Find and book qualified service providers for repairs and maintenance with just a few clicks.",
-        path: "/services"
+        path: "/inventory"
     }, {
         icon: ShoppingCart,
         title: "Grocery Shopping",
         description: "Browse and order grocery items directly from our platform with quick delivery options.",
-        path: "/groceries"
+        path: "/grocery-home"
     }, {
         icon: Clipboard,
         title: "Maintenance Reminders",
         description: "Get timely notifications for warranty expirations, regular maintenance, and service requirements.",
-        path: "/reminders"
+        path: "/user-services"
     }];
 
     // Handle navigation to feature page
@@ -403,7 +403,7 @@ const TrackTidyHomePage = () => {
                                 <p className="text-sm text-white mt-1">{category.description}</p>
                                 <motion.a
                                     href={category.link}
-                                    className="mt-3 inline-flex items-center text-white font-medium"
+                                    className="mt-3 inline-flex items-center text-green-600 font-medium"
                                     whileHover={{x: 5}}
                                 >
                                     See more
