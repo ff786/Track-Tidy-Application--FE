@@ -24,18 +24,35 @@ const AddInventory = ({ setIsModalOpen }) => {
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
     if (type === 'file' && name === 'ProductImage') {
-      const file = files[0];
-      setFormData({ ...formData, [name]: file });
+        const file = files[0];
+        setFormData({ ...formData, [name]: file });
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      if (file) {
-        reader.readAsDataURL(file);
-      }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result);
+        };
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    } else if (type === 'number') {
+        if (name === 'productValue') {
+            // Validate product value to have max 2 decimal places and be >= 0.01
+            const regex = /^\d*\.?\d{0,2}$/;  // Only allows up to 2 decimal places
+            if (value === '' || regex.test(value)) {
+                const numValue = parseFloat(value);
+                if (numValue >= 0.01 || value === '') {  // Minimum value of 0.01
+                    setFormData({ ...formData, [name]: value });
+                }
+            }
+        } else {
+            // For quantity and warranty period - only positive whole numbers
+            const numValue = parseInt(value);
+            if (numValue > 0 || value === '') {
+                setFormData({ ...formData, [name]: value });
+            }
+        }
     } else {
-      setFormData({ ...formData, [name]: value });
+        setFormData({ ...formData, [name]: value });
     }
   };
 
@@ -52,11 +69,14 @@ const AddInventory = ({ setIsModalOpen }) => {
     if (!formData.productId) {
       newErrors.productId = 'Product ID is required';
     }
-    if (formData.quantity <= 0) {
+    if (!formData.quantity || formData.quantity <= 0) {
       newErrors.quantity = 'Quantity must be greater than 0';
     }
-    if (formData.productValue <= 0) {
+    if (!formData.productValue || formData.productValue <= 0) {
       newErrors.productValue = 'Product value must be greater than 0';
+    }
+    if (!formData.WarrantyPeriod || formData.WarrantyPeriod <= 0) {
+      newErrors.WarrantyPeriod = 'Warranty period must be greater than 0';
     }
     return newErrors;
   };
@@ -190,10 +210,13 @@ const AddInventory = ({ setIsModalOpen }) => {
                           type="number"
                           name="quantity"
                           id="quantity"
+                          min="1"
                           value={formData.quantity}
                           onChange={handleChange}
+                          onWheel={(e) => e.target.blur()} // Prevent mousewheel from changing value
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
+                          placeholder="Enter quantity (min: 1)"
                       />
                       {errors.quantity && <p className="text-red-300 text-sm mt-1">{errors.quantity}</p>}
                     </div>
@@ -210,11 +233,14 @@ const AddInventory = ({ setIsModalOpen }) => {
                           type="number"
                           name="productValue"
                           id="productValue"
-                          placeholder="Product Value Rs"
+                          min="10.00"
+                          step="1"
                           value={formData.productValue}
                           onChange={handleChange}
+                          onWheel={(e) => e.target.blur()}
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
+                          placeholder="Enter price (min:10.00)"
                       />
                       {errors.productValue && <p className="text-red-300 text-sm mt-1">{errors.productValue}</p>}
                     </div>
@@ -228,9 +254,10 @@ const AddInventory = ({ setIsModalOpen }) => {
                           type="number"
                           name="WarrantyPeriod"
                           id="WarrantyPeriod"
-                          placeholder="In Months"
+                          min="1"
                           value={formData.WarrantyPeriod}
                           onChange={handleChange}
+                          onWheel={(e) => e.target.blur()}
                           className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"
                           required
                       />
