@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Camera, Upload, X, Calendar, DollarSign, Package, Tag, Loader, Layers } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const AddGroceryItem = ({ setIsModalOpen }) => {
 
@@ -78,10 +79,18 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
         setIsLoading(true);
 
         try {
-            // Create FormData object for multipart/form-data submission (needed for file upload)
-            const submitData = new FormData();
+            // Show loading state
+            Swal.fire({
+                title: 'Adding Item',
+                text: 'Please wait while we process your request...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-            // Append all form fields to FormData
+            const submitData = new FormData();
             Object.keys(formData).forEach(key => {
                 if (key === 'itemImage' && formData[key]) {
                     submitData.append(key, formData[key]);
@@ -90,30 +99,38 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
                 }
             });
 
-            // Make API request
             const response = await fetch('http://localhost:8080/api/track-tidy/grocery/create', {
                 method: 'POST',
                 body: submitData,
-                // Don't set Content-Type header - fetch will automatically set it with boundary for FormData
             });
 
-            // Handle response
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 throw new Error(errorData?.message || `Error: ${response.status}`);
             }
 
-            const result = await response.json();
-            setSuccessMessage('Grocery item added successfully!');
+            await response.json();
 
-            // Close modal after short delay
-            setTimeout(() => {
-                setIsModalOpen(false);
-            }, 1500);
+            // Show success message
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Grocery item added successfully!',
+                timer: 1500,
+                showConfirmButton: false,
+                willClose: () => {
+                    setIsModalOpen(false);
+                }
+            });
 
         } catch (err) {
             console.error('Error adding grocery item:', err);
-            setError(err.message || 'Failed to add grocery item. Please try again.');
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to add grocery item. Please try again.',
+                confirmButtonColor: '#15803d'
+            });
         } finally {
             setIsLoading(false);
         }

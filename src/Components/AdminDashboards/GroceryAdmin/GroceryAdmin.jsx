@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddGroceryItem from "../../GroceryConnectCommon/AddGroceryItem.jsx";
 import {useNavigate} from "react-router-dom";
+import Swal from "sweetalert2";
 
 const AdminViewGrocery = () => {
     const [groceryItems, setGroceryItems] = useState([]);
@@ -39,16 +40,36 @@ const AdminViewGrocery = () => {
         }
     };*/
 
-    const handleDeleteItem = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this item?")) return;
-
+    const handleDeleteItem =  (id) => {
+        Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#15803d',
+                    cancelButtonColor: '#dc2626',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
         axios.delete(`http://localhost:8080/api/track-tidy/grocery/delete?id=${id}`)
             .then(() => {
                 setGroceryItems(groceryItems.filter(item => item.id !== id));
+                Swal.fire(
+                                            'Deleted!',
+                                            'Service request has been deleted.',
+                                            'success'
+                                        );
             })
             .catch(error => {
-                console.error('Error deleting grocery item:', error);
+                console.error('Error deleting service:', error);
+                                       Swal.fire(
+                                           'Error!',
+                                           'Failed to delete service request.',
+                                           'error'
+                                       );
             });
+    }
+      });
     };
 
     const handleEdit = (id, item) => {
@@ -56,34 +77,66 @@ const AdminViewGrocery = () => {
         setEditedItem(item);
     };
 
-    const handleSave = (id) => {
-        if (!window.confirm("Are you sure you want to save these changes?")) return;
+    const handleSave = async (id) => {
+  // Confirmation dialog
+  const confirmResult = await Swal.fire({
+    title: 'Are you sure?',
+    text: 'You want to save these changes?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, save it!',
+    cancelButtonText: 'Cancel'
+  });
 
-        const formData = new FormData();
-        formData.append("itemName", editedItem.itemName);
-        formData.append("price", editedItem.price);
-        formData.append("productId", editedItem.productId);
-        formData.append("quantity", editedItem.quantity);
-        formData.append("expiryDate", editedItem.expiryDate);
-        formData.append("itemImage", editedItem.itemImage ? editedItem.itemImage : null);
-        formData.append("id", id);
+  if (!confirmResult.isConfirmed) return;
 
-        axios.put(`http://localhost:8080/api/track-tidy/grocery/update/${id}`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
-            }
-        })
-            .then(() => {
-                setGroceryItems(groceryItems.map(item =>
-                    item.id === id ? { ...item, ...editedItem } : item
-                ));
-                setEditMode(null); //Exit edit mode
-            })
-            .catch(error => {
-                console.error('Error updating grocery item:', error.response?.data || error.message);
-            });
-    };
+  // Prepare form data
+  const formData = new FormData();
+  formData.append("itemName", editedItem.itemName);
+  formData.append("price", editedItem.price);
+  formData.append("productId", editedItem.productId);
+  formData.append("quantity", editedItem.quantity);
+  formData.append("expiryDate", editedItem.expiryDate);
+  formData.append("itemImage", editedItem.itemImage ? editedItem.itemImage : null);
+  formData.append("id", id);
+
+  try {
+    // Make API request
+    await axios.put(`http://localhost:8080/api/track-tidy/grocery/update/${id}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+      }
+    });
+
+    // Update state
+    setGroceryItems(groceryItems.map(item =>
+      item.id === id ? { ...item, ...editedItem } : item
+    ));
+    setEditMode(null);
+
+    // Success notification
+    await Swal.fire({
+      title: 'Success!',
+      text: 'Your changes have been saved.',
+      icon: 'success',
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+  } catch (error) {
+    console.error('Error updating grocery item:', error.response?.data || error.message);
+    
+    // Error notification
+    await Swal.fire({
+      title: 'Error!',
+      text: 'Failed to save changes. Please try again.',
+      icon: 'error'
+    });
+  }
+};
 
     const handleCancelClick = () => {
         setEditMode(null);

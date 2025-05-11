@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Plumbing from "../../assets/plumbingsvrc.png";
 import { useAuth } from "../../service/AuthContext.jsx";
+import Swal from 'sweetalert2';
 
 const ServiceInput = () => {
     const { user } = useAuth();
@@ -105,7 +106,16 @@ const ServiceInput = () => {
                 throw new Error("Failed to submit the service request");
             }
 
-            alert("Service request submitted successfully!");
+            // Replace alert with Swal
+            await Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Service request submitted successfully!',
+                confirmButtonColor: '#15803d',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
             // Reset form
             setServiceDesc("");
             setServiceType("");
@@ -116,6 +126,12 @@ const ServiceInput = () => {
             setReferralCode("");
             setStep(1);
         } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message,
+                confirmButtonColor: '#15803d'
+            });
             setErrors({ submit: error.message });
         }
     };
