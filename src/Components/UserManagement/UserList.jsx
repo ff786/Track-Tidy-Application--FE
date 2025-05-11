@@ -79,9 +79,8 @@ function UserList() {
         }
     };
 
-
     const handleDelete = (id) => {
-        axios.delete(`http://localhost:8080/api/track-tidy/user/delete?id=${id}`)
+        axios.delete(`http://localhost:8080/api/track-tidy/admin/delete/${id}`)
             .then(() => {
                 setUsers(users.filter(user => user.id !== id));
             })
