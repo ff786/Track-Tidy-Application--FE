@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trash2, Pencil } from 'lucide-react';
+import {Trash2, Pencil, Save, X, Check} from 'lucide-react';
 import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 import autoTable from 'jspdf-autotable';
 
 function UserList() {
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const navigate = useNavigate();
+    const [editRowId, setEditRowId] = useState(null);
+    const [editedData, setEditedData] = useState({});
+
+    const handleCancelClick = () => {
+        setEditRowId(null);
+        setEditedData({});
+    };
 
     useEffect(() => {
         if (!sessionStorage.getItem("access_token")) {
@@ -19,13 +25,60 @@ function UserList() {
 
         axios.get('http://localhost:8080/api/track-tidy/admin/getAll')
             .then(response => {
-                console.log(response.data);
                 setUsers(response.data);
             })
             .catch(error => {
                 console.error('Error fetching users:', error);
             });
     }, [navigate]);
+
+    const handleEditClick = (user) => {
+        setEditRowId(user.id);
+        setEditedData({ ...user });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditedData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleEditUser = async (id) => {
+        const confirmSave = window.confirm("Are you sure you want to save the changes?");
+        if (!confirmSave) return;
+
+        const updatedUser = {
+            firstName: editedData.firstName,
+            lastName: editedData.lastName,
+            email: editedData.email,
+            mobileNumber: editedData.mobileNumber,
+            role: editedData.role,
+        };
+
+        try {
+            await axios.put(
+                `http://localhost:8080/api/track-tidy/admin/update/${id}`,
+                updatedUser,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                    }
+                }
+            );
+
+            setUsers(prev =>
+                prev.map(user => (user.id === id ? { ...editedData } : user))
+            );
+            setEditRowId(null);
+            setEditedData({});
+        } catch (error) {
+            console.error("Error updating user:", error);
+        }
+    };
+
 
     const handleDelete = (id) => {
         axios.delete(`http://localhost:8080/api/track-tidy/user/delete?id=${id}`)
@@ -127,35 +180,97 @@ function UserList() {
 
             <div className="overflow-x-auto bg-green-900 rounded-xl shadow-lg max-h-fit overflow-y-scroll">
                 <table className="min-w-full text-sm text-left">
-                    <thead className="bg-green-700 text-green-100 uppercase text-xs position-relative">
+                    <thead className="bg-green-700 text-green-100 uppercase text-xs">
                     <tr>
                         {["First Name", "Last Name", "Email", "Contact Number", "Role", "Action"].map((header, index) => (
-                            <th key={index} className="px-4 py-3 whitespace-nowrap">{header}</th>
+                            <th key={index} className="px-4 py-3">{header}</th>
                         ))}
                     </tr>
                     </thead>
-
                     <tbody className="divide-y divide-green-700">
                     {filteredUsers.map((user, idx) => (
-                        <tr key={user.id} className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
-                            <td className="px-4 py-3">{user.firstName}</td>
-                            <td className="px-4 py-3">{user.lastName}</td>
-                            <td className="px-4 py-3">{user.email}</td>
-                            <td className="px-4 py-3">{user.mobileNumber}</td>
-                            <td className="px-4 py-3">{user.role}</td>
-                            <td className="px-4 py-3">
-                                <div className="flex space-x-3">
-                                    <button className="text-blue-400 hover:text-blue-200 transition">
-                                        <Pencil size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(user.id)}
-                                        className="text-red-400 hover:text-red-200 transition"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                            </td>
+                        <tr key={user.id}
+                            className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700`}>
+                            {editRowId === user.id ? (
+                                <>
+                                    <td className="px-4 py-2">
+                                        <input
+                                            name="firstName"
+                                            value={editedData.firstName}
+                                            onChange={handleInputChange}
+                                            className="bg-green-100 text-green-800 px-2 py-1 rounded w-full"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <input
+                                            name="lastName"
+                                            value={editedData.lastName}
+                                            onChange={handleInputChange}
+                                            className="bg-green-100 text-green-800 px-2 py-1 rounded w-full"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <input
+                                            name="email"
+                                            value={editedData.email}
+                                            onChange={handleInputChange}
+                                            className="bg-green-100 text-green-800 px-2 py-1 rounded w-full"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <input
+                                            name="mobileNumber"
+                                            value={editedData.mobileNumber}
+                                            onChange={handleInputChange}
+                                            className="bg-green-100 text-green-800 px-2 py-1 rounded w-full"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-2">
+                                        <input
+                                            name="role"
+                                            value={editedData.role}
+                                            onChange={handleInputChange}
+                                            className="bg-green-100 text-green-800 px-2 py-1 rounded w-full"
+                                        />
+                                    </td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex space-x-3">
+                                            <button onClick={() => handleEditUser(user.id)}
+                                                    className="text-green-400 hover:text-green-200 transition">
+                                                <Save size={18}/>
+                                            </button>
+                                            <button onClick={handleCancelClick}
+                                                    className="text-red-400 hover:text-red-200 transition">
+                                                <X size={18}/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </>
+                            ) : (
+                                <>
+                                    <td className="px-4 py-3">{user.firstName}</td>
+                                    <td className="px-4 py-3">{user.lastName}</td>
+                                    <td className="px-4 py-3">{user.email}</td>
+                                    <td className="px-4 py-3">{user.mobileNumber}</td>
+                                    <td className="px-4 py-3">{user.role}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex space-x-3">
+                                            <button
+                                                onClick={() => handleEditClick(user)}
+                                                className="text-blue-400 hover:text-blue-200"
+                                            >
+                                                <Pencil size={18}/>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(user.id)}
+                                                className="text-red-400 hover:text-red-200"
+                                            >
+                                                <Trash2 size={18}/>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </>
+                            )}
                         </tr>
                     ))}
                     </tbody>

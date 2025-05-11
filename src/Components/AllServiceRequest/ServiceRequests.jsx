@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trash2, Pencil, X, Check } from 'lucide-react';
+import { Trash2, Pencil, X, Check, Save } from 'lucide-react';
 import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
@@ -15,7 +15,6 @@ function ServiceRequest() {
     const navigate = useNavigate();
     const [editRowId, setEditRowId] = useState(null);
     const [editedData, setEditedData] = useState({});
-    const [editId, setEditId] = useState(null);
 
     const handleEditClick = (item) => {
         setEditRowId(item.id);
@@ -301,7 +300,7 @@ function ServiceRequest() {
                                         <div className="flex space-x-3">
                                             <button onClick={() => handleSaveClick(item.id)}
                                                     className="text-green-400 hover:text-green-200 transition">
-                                                <Check size={18}/>
+                                                <Save size={18}/>
                                             </button>
                                             <button onClick={handleCancelClick}
                                                     className="text-red-400 hover:text-red-200 transition">

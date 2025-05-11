@@ -120,8 +120,6 @@ const HomeInventory = () => {
         }
     }, [user]);
 
-
-
     // Calculate remaining budget whenever cart changes
     useEffect(() => {
         if (packageInfo && packageInfo.inventoryValue) {
@@ -280,7 +278,7 @@ const HomeInventory = () => {
 
             // Here you would send the cart data to your API
             console.log("Submitting inventory request with items:", cart);
-            
+
             // Show success message
             await Swal.fire({
                 icon: 'success',
@@ -303,7 +301,39 @@ const HomeInventory = () => {
                 confirmButtonColor: '#15803d'
             });
         }
+        try {
+            for (const item of cart) {
+                const formData = new FormData();
+                formData.append("ProductImage", item.ProductImage);
+                formData.append("productName", item.productName);
+                formData.append("productId", item.productId);
+                formData.append("productCategory", item.productCategory);
+                formData.append("quantity", item.quantity);
+                formData.append("productValue", item.productValue);
+
+                const response = await fetch("http://localhost:8080/api/track-tidy/inventory/request/create", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`,
+                    },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to submit item ${item.itemName}`);
+                }
+            }
+
+            alert("Inventory request submitted successfully!");
+            setCart([]);
+            setShowCart(false);
+
+        } catch (error) {
+            console.error("Error submitting inventory request:", error);
+            alert("There was an error submitting the inventory request. Please try again.");
+        }
     };
+
 
     return (
         <>
@@ -410,7 +440,7 @@ const HomeInventory = () => {
                                 transition={{ duration: 0.3 }}
                                 onClick={() => {
                                     setActiveTab(category.name);
-                                    productsRef.current?.scrollIntoView({ 
+                                    productsRef.current?.scrollIntoView({
                                         behavior: 'smooth',
                                         block: 'start'
                                     });

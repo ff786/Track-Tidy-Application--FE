@@ -35,8 +35,8 @@ function PackagesAdmin() {
     };
 
     const handleExtend = (id) => {
-        // This needs to be connected to a backend endpoint (e.g., `/extend?id=`)
-        axios.post(`http://localhost:8080/api/track-tidy/package/extend?id=${id}`)
+
+        axios.post(`http://localhost:8080/api/track-tidy/package/extend/${id}`)
             .then(() => {
                 alert("Package extended for another month.");
             })
@@ -72,9 +72,10 @@ function PackagesAdmin() {
                         <th className="px-4 py-3">Email</th>
                         <th className="px-4 py-3">Package Type</th>
                         <th className="px-4 py-3">Total Budget</th>
-                        <th className="px-4 py-3">Inventory</th>
-                        <th className="px-4 py-3">Grocery</th>
-                        <th className="px-4 py-3">Services</th>
+                        <th className="px-4 py-3">Inventory Budget</th>
+                        <th className="px-4 py-3">Grocery Budget</th>
+                        <th className="px-4 py-3">Services Budget</th>
+                        <th className="px-4 py-3">Subscribed Date</th>
                         <th className="px-4 py-3">Action</th>
                     </tr>
                     </thead>
@@ -94,6 +95,7 @@ function PackagesAdmin() {
                                 <td className="px-4 py-3">{pkg.inventoryValue}</td>
                                 <td className="px-4 py-3">{pkg.groceryValue}</td>
                                 <td className="px-4 py-3">{pkg.serviceValue}</td>
+                                <td className="px-4 py-3">{pkg.subscribeDate}</td>
                                 <td className="px-4 py-3 flex flex-row">
                                     <button
                                         onClick={() => handleExtend(pkg.id)}
