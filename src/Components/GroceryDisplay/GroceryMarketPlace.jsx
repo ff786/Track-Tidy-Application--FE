@@ -60,9 +60,9 @@ const TrackTidyGrocery = () => {
 
                         setPackageInfo(matchedPackage);
 
-                        if (matchedPackage?.inventoryValue) {
+                        if (matchedPackage?.groceryValue) {
                             /*console.log("Inventory Value:", matchedPackage.inventoryValue); // ✅ Log inventory value*/
-                            setRemainingBudget(parseFloat(matchedPackage.inventoryValue));
+                            setRemainingBudget(parseFloat(matchedPackage.groceryValue));
                         }
                     }
 
@@ -77,11 +77,11 @@ const TrackTidyGrocery = () => {
 
     // Calculate remaining budget whenever cart changes
     useEffect(() => {
-        if (packageInfo && packageInfo.inventoryValue) {
+        if (packageInfo && packageInfo.groceryValue) {
             const cartTotal = cart.reduce((total, item) =>
-                total + (parseFloat(item.productValue) * item.cartQuantity), 0);
+                total + (parseFloat(item.price) * item.cartQuantity), 0);
 
-            const remaining = parseFloat(packageInfo.inventoryValue) - cartTotal;
+            const remaining = parseFloat(packageInfo.groceryValue) - cartTotal;
             setRemainingBudget(remaining);
             setBudgetExceeded(remaining < 0);
         }
@@ -241,14 +241,41 @@ const TrackTidyGrocery = () => {
         total + (parseFloat(item.price) * item.cartQuantity), 0);
 
     // Submit order
-    const submitOrder = () => {
-        // Here you would send the cart data to your API
-        console.log("Submitting order with items:", cart);
-        alert("Order submitted successfully!");
+    const submitOrder = async () => {
+        if (budgetExceeded) {
+            alert("Your request exceeds the available budget. Please adjust your cart.");
+            return;
+        }
+        try {
+            for (const item of cart) {
+                const formData = new FormData();
+                formData.append("itemImage", item.itemImage);
+                formData.append("itemName", item.itemName);
+                formData.append("productId", item.productId);
+                formData.append("quantity", item.quantity);
+                formData.append("price", item.price);
 
-        // Reset cart and close modal
-        setCart([]);
-        setShowCart(false);
+                const response = await fetch("http://localhost:8080/api/track-tidy/grocery/request/create", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`,
+                    },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to submit item ${item.itemName}`);
+                }
+            }
+
+            alert("Inventory request submitted successfully!");
+            setCart([]);
+            setShowCart(false);
+
+        } catch (error) {
+            console.error("Error submitting inventory request:", error);
+            alert("There was an error submitting the inventory request. Please try again.");
+        }
     };
 
     return (
@@ -410,7 +437,7 @@ const TrackTidyGrocery = () => {
 
                                         {/* Product Details */}
                                         <div className="p-4 flex-grow flex flex-col">
-                                            <h3 className="font-semibold text-gray-800 text-lg mb-2">{product.name}</h3>
+                                            <h3 className="font-semibold text-gray-800 text-lg mb-2">{product.itemName}</h3>
                                             <div className="text-sm text-gray-500 mb-2">
                                                 <p>Quantity: {product.quantity} {product.unit || 'units'}</p>
                                                 {product.weight && <p>Weight: {product.weight}</p>}
@@ -420,12 +447,12 @@ const TrackTidyGrocery = () => {
                                                     {product.price ? (
                                                         <>
                                                             <span className="ml-2 font-bold text-green-700">
-                                                                ${parseFloat(product.price).toFixed(2)}
+                                                                LKR {parseFloat(product.price).toFixed(2)}
                                                             </span>
                                                         </>
                                                     ) : (
                                                         <span className="font-bold text-green-700">
-                                                            ${parseFloat(product.price).toFixed(2)}
+                                                            LKR {parseFloat(product.price).toFixed(2)}
                                                         </span>
                                                     )}
                                                 </div>
@@ -475,7 +502,7 @@ const TrackTidyGrocery = () => {
                                 <div className="flex justify-between items-center">
                                     <span className="font-medium">Package Budget:</span>
                                     <span className="font-bold">
-                                        LKR {packageInfo ? parseFloat(packageInfo.inventoryValue).toFixed(2) : '0.00'}
+                                        LKR {packageInfo ? parseFloat(packageInfo.groceryValue).toFixed(2) : '0.00'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">

@@ -251,20 +251,45 @@ const HomeInventory = () => {
         total + (parseFloat(item.productValue) * item.cartQuantity), 0);
 
     // Submit inventory request
-    const submitInventoryRequest = () => {
+    const submitInventoryRequest = async () => {
         if (budgetExceeded) {
             alert("Your request exceeds the available budget. Please adjust your cart.");
             return;
         }
 
-        // Here you would send the cart data to your API
-        console.log("Submitting inventory request with items:", cart);
-        alert("Inventory request submitted successfully!");
+        try {
+            for (const item of cart) {
+                const formData = new FormData();
+                formData.append("ProductImage", item.ProductImage);
+                formData.append("productName", item.productName);
+                formData.append("productId", item.productId);
+                formData.append("productCategory", item.productCategory);
+                formData.append("quantity", item.quantity);
+                formData.append("productValue", item.productValue);
 
-        // Reset cart and close modal
-        setCart([]);
-        setShowCart(false);
+                const response = await fetch("http://localhost:8080/api/track-tidy/inventory/request/create", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`,
+                    },
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to submit item ${item.itemName}`);
+                }
+            }
+
+            alert("Inventory request submitted successfully!");
+            setCart([]);
+            setShowCart(false);
+
+        } catch (error) {
+            console.error("Error submitting inventory request:", error);
+            alert("There was an error submitting the inventory request. Please try again.");
+        }
     };
+
 
     return (
         <>
