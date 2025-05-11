@@ -53,6 +53,7 @@ const Signup = () => {
       };
 
       try {
+
         // Show loading alert
         Swal.fire({
           title: 'Registering...',
@@ -68,10 +69,12 @@ const Signup = () => {
         await axios.post("http://localhost:8080/api/track-tidy/user/register", values);
         
         // 2. Store in localStorage
+
         const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
         existingUsers.push(newUser);
         localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
         
+
         // 3. Show success message and redirect
         await Swal.fire({
           icon: 'success',
@@ -88,10 +91,12 @@ const Signup = () => {
         console.error("Signup error:", error);
         
         // Store locally if API fails
+
         const existingUsers = JSON.parse(localStorage.getItem("registeredUsers")) || [];
         existingUsers.push(newUser);
         localStorage.setItem("registeredUsers", JSON.stringify(existingUsers));
         
+
         await Swal.fire({
           icon: 'warning',
           title: 'Partial Success',
@@ -101,6 +106,7 @@ const Signup = () => {
         });
         
         navigate("/");
+
       } finally {
         setSubmitting(false);
       }
