@@ -10,8 +10,8 @@ const ResetPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { email} = location.state || {}; 
 
-  const token = new URLSearchParams(location.search).get('token');
 
   const isPasswordStrong = (pwd) => {
     return pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
@@ -21,6 +21,12 @@ const ResetPassword = () => {
     e.preventDefault();
     setError('');
     setMessage('');
+
+    // Add debug logging
+    console.log('Submitting with:', {
+      email: email,
+      password: password
+    });
 
     if (!isPasswordStrong(password)) {
       setError(
@@ -36,24 +42,40 @@ const ResetPassword = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:8080/api/auth/reset-password', {
+      const response = await fetch('http://localhost:8080/api/track-tidy/api/auth/reset-password', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          email: email, 
+          newPassword: password 
+        }),
       });
 
-      const data = await response.json();
+      const text = await response.text();
+      console.log('Raw response:', text);
+      
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        throw new Error('Invalid response from server');
+      }
 
       if (response.ok) {
         setMessage('Password reset successfully! Redirecting to login...');
         setTimeout(() => {
-          navigate('/login');
+          navigate('/');
         }, 2000);
       } else {
-        setError(data.error || 'Failed to reset password');
+        setError(data.message || data.error || 'Failed to reset password');
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      console.error('Reset password error:', err);
+      setError(`Failed to reset password: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
