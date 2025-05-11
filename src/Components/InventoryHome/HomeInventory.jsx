@@ -293,7 +293,7 @@ const HomeInventory = () => {
             setCart([]);
             setShowCart(false);
 
-        } catch (error) {
+        } catch {
             Swal.fire({
                 icon: 'error',
                 title: 'Submission Failed',

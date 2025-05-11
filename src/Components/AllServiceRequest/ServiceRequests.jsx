@@ -64,7 +64,7 @@ function ServiceRequest() {
                         'success'
                     );
                 })
-                .catch(error => {
+                .catch(() => {
                     Swal.fire(
                         'Error!',
                         'Failed to save changes.',
