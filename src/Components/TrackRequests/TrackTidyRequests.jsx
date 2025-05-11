@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopHeader from "../common/TopHeader/TopHeader.jsx";
-import { motion } from "framer-motion"; // Assuming you have framer-motion installed
+import { motion } from "framer-motion";
 
 // Mock data for demonstration
 const mockRequests = [
