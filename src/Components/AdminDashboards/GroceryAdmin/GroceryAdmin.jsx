@@ -56,15 +56,15 @@ const AdminViewGrocery = () => {
                 setGroceryItems(groceryItems.filter(item => item.id !== id));
                 Swal.fire(
                                             'Deleted!',
-                                            'Service request has been deleted.',
+                                            'Grocery Item has been deleted.',
                                             'success'
                                         );
             })
             .catch(error => {
-                console.error('Error deleting service:', error);
+                console.error('Error deleting item:', error);
                                        Swal.fire(
                                            'Error!',
-                                           'Failed to delete service request.',
+                                           'Failed to delete item request.',
                                            'error'
                                        );
             });
