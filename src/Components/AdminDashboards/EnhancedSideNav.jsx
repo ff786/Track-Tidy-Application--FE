@@ -12,6 +12,9 @@ import AdminViewGrocery from "./GroceryAdmin/GroceryAdmin.jsx";
 import PackagesAdmin from "./PackagesAdmin/PackagesAdmin.jsx";
 import PrivacyPolicy from "../PrivacyPolicy/PrivacyPolicy.jsx";
 import AboutUs from "../AboutUs/AboutUs.jsx";
+import UserViewInventory from "./InventoryAdmin/InventoryUserRequest.jsx";
+import UserViewGrocery from "./GroceryAdmin/GroceryRequestuser.jsx";
+import UserServiceRequest from "./ServiceAdmin/ServiceUserRequests.jsx";
 
 // Demo component to showcase the sidebar
 const SideNavPreview = () => {
@@ -29,9 +32,17 @@ const SideNavPreview = () => {
                 { to: '/', icon: <Home size={20} />, label: 'Home' },
                 { to: '/view-in', icon: <PackageSearch size={20} />, label: 'My Inventory' },
                 { to: '/view-service', icon: <Wrench size={20} />, label: 'Maintenance Service' },
-                { to: '/view-grocery', icon: <ShoppingCart size={20} />, label: 'Grocery List   ' },
+                { to: '/view-grocery', icon: <ShoppingCart size={20} />, label: 'Grocery List' },
                 { to: '/user-management', icon: <UserCog size={20} />, label: 'Profile Management' },
                 { to: '/view-packages', icon: <Box size={20} />, label: 'Packages Management' },
+            ]
+        },
+        {
+            section: 'User Main',
+            links: [
+                { to: '/inventory-request', icon: <PackageSearch size={20} />, label: 'User Inventory Requests' },
+                { to: '/grocery-user-request', icon: <ShoppingCart size={20} />, label: 'User Grocery Requests' },
+                { to: '/service-user-request', icon: <Wrench size={20} />, label: 'User Service Requests' },
             ]
         },
         {
@@ -103,6 +114,12 @@ const SideNavPreview = () => {
                             return <AdminViewGrocery />;
                             case '/view-packages':
                                 return <PackagesAdmin />;
+                                case '/inventory-request':
+                                    return <UserViewInventory />;
+                                    case '/grocery-user-request':
+                                        return <UserViewGrocery />;
+                                        case '/service-user-request':
+                                            return <UserServiceRequest />;
             default:
                 return (
                     <>

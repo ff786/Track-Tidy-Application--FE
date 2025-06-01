@@ -49,13 +49,14 @@ function TrackTidyChatbot() {
             const response = await axios.post(
                 'http://localhost:8080/api/track-tidy/package/create',
                 {
-                    packageType: pkg.type,
+
+                    packageType: 'Custom Package',
                     packageValue: pkg.totalBudget,
                     groceryValue: groceryValue,
                     serviceValue: serviceValue,
                     inventoryValue: inventoryValue,
                     subscribedDate: today,
-                    userId: user?.email, // Include userId in the request body
+                    userId: user?.email,
                 },
                 {
                     headers: {

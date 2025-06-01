@@ -32,7 +32,7 @@ const Login = (userData) => {
 
       // Admin check before hitting API
       const adminEmail = "admin@example.com";
-      const adminPassword = "adminPassword123";
+      const adminPassword = "admin@123";
 
       if (values.email === adminEmail && values.password === adminPassword) {
         Swal.fire({

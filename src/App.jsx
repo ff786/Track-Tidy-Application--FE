@@ -29,6 +29,9 @@ import DashboardOverview from "./Components/AdminDashboards/DashBoardAdmin/dashb
 import AdminViewGrocery from "./Components/AdminDashboards/GroceryAdmin/GroceryAdmin.jsx";
 import PackagesAdmin from "./Components/AdminDashboards/PackagesAdmin/PackagesAdmin.jsx";
 import AccountManagement from "./Components/UserAccountManagent/AccountManagement.jsx";
+import UserViewInventory from "./Components/AdminDashboards/InventoryAdmin/InventoryUserRequest.jsx";
+import UserViewGrocery from "./Components/AdminDashboards/GroceryAdmin/GroceryRequestuser.jsx";
+import UserServiceRequest from "./Components/AdminDashboards/ServiceAdmin/ServiceUserRequests.jsx";
 
 
 
@@ -120,6 +123,18 @@ const router = createBrowserRouter([
     {
         path: '/account',
         element: <div> <AccountManagement /> </div>
+    },
+    {
+        path: '/inventory-request',
+        element: <div> <UserViewInventory /> </div>
+    },
+    {
+        path: '/grocery-user-request',
+        element: <div> <UserViewGrocery /> </div>
+    },
+    {
+        path: '/service-user-request',
+        element: <div> <UserServiceRequest /> </div>
     },
 ])
 

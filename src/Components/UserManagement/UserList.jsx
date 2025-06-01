@@ -5,6 +5,7 @@ import {Trash2, Pencil, Save, X, Check} from 'lucide-react';
 import Papa from 'papaparse';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 function UserList() {
     const [users, setUsers] = useState([]);
@@ -46,8 +47,18 @@ function UserList() {
     };
 
     const handleEditUser = async (id) => {
-        const confirmSave = window.confirm("Are you sure you want to save the changes?");
-        if (!confirmSave) return;
+        // Replace window.confirm with Swal
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to save these changes?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, save it!'
+        });
+
+        if (!result.isConfirmed) return;
 
         const updatedUser = {
             firstName: editedData.firstName,
@@ -74,19 +85,58 @@ function UserList() {
             );
             setEditRowId(null);
             setEditedData({});
+
+            // Show success message
+            await Swal.fire({
+                icon: 'success',
+                title: 'Updated!',
+                text: 'User information has been updated successfully.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+
         } catch (error) {
             console.error("Error updating user:", error);
+            // Show error message
+            await Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Failed to update user information.',
+                confirmButtonColor: '#15803d'
+            });
         }
     };
 
     const handleDelete = (id) => {
-        axios.delete(`http://localhost:8080/api/track-tidy/admin/delete/${id}`)
-            .then(() => {
-                setUsers(users.filter(user => user.id !== id));
-            })
-            .catch(error => {
-                console.error('Error deleting user:', error);
-            });
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d', // green-700
+            cancelButtonColor: '#dc2626', // red-600
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`http://localhost:8080/api/track-tidy/admin/delete/${id}`)
+                    .then(() => {
+                        setUsers(users.filter(user => user.id !== id));
+                        Swal.fire(
+                            'Deleted!',
+                            'Item has been deleted successfully.',
+                            'success'
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error deleting user:', error);
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete the item.',
+                            'error'
+                        );
+                    });
+            }
+        });
     };
 
     const filteredUsers = users.filter(user =>

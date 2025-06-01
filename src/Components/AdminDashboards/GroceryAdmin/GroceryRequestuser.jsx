@@ -1,34 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
-import { Trash2, Pencil, Check, X } from "lucide-react";
+import {Trash2, Pencil, Check, X} from "lucide-react";
 import Papa from 'papaparse';
-import { jsPDF } from "jspdf";
+import {jsPDF} from "jspdf";
 import autoTable from 'jspdf-autotable';
 import AddGroceryItem from "../../GroceryConnectCommon/AddGroceryItem.jsx";
 import {useNavigate} from "react-router-dom";
 import Swal from "sweetalert2";
 
-const AdminViewGrocery = () => {
+const UserViewGrocery = () => {
     const [groceryItems, setGroceryItems] = useState([]);
     const [search, setSearch] = useState("");
     const [editMode, setEditMode] = useState(null);
     const [editedItem, setEditedItem] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
     const navigate = useNavigate();
 
-    useEffect( () => {
+    useEffect(() => {
         if (!sessionStorage.getItem("access_token")) {
             navigate("/"); // Redirect to login if no token
         }
 
-        axios.get('http://localhost:8080/api/track-tidy/grocery/getAll')
+        axios.get('http://localhost:8080/api/track-tidy/grocery/request/getAll')
             .then(response => {
-                    setGroceryItems(response.data);
-                })
-                .catch(error => {
-                    console.error('Error fetching grocery items:', error);
-                });
+                setGroceryItems(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching grocery items:', error);
+            });
     }, [navigate]);
 
     /*const fetchGroceryItems = async () => {
@@ -40,36 +39,36 @@ const AdminViewGrocery = () => {
         }
     };*/
 
-    const handleDeleteItem =  (id) => {
+    const handleDeleteItem = (id) => {
         Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#15803d',
-                    cancelButtonColor: '#dc2626',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-        axios.delete(`http://localhost:8080/api/track-tidy/grocery/delete?id=${id}`)
-            .then(() => {
-                setGroceryItems(groceryItems.filter(item => item.id !== id));
-                Swal.fire(
-                                            'Deleted!',
-                                            'Grocery Item has been deleted.',
-                                            'success'
-                                        );
-            })
-            .catch(error => {
-                console.error('Error deleting item:', error);
-                                       Swal.fire(
-                                           'Error!',
-                                           'Failed to delete item request.',
-                                           'error'
-                                       );
-            });
-    }
-      });
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#15803d',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.delete(`http://localhost:8080/api/track-tidy/grocery/delete?id=${id}`)
+                    .then(() => {
+                        setGroceryItems(groceryItems.filter(item => item.id !== id));
+                        Swal.fire(
+                            'Deleted!',
+                            'Grocery Item has been deleted.',
+                            'success'
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error deleting item:', error);
+                        Swal.fire(
+                            'Error!',
+                            'Failed to delete item request.',
+                            'error'
+                        );
+                    });
+            }
+        });
     };
 
     const handleEdit = (id, item) => {
@@ -78,65 +77,65 @@ const AdminViewGrocery = () => {
     };
 
     const handleSave = async (id) => {
-  // Confirmation dialog
-  const confirmResult = await Swal.fire({
-    title: 'Are you sure?',
-    text: 'You want to save these changes?',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, save it!',
-    cancelButtonText: 'Cancel'
-  });
+        // Confirmation dialog
+        const confirmResult = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You want to save these changes?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, save it!',
+            cancelButtonText: 'Cancel'
+        });
 
-  if (!confirmResult.isConfirmed) return;
+        if (!confirmResult.isConfirmed) return;
 
-  // Prepare form data
-  const formData = new FormData();
-  formData.append("itemName", editedItem.itemName);
-  formData.append("price", editedItem.price);
-  formData.append("productId", editedItem.productId);
-  formData.append("quantity", editedItem.quantity);
-  formData.append("expiryDate", editedItem.expiryDate);
-  formData.append("itemImage", editedItem.itemImage ? editedItem.itemImage : null);
-  formData.append("id", id);
+        // Prepare form data
+        const formData = new FormData();
+        formData.append("itemName", editedItem.itemName);
+        formData.append("price", editedItem.price);
+        formData.append("productId", editedItem.productId);
+        formData.append("quantity", editedItem.quantity);
+        formData.append("expiryDate", editedItem.expiryDate);
+        formData.append("itemImage", editedItem.itemImage ? editedItem.itemImage : null);
+        formData.append("id", id);
 
-  try {
-    // Make API request
-    await axios.put(`http://localhost:8080/api/track-tidy/grocery/update/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
-      }
-    });
+        try {
+            // Make API request
+            await axios.put(`http://localhost:8080/api/track-tidy/grocery/update/${id}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
+                }
+            });
 
-    // Update state
-    setGroceryItems(groceryItems.map(item =>
-      item.id === id ? { ...item, ...editedItem } : item
-    ));
-    setEditMode(null);
+            // Update state
+            setGroceryItems(groceryItems.map(item =>
+                item.id === id ? {...item, ...editedItem} : item
+            ));
+            setEditMode(null);
 
-    // Success notification
-    await Swal.fire({
-      title: 'Success!',
-      text: 'Your changes have been saved.',
-      icon: 'success',
-      timer: 2000,
-      showConfirmButton: false
-    });
+            // Success notification
+            await Swal.fire({
+                title: 'Success!',
+                text: 'Your changes have been saved.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
-  } catch (error) {
-    console.error('Error updating grocery item:', error.response?.data || error.message);
-    
-    // Error notification
-    await Swal.fire({
-      title: 'Error!',
-      text: 'Failed to save changes. Please try again.',
-      icon: 'error'
-    });
-  }
-};
+        } catch (error) {
+            console.error('Error updating grocery item:', error.response?.data || error.message);
+
+            // Error notification
+            await Swal.fire({
+                title: 'Error!',
+                text: 'Failed to save changes. Please try again.',
+                icon: 'error'
+            });
+        }
+    };
 
     const handleCancelClick = () => {
         setEditMode(null);
@@ -144,7 +143,7 @@ const AdminViewGrocery = () => {
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setEditedItem({
             ...editedItem,
             [name]: value
@@ -175,7 +174,7 @@ const AdminViewGrocery = () => {
         }));
 
         const csv = Papa.unparse(csvData);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
 
@@ -235,12 +234,6 @@ const AdminViewGrocery = () => {
             {/* Add Item and Report Buttons */}
             <div className="mb-6 flex items-center">
                 <button
-                    onClick={handleAddItemClick}
-                    className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition mr-4"
-                >
-                    + Add Grocery Item
-                </button>
-                <button
                     onClick={generateCSV}
                     className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition mr-4"
                 >
@@ -260,8 +253,7 @@ const AdminViewGrocery = () => {
                     <thead className="bg-green-700 text-green-100 uppercase text-xs">
                     <tr>
                         {[
-                            "Item Name", "Price", "Product ID", "Quantity",
-                            "Expiry Date", "Image", "Actions"
+                            "Item Name", "Price", "Product ID", "Quantity", "Actions"
                         ].map((header, index) => (
                             <th key={index} className="px-4 py-3 whitespace-nowrap">{header}</th>
                         ))}
@@ -276,7 +268,8 @@ const AdminViewGrocery = () => {
                         </tr>
                     ) : (
                         filteredGroceryItems.map((item, idx) => (
-                            <tr key={item.id} className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
+                            <tr key={item.id}
+                                className={`${idx % 2 === 0 ? 'bg-green-800' : 'bg-green-900'} hover:bg-green-700 transition`}>
                                 {editMode === item.id ? (
                                     <>
                                         <td className="px-4 py-3">
@@ -316,37 +309,17 @@ const AdminViewGrocery = () => {
                                             />
                                         </td>
                                         <td className="px-4 py-3">
-                                            <input
-                                                type="date"
-                                                name="expiryDate"
-                                                value={editedItem.expiryDate || item.expiryDate}
-                                                onChange={handleChange}
-                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="file"
-                                                name="itemImage"
-                                                value={editedItem.itemImage || item.itemImage}
-                                                onChange={(e) =>
-                                                    setEditedItem({...editedItem, itemImage: e.target.files[0] })
-                                                }
-                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
                                             <button
                                                 onClick={() => handleSave(item.id)}
                                                 className="text-green-400 hover:text-green-200 mr-2"
                                             >
-                                                <Check size={18} />
+                                                <Check size={18}/>
                                             </button>
                                             <button
                                                 onClick={handleCancelClick}
                                                 className="text-red-500 hover:text-red-300"
                                             >
-                                                <X size={18} />
+                                                <X size={18}/>
                                             </button>
                                         </td>
                                     </>
@@ -356,30 +329,18 @@ const AdminViewGrocery = () => {
                                         <td className="px-4 py-3">Rs. {item.price}</td>
                                         <td className="px-4 py-3">{item.productId}</td>
                                         <td className="px-4 py-3">{item.quantity}</td>
-                                        <td className="px-4 py-3">{item.expiryDate}</td>
-                                        <td className="px-4 py-3">
-                                            {item.productImageBase64 ? (
-                                                <img
-                                                    src={item.productImageBase64}
-                                                    alt="Grocery"
-                                                    className="h-12 w-12 object-cover rounded"
-                                                />
-                                            ) : (
-                                                "No Image"
-                                            )}
-                                        </td>
                                         <td className="px-4 py-3 flex gap-2">
                                             <button
                                                 onClick={() => handleEdit(item.id, item)}
                                                 className="text-yellow-400 hover:text-yellow-500"
                                             >
-                                                <Pencil size={18} />
+                                                <Pencil size={18}/>
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteItem(item.id)}
                                                 className="text-red-500 hover:text-red-600"
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={18}/>
                                             </button>
                                         </td>
                                     </>
@@ -391,9 +352,9 @@ const AdminViewGrocery = () => {
                 </table>
             </div>
 
-            {isModalOpen && <AddGroceryItem setIsModalOpen={setIsModalOpen} />}
+            {isModalOpen && <AddGroceryItem setIsModalOpen={setIsModalOpen}/>}
         </div>
     );
 };
 
-export default AdminViewGrocery;
+export default UserViewGrocery;

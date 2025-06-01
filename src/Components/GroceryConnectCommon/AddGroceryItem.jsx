@@ -178,6 +178,7 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
                                         <input
                                             type="text"
                                             name="itemName"
+                                            placeholder="e.g. Bread"
                                             id="itemName"
                                             value={formData.itemName}
                                             onChange={handleChange}
@@ -195,6 +196,7 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
                                         <input
                                             type="text"
                                             name="productId"
+                                            placeholder="e.g. brd456"
                                             id="productId"
                                             value={formData.productId}
                                             onChange={handleChange}
@@ -230,6 +232,7 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
                                             type="date"
                                             name="expiryDate"
                                             id="expiryDate"
+                                            placeholder=""
                                             value={formData.expiryDate}
                                             onChange={handleChange}
                                             min={today}
@@ -251,6 +254,7 @@ const AddGroceryItem = ({ setIsModalOpen }) => {
                                             type="number"
                                             name="price"
                                             id="price"
+                                            placeholder="e.g. In LKR"
                                             value={formData.price}
                                             onChange={handleChange}
                                             className="w-full p-3 border border-green-500 rounded-lg bg-green-800 bg-opacity-50 text-white"

@@ -9,7 +9,7 @@ import AddInventory from "../../HomeInventory/addInventory.jsx";
 import Swal from 'sweetalert2';
 
 
-function AdminViewInventory() {
+function UserViewInventory() {
     const [inventory, setInventory] = useState([]);
     const [search, setSearch] = useState("");
     const [editMode, setEditMode] = useState(null); // Track the currently edited item
@@ -22,7 +22,7 @@ function AdminViewInventory() {
             navigate("/"); // Redirect to login if no token
         }
 
-        axios.get('http://localhost:8080/api/track-tidy/inventory/getAll')
+        axios.get('http://localhost:8080/api/track-tidy/inventory/request/getAll')
             .then(response => {
                 setInventory(response.data);
             })
@@ -42,7 +42,7 @@ function AdminViewInventory() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                axios.delete(`http://localhost:8080/api/track-tidy/inventory/delete?id=${id}`)
+                axios.delete(`http://localhost:8080/api/track-tidy/inventory/request/delete?id=${id}`)
                     .then(() => {
                         setInventory(inventory.filter(item => item.id !== id));
                         Swal.fire(
@@ -89,7 +89,7 @@ function AdminViewInventory() {
                 formData.append("warrantyPeriod", editedItem.warrantyPeriod);
                 formData.append("id", id);
 
-                axios.put(`http://localhost:8080/api/track-tidy/inventory/update/${id}`, formData, {
+                axios.put(`http://localhost:8080/api/track-tidy/inventory/request/approve/${id}`, formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                         "Authorization": `Bearer ${sessionStorage.getItem("access_token")}`
@@ -146,10 +146,8 @@ function AdminViewInventory() {
             "Item Name": item.productName,
             "Product Category": item.productCategory,
             "Quantity": item.quantity,
-            "Product ID": item.productId,
             "warrantyPeriod": item.warrantyPeriod,
             "Purchase Value": item.productValue,
-            "Product Image": item.ProductImage,
         }));
 
         const csv = Papa.unparse(csvData);
@@ -174,8 +172,8 @@ function AdminViewInventory() {
             "Warranty Period", "Purchase Value", "Product Image"
         ];
         const tableRows = filteredInventory.map(item => [
-            item.productName, item.productCategory, item.quantity, item.productId,
-            item.warrantyPeriod, item.productValue, item.ProductImage
+            item.productName, item.productCategory, item.quantity,
+            item.warrantyPeriod, item.productValue
         ]);
 
         autoTable(doc, {
@@ -205,12 +203,6 @@ function AdminViewInventory() {
             {/* Generate Report Buttons */}
             <div className="mb-6 flex items-center">
                 <button
-                    onClick={() => setIsModalOpen(true)} // Open the modal
-                    className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition mr-4"
-                >
-                    + Add Inventory Item
-                </button>
-                <button
                     onClick={generateCSV}
                     className="bg-green-600 text-green-50 py-2 px-4 rounded-lg hover:bg-green-500 transition mr-4"
                 >
@@ -230,8 +222,7 @@ function AdminViewInventory() {
                     <thead className="bg-green-700 text-green-100 uppercase text-xs">
                     <tr>
                         {[
-                            "Product Name", "Product Category", "Quantity",
-                            "Product ID", "Warranty Period", "Product Value", "Product Image", "Action"
+                            "Product Name", "Product Category", "Quantity", "Warranty Period", "Product Value", "Action"
                         ].map((header, index) => (
                             <th key={index} className="px-4 py-3 whitespace-nowrap">{header}</th>
                         ))}
@@ -278,15 +269,6 @@ function AdminViewInventory() {
                                         </td>
                                         <td className="px-4 py-3">
                                             <input
-                                                type="text"
-                                                name="productId"
-                                                value={editedItem.productId || item.productId}
-                                                onChange={handleChange}
-                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
                                                 type="texnumbert"
                                                 name="warrantyPeriod"
                                                 value={editedItem.warrantyPeriod || item.warrantyPeriod}
@@ -302,25 +284,6 @@ function AdminViewInventory() {
                                                 onChange={handleChange}
                                                 className="px-4 py-2 rounded-lg text-green-800 bg-green-200"
                                             />
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                name="ProductImage"
-                                                onChange={(e) =>
-                                                    setEditedItem({ ...editedItem, ProductImage: e.target.files[0] })
-                                                }
-                                                className="px-4 py-2 rounded-lg text-green-800 bg-green-200 w-full"
-                                            />
-                                            {/*<input
-                                                type="file"
-                                                accept="image/*"
-                                                name="ProductImage"
-                                                value={editedItem.ProductImage || item.ProductImage}
-                                                onChange={handleChange}
-
-                                            />*/}
                                         </td>
                                         <td className="px-4 py-3">
                                             <button
@@ -342,17 +305,8 @@ function AdminViewInventory() {
                                         <td className="px-4 py-3">{item.productName}</td>
                                         <td className="px-4 py-3">{item.productCategory}</td>
                                         <td className="px-4 py-3">{item.quantity}</td>
-                                        <td className="px-4 py-3">{item.productId}</td>
                                         <td className="px-4 py-3">{item.warrantyPeriod}</td>
                                         <td className="px-4 py-3">Rs. {item.productValue}</td>
-                                        <td className="px-4 py-3">
-                                            {item.productImageBase64 ? (
-                                                <img src={item.productImageBase64} alt="Product" className="w-16 h-16 object-cover rounded" />
-                                            ) : (
-                                                "No Image"
-                                            )}
-                                        </td>
-
                                         <td className="px-4 py-3 flex flex-row">
                                             <button
                                                 onClick={() => handleEdit(item.id, item)}
@@ -382,4 +336,4 @@ function AdminViewInventory() {
     );
 }
 
-export default AdminViewInventory;
+export default UserViewInventory;
